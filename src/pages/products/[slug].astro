@@ -1,0 +1,104 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import products from '../../data/products.json';
+
+export function getStaticPaths() {
+  return products.map((product) => ({
+    params: { slug: product.slug },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+
+function formatPrice(amount: number | null, currency: string) {
+  if (amount === null) return '';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+}
+
+const gallery = product.images.length > 0 ? product.images : [product.image].filter(Boolean);
+---
+
+<Layout title={`${product.name} — Faithful Journey Solar`} description={product.description.slice(0, 160)}>
+  <section class="max-w-[1280px] mx-auto px-6 py-12">
+    <a href="/" class="text-sm text-fj-navy/60 hover:text-fj-navy">&larr; Back to shop</a>
+
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div>
+        <div class="aspect-square bg-white border border-fj-sand rounded flex items-center justify-center overflow-hidden">
+          {gallery[0] ? (
+            <img src={gallery[0]} alt={product.name} class="w-full h-full object-contain" />
+          ) : (
+            <span class="text-fj-navy/30 text-sm">No image</span>
+          )}
+        </div>
+        {gallery.length > 1 && (
+          <div class="mt-3 grid grid-cols-4 gap-2">
+            {gallery.slice(1).map((img) => (
+              <div class="aspect-square bg-white border border-fj-sand rounded overflow-hidden">
+                <img src={img} alt={product.name} class="w-full h-full object-contain" loading="lazy" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <span class="block text-xs uppercase font-semibold text-fj-green-deep tracking-wide mb-2">{product.brand} Products</span>
+        <h1 class="font-heading font-extrabold uppercase text-2xl sm:text-3xl text-fj-navy">{product.name}</h1>
+        <p class="mt-2 font-heading font-extrabold text-2xl text-fj-gold">
+          {product.price !== null ? formatPrice(product.price, product.currency) : 'Contact for price'}
+          {product.hasMultiplePrices && (
+            <span class="block text-sm font-normal font-sans text-fj-navy/60 mt-1">
+              Starting price — options available at checkout
+            </span>
+          )}
+        </p>
+
+        <div class="mt-6">
+          {product.price !== null ? (
+            <button
+              type="button"
+              id="add-to-cart-btn"
+              class="inline-flex items-center justify-center bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+              data-slug={product.slug}
+              data-name={product.name}
+              data-image={product.image}
+              data-price={product.price}
+            >
+              Add to Cart
+            </button>
+          ) : (
+            <a
+              href={`mailto:info@faithfuljourneysolar.com?subject=${encodeURIComponent('Order: ' + product.name)}`}
+              class="inline-flex items-center justify-center bg-fj-navy hover:bg-fj-navy-deep text-white font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+            >
+              Email Us to Order
+            </a>
+          )}
+        </div>
+
+        <div class="mt-8 prose prose-sm max-w-none whitespace-pre-line text-fj-navy/80">
+          {product.description}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { addToCart } from '../../lib/cart';
+
+    const btn = document.getElementById('add-to-cart-btn') as HTMLButtonElement | null;
+    btn?.addEventListener('click', () => {
+      addToCart({
+        slug: btn.dataset.slug || '',
+        name: btn.dataset.name || '',
+        image: btn.dataset.image || '',
+        price: Number(btn.dataset.price) || 0,
+      });
+      const original = btn.textContent;
+      btn.textContent = 'Added!';
+      setTimeout(() => (btn.textContent = original), 1200);
+    });
+  </script>
+</Layout>

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Auto Generator Start – Onboard Generators",
+    "id": "6ab165ec791299e19f54c8e8",
+    "status": "created"
+  },
+  {
+    "name": "Victron MultiPlus-II External Fan Kit",
+    "id": "6ab165f5c21f7bc9a548c123",
+    "status": "created"
+  },
+  {
+    "name": "Auto Generator Start – Portable Generators",
+    "id": "6ab165fd791299e19f54cb32",
+    "status": "created"
+  },
+  {
+    "name": "VE.Direct Cable",
+    "id": "6ab165ff2bfb4e37de1ae17e",
+    "status": "created"
+  },
+  {
+    "name": "Victron Cerbo GX MK2",
+    "id": "6ab16601a66feb9159747e73",
+    "status": "created"
+  },
+  {
+    "name": "Victron SmartShunt 500A",
+    "id": "6ab166031277448b610380ea",
+    "status": "created"
+  },
+  {
+    "name": "Victron GX Touch",
+    "id": "6ab16605ee6899ed6263898e",
+    "status": "created"
+  },
+  {
+    "name": "Victron BMV-712",
+    "id": "6ab16607ee6899ed626389cb",
+    "status": "created"
+  }
+]

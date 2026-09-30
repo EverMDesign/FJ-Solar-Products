@@ -1,0 +1,143 @@
+[
+  {
+    "id": "6ab165ec791299e19f54c8e8",
+    "slug": "auto-generator-start-onboard-generators",
+    "name": "Auto Generator Start – Onboard Generators",
+    "brand": "FJ Solar",
+    "description": "This interface box connects Victron devices to onboard generators. It interprets start/stop signals from Victron systems and converts them using four adjustable relays into signals the generator recognizes. By default, it sends negative signals; positive signal versions are available.\n\nKey Features:\n• No power cycling needed after unexpected shutdown\n• User-friendly operation\n• Weather-resistant IP65 enclosure\n• Compatible with 12v, 24v, and 48v systems\n• Works with Onan, NPS, RVMP, and marine generators\n\nRequirements: Victron Cerbo GX with SmartShunt or BMV-712; generator with two signal wires and negative wire.\n\nCompatibility Notes: Negative signal works across all voltages. Positive signal typically 12vdc only. Onan QD3200 incompatible. RVMP and marine require modifications.",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/0430887f-b183-4a3c-8727-a8a8cf333e53.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/0430887f-b183-4a3c-8727-a8a8cf333e53.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/d608da3b-adce-4882-96a1-12ec84804aa2.webp"
+    ],
+    "price": 329,
+    "priceLabel": "Negative Signal",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  },
+  {
+    "id": "6ab165fd791299e19f54cb32",
+    "slug": "auto-generator-start-portable-generators",
+    "name": "Auto Generator Start – Portable Generators",
+    "brand": "FJ Solar",
+    "description": "This device serves as an interface between Victron battery monitoring systems and compatible portable generators. The unit tracks battery state of charge or system load, automatically signaling the generator to start when batteries reach critically low levels and stopping when sufficiently charged.\n\nKey Features:\n• Quick-connect plugs for simplified setup\n• Standard 15-foot interconnect cable (custom lengths available)\n• Works with Victron Cerbo GX paired with SmartShunt or BMV-712\n\nCompatibility:\n• Westinghouse portable generators with Smart Switch connector\n• Duromax portable generators with ATS connector\n• Genmax portable generators with ATS connector",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/81d248c3-bccd-4601-9092-f9c32a709947.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/81d248c3-bccd-4601-9092-f9c32a709947.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f4c17402-f8e7-4a7e-a8ae-f703cecf447c.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f9d1cde9-59da-46c0-8407-462d1a693cfc.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/eef8f334-f84c-46db-8161-44201043bf85.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/536f3668-547a-47bd-acbc-56662b7d4fc9.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/b86fb3c3-4276-4afc-abe2-3dbca3f0c7c5.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7246f923-e9d8-42b4-aa73-0c548e4c1eca.webp"
+    ],
+    "price": 329,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  },
+  {
+    "id": "6ab165ff2bfb4e37de1ae17e",
+    "slug": "ve-direct-cable",
+    "name": "VE.Direct Cable",
+    "brand": "FJ Solar",
+    "description": "The VE.Direct cable is used to connect one Victron component to the Cerbo GX using the VE.Direct port on the device. Cable length: 1.8 meters.",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/118087f3-0c06-42eb-b03e-bd72215ae5fd.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/118087f3-0c06-42eb-b03e-bd72215ae5fd.webp"
+    ],
+    "price": 18.99,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  },
+  {
+    "id": "6ab16607ee6899ed626389cb",
+    "slug": "victron-bmv-712",
+    "name": "Victron BMV-712",
+    "brand": "Victron",
+    "description": "Smart Battery Monitor with built-in Bluetooth. The BMV-712 connects to the VictronConnect smartphone app for customization, data monitoring, historical review, and software updates.\n\nKey Features:\n• Bluetooth built-in\n• Easy to install — all electrical connections via quick connect PCB on the current shunt\n• Midpoint voltage monitoring for series-connected batteries\n• Minimal current draw (0.7Ah/month @ 12V; 0.6Ah/month @ 24V)\n• Bi-stable alarm relay\n• Battery voltage, current, power, amp-hours, and state of charge tracking\n• 500 Amp quick connect shunt and connection kit\n• VE.Direct communication port\n• Input voltage range: 6.5–70V\n\nIncluded: RJ12 cable (10m), battery cable with fuse (2m), front bezels, securing ring, mounting screws.",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp"
+    ],
+    "price": 158.95,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  },
+  {
+    "id": "6ab16601a66feb9159747e73",
+    "slug": "victron-cerbo-gx-mk2",
+    "name": "Victron Cerbo GX MK2",
+    "brand": "Victron",
+    "description": "The Cerbo GX MK2 functions as a communication center enabling system control from anywhere. Users can access it via Victron Remote Management (VRM) portal, GX Touch display, Multi-Functional Display (MFD), or VictronConnect app with Bluetooth capability.\n\nKey Features:\n• 3 VE.Direct ports, 3 USB ports, 4 digital inputs, and 2 relays\n• Battery state of charge monitoring, power consumption tracking, and power harvesting oversight\n• Generator auto start/stop functionality\n• Remote configuration via internet or local network\n• Waterproof touchscreen display options (GX Touch 50 and 70, sold separately)\n• Simple DIN-Rail mounting compatibility\n• Single-cable connection to optional displays",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fcd82811-3245-482b-88ed-ad9fd4fb79be.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fcd82811-3245-482b-88ed-ad9fd4fb79be.webp"
+    ],
+    "price": 272.85,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  },
+  {
+    "id": "6ab16605ee6899ed6263898e",
+    "slug": "victron-gx-touch",
+    "name": "Victron GX Touch",
+    "brand": "Victron",
+    "description": "The GX Touch is the display accessory for the Cerbo GX. The touch screen display gives an instant overview of your system and allows you to adjust settings in the blink of an eye.\n\nKey Features:\n• Waterproof design\n• Bolted dashboard mounting (eliminates complex cut-outs)\n• Slim waterproof design\n• Single-cable connectivity to Cerbo GX\n• Bluetooth capability for VictronConnect app access and VRM portal connectivity",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7393c123-6cd3-4a47-a52a-050e6d346d29.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7393c123-6cd3-4a47-a52a-050e6d346d29.webp"
+    ],
+    "price": 220.15,
+    "priceLabel": "Touch 50",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  },
+  {
+    "id": "6ab165f5c21f7bc9a548c123",
+    "slug": "victron-multiplus-ii-external-fan-kit",
+    "name": "Victron MultiPlus-II External Fan Kit",
+    "brand": "Victron",
+    "description": "This cooling enhancement kit improves airflow through Victron MultiPlus-II inverter/charger units. When horizontal placement becomes necessary in tight spaces, it can disrupt the intended airflow and reduce cooling efficiency. This kit compensates by improving circulation.\n\nThe system integrates with one of the inverter's internal relays, allowing external fans to operate automatically synchronized with internal fan activity.\n\nIncluded Components:\n• Two 80mm fans\n• Two fan guards\n• Two ABS fan mounting adapters\n• Mounting hardware\n• Programming assistance\n\nCompatible Models:\n• Victron MultiPlus-II 12/3000-120\n• Victron MultiPlus-II 24/3000-70\n• Victron MultiPlus-II 12/3000-120 2x120v\n• Victron MultiPlus-II 24/3000-70 2x120v",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f96623e0-96cc-443e-8f43-352e1d6fd127.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f96623e0-96cc-443e-8f43-352e1d6fd127.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/b5c034fd-7e82-4e3a-b22a-7bba05606e9a.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fb0dc43e-07dd-4a58-8177-458b3fb6fe93.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/dc736f30-2936-4ac6-b71d-77265961a9a0.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/168ed4dd-ea2e-47c1-bdbc-6816be7bb7d7.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/e2af19ad-3770-4f7a-825d-6cd3eabf89d2.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/1496e9f5-8bcf-4b50-9dea-69ae64665e30.webp"
+    ],
+    "price": 69.99,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  },
+  {
+    "id": "6ab166031277448b610380ea",
+    "slug": "victron-smartshunt-500a",
+    "name": "Victron SmartShunt 500A",
+    "brand": "Victron",
+    "description": "The SmartShunt is an all-in-one battery monitor, only without a display. Your phone acts as the display. It connects via Bluetooth to the VictronConnect app and displays battery parameters including state of charge, time remaining, and historical data.\n\nKey Features:\n• Bluetooth connectivity to VictronConnect app\n• VE.Direct port for GX device integration\n• Secondary connection for: monitoring a second battery, midpoint monitoring, or a temperature sensor\n• Battery voltage, current, power, amp-hours, and state of charge tracking\n• Remaining discharge time calculation",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/31143cb1-5589-42d2-af3b-81d628d63ed1.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/31143cb1-5589-42d2-af3b-81d628d63ed1.webp"
+    ],
+    "price": 100.3,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "weightOz": 16
+  }
+]

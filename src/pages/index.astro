@@ -1,0 +1,196 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import products from '../data/products.json';
+
+function formatPrice(amount: number | null, currency: string) {
+  if (amount === null) return 'Contact for price';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+}
+
+const featuredProduct = products[0];
+const DEFAULT_FILTER = 'All';
+const productsWithMeta = products.map((product, index) => ({ ...product, allIndex: index }));
+---
+
+<Layout title="Shop — Faithful Journey Solar" description="Victron parts and off-grid power gear from Faithful Journey Solar.">
+  <section class="relative flex items-center min-h-[600px] overflow-hidden bg-fj-navy">
+    <div class="absolute inset-0 bg-cover bg-center bg-[url('/images/fjsp-shop-hero.webp')]"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-fj-navy via-fj-navy/85 to-fj-green-deep/60"></div>
+
+    <div class="relative z-10 max-w-[1280px] mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-16 items-center py-20">
+      <div class="text-white text-center lg:text-left">
+        <h1 class="font-heading font-extrabold uppercase leading-[1.1] tracking-tight text-5xl sm:text-6xl lg:text-[4.5rem] mb-6">
+          Faithful Journey<br /><span class="text-fj-gold">Solar Products</span>
+        </h1>
+        <p class="text-lg text-fj-sand max-w-[600px] mx-auto lg:mx-0 mb-10">
+          Reliable solar, electrical, and off-grid equipment selected by professionals who install and use these systems.
+        </p>
+        <a
+          href="#shop"
+          class="inline-flex items-center justify-center border-2 border-fj-cream text-fj-cream hover:bg-fj-cream hover:text-fj-navy font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+        >
+          Shop Now
+        </a>
+      </div>
+
+      <div class="bg-fj-cream rounded p-8 shadow-[0_20px_40px_rgba(0,0,0,0.3)] border-t-4 border-fj-gold">
+        <h2 class="text-2xl font-bold text-fj-navy mb-2 normal-case">{featuredProduct.name}</h2>
+        <span class="block font-heading font-extrabold text-2xl text-fj-gold mb-6">
+          {formatPrice(featuredProduct.price, featuredProduct.currency)}
+        </span>
+        <div class="bg-white border border-fj-sand rounded h-[200px] flex items-center justify-center p-6 mb-6">
+          {featuredProduct.image && (
+            <img src={featuredProduct.image} alt={featuredProduct.name} class="max-h-full object-contain" />
+          )}
+        </div>
+        <button
+          type="button"
+          class="add-to-cart-btn w-full bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+          data-slug={featuredProduct.slug}
+          data-name={featuredProduct.name}
+          data-image={featuredProduct.image}
+          data-price={featuredProduct.price}
+        >
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="shop" class="py-16 sm:py-24">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="flex gap-4 mb-12 flex-wrap">
+        <button
+          type="button"
+          class="filter-btn text-xs px-4 py-2 rounded-full border border-fj-navy-deep font-bold tracking-wide bg-fj-navy text-fj-cream"
+          data-brand="All"
+          aria-pressed="true"
+        >
+          ALL PRODUCTS
+        </button>
+        <button
+          type="button"
+          class="filter-btn text-xs px-4 py-2 rounded-full border border-fj-navy-deep font-bold tracking-wide bg-transparent text-fj-navy hover:bg-fj-sand"
+          data-brand="FJ Solar"
+          aria-pressed="false"
+        >
+          FJ SOLAR PRODUCTS
+        </button>
+        <button
+          type="button"
+          class="filter-btn text-xs px-4 py-2 rounded-full border border-fj-navy-deep font-bold tracking-wide bg-transparent text-fj-navy hover:bg-fj-sand"
+          data-brand="Victron"
+          aria-pressed="false"
+        >
+          VICTRON PRODUCTS
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        {productsWithMeta.map((product) => (
+          <ProductCard
+            slug={product.slug}
+            name={product.name}
+            brand={product.brand}
+            image={product.image}
+            price={product.price}
+            currency={product.currency}
+            hasMultiplePrices={product.hasMultiplePrices}
+            hidden={product.allIndex >= 6}
+          />
+        ))}
+      </div>
+
+      <div class="text-center">
+        <button
+          id="show-more-btn"
+          class:list={['border-2 border-fj-navy-deep text-fj-navy hover:bg-fj-navy-deep hover:text-fj-cream font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors', { hidden: products.length <= 6 }]}
+          data-brand={DEFAULT_FILTER}
+        >
+          Show More Products
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-fj-green text-white py-20 text-center border-t-4 border-fj-navy-deep">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <h2 class="font-heading font-extrabold uppercase text-3xl mb-4">Not Sure What You Need?</h2>
+      <p class="text-lg max-w-[600px] mx-auto mb-8 text-fj-cream">
+        Building or upgrading an RV or off-grid electrical system? Get help identifying the right equipment for your setup from working installation professionals.
+      </p>
+      <a
+        href="mailto:info@faithfuljourneysolar.com?subject=Product%20Help"
+        class="inline-flex items-center justify-center border-2 border-fj-gold text-fj-gold hover:bg-fj-gold hover:text-fj-navy font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+      >
+        Get Product Help
+      </a>
+    </div>
+  </section>
+
+  <script>
+    import { addToCart } from '../lib/cart';
+
+    document.querySelectorAll<HTMLButtonElement>('.add-to-cart-btn, .add-to-cart-icon').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        addToCart({
+          slug: btn.dataset.slug || '',
+          name: btn.dataset.name || '',
+          image: btn.dataset.image || '',
+          price: Number(btn.dataset.price) || 0,
+        });
+        const original = btn.textContent;
+        btn.textContent = btn.classList.contains('add-to-cart-icon') ? '✓' : 'Added!';
+        setTimeout(() => (btn.textContent = original), 1200);
+      });
+    });
+
+    const ACTIVE_CLASSES = ['bg-fj-navy', 'text-fj-cream'];
+    const GHOST_CLASSES = ['bg-transparent', 'text-fj-navy'];
+
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+    const cards = document.querySelectorAll<HTMLElement>('.product-card');
+    const showMoreBtn = document.getElementById('show-more-btn');
+
+    function applyFilter(brand: string) {
+      const matches = (card: HTMLElement) => brand === 'All' || card.dataset.brand === brand;
+
+      let shown = 0;
+      cards.forEach((card) => {
+        if (!matches(card)) {
+          card.classList.add('hidden');
+          return;
+        }
+        shown++;
+        card.classList.toggle('hidden', shown > 6);
+      });
+
+      const totalMatching = Array.from(cards).filter(matches).length;
+      if (showMoreBtn) {
+        showMoreBtn.classList.toggle('hidden', totalMatching <= 6);
+        showMoreBtn.dataset.brand = brand;
+      }
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach((b) => {
+          const isActive = b === btn;
+          b.classList.remove(...ACTIVE_CLASSES, ...GHOST_CLASSES);
+          b.classList.add(...(isActive ? ACTIVE_CLASSES : GHOST_CLASSES));
+          b.setAttribute('aria-pressed', String(isActive));
+        });
+        applyFilter(btn.dataset.brand || '');
+      });
+    });
+
+    showMoreBtn?.addEventListener('click', () => {
+      const brand = showMoreBtn.dataset.brand || '';
+      cards.forEach((card) => {
+        if (brand === 'All' || card.dataset.brand === brand) card.classList.remove('hidden');
+      });
+      showMoreBtn.classList.add('hidden');
+    });
+  </script>
+</Layout>

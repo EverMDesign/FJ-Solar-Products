@@ -1,0 +1,56 @@
+---
+interface Props {
+  slug: string;
+  name: string;
+  brand: string;
+  image: string | null;
+  price: number | null;
+  currency: string;
+  hasMultiplePrices: boolean;
+  hidden?: boolean;
+}
+
+const { slug, name, brand, image, price, currency, hasMultiplePrices, hidden = false } = Astro.props;
+
+function formatPrice(amount: number | null, currency: string) {
+  if (amount === null) return 'Contact for price';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+}
+---
+
+<div
+  class:list={['product-card group bg-white border border-fj-sand rounded flex flex-col hover:border-fj-navy-deep transition-colors', { hidden }]}
+  data-brand={brand}
+>
+  <a href={`/products/${slug}/`} class="flex-1 flex flex-col">
+    <div class="h-[220px] p-6 flex items-center justify-center border-b border-fj-sand">
+      {image ? (
+        <img src={image} alt={name} class="max-h-full object-contain" loading="lazy" />
+      ) : (
+        <span class="text-fj-navy/30 text-sm">No image</span>
+      )}
+    </div>
+    <div class="p-6 flex flex-col flex-1">
+      <span class="text-[11px] uppercase font-semibold text-fj-green-deep tracking-wide mb-2">{brand} Products</span>
+      <h3 class="font-heading font-bold text-lg text-fj-navy mb-4 leading-snug flex-1">{name}</h3>
+    </div>
+  </a>
+  <div class="px-6 pb-6 flex items-center justify-between">
+    <span class="font-heading font-extrabold text-xl text-fj-gold">
+      {formatPrice(price, currency)}{hasMultiplePrices && <span class="text-fj-navy/50 font-normal text-sm"> +</span>}
+    </span>
+    {price !== null && (
+      <button
+        type="button"
+        class="add-to-cart-icon w-10 h-10 rounded border-2 border-fj-navy-deep text-fj-navy flex items-center justify-center text-lg group-hover:bg-fj-navy-deep group-hover:text-fj-cream transition-colors"
+        aria-label={`Add ${name} to cart`}
+        data-slug={slug}
+        data-name={name}
+        data-image={image}
+        data-price={price}
+      >
+        +
+      </button>
+    )}
+  </div>
+</div>

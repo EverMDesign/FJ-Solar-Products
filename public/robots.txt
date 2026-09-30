@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /banner-ctrl-9f3k7q2z
+
+Sitemap: https://shop.faithfuljourneysolar.com/sitemap-index.xml

@@ -1,0 +1,132 @@
+---
+---
+
+<div
+  id="cart-overlay"
+  class="fixed inset-0 bg-fj-navy/70 z-[999] opacity-0 invisible transition-all duration-300"
+></div>
+<div
+  id="cart-drawer"
+  class="fixed top-0 right-0 bottom-0 w-full max-w-[480px] bg-fj-cream z-[1000] flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.1)] translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+>
+  <div class="flex items-center justify-between px-8 py-6 border-b border-fj-sand bg-white">
+    <h3 class="font-heading font-extrabold uppercase text-xl text-fj-navy">Your Cart</h3>
+    <button type="button" id="cart-close-btn" aria-label="Close cart" class="text-2xl text-fj-navy leading-none">&times;</button>
+  </div>
+
+  <div id="cart-drawer-empty" class="flex-1 flex items-center justify-center px-8 text-fj-navy/50 text-sm hidden">
+    Your cart is empty.
+  </div>
+
+  <div id="cart-drawer-items" class="flex-1 overflow-y-auto px-8 py-6"></div>
+
+  <div id="cart-drawer-footer" class="p-8 bg-white border-t-2 border-fj-gold">
+    <div class="flex items-center justify-between mb-6 font-heading font-bold text-lg">
+      <span>SUBTOTAL</span>
+      <span id="cart-drawer-subtotal" class="text-fj-gold">$0.00</span>
+    </div>
+    <a
+      href="/cart/"
+      class="block w-full text-center bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors mb-3"
+    >
+      View Cart &amp; Checkout
+    </a>
+    <button
+      type="button"
+      id="cart-continue-btn"
+      class="block w-full text-center border-2 border-fj-navy-deep text-fj-navy hover:bg-fj-navy-deep hover:text-fj-cream font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+    >
+      Continue Shopping
+    </button>
+  </div>
+</div>
+
+<script>
+  import { getCart, removeFromCart, setQuantity, type CartItem } from '../lib/cart';
+
+  const overlay = document.getElementById('cart-overlay')!;
+  const drawer = document.getElementById('cart-drawer')!;
+  const itemsEl = document.getElementById('cart-drawer-items')!;
+  const emptyEl = document.getElementById('cart-drawer-empty')!;
+  const footerEl = document.getElementById('cart-drawer-footer')!;
+  const subtotalEl = document.getElementById('cart-drawer-subtotal')!;
+
+  const money = (n: number) => `$${n.toFixed(2)}`;
+
+  function openDrawer() {
+    render();
+    overlay.classList.remove('opacity-0', 'invisible');
+    drawer.classList.remove('translate-x-full');
+  }
+
+  function closeDrawer() {
+    overlay.classList.add('opacity-0', 'invisible');
+    drawer.classList.add('translate-x-full');
+  }
+
+  function render() {
+    const cart = getCart();
+
+    if (cart.length === 0) {
+      emptyEl.classList.remove('hidden');
+      itemsEl.classList.add('hidden');
+      footerEl.classList.add('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    itemsEl.classList.remove('hidden');
+    footerEl.classList.remove('hidden');
+
+    itemsEl.innerHTML = '';
+    let subtotal = 0;
+
+    cart.forEach((item: CartItem) => {
+      subtotal += item.price * item.quantity;
+
+      const row = document.createElement('div');
+      row.className = 'flex gap-4 mb-6 pb-6 border-b border-fj-sand last:mb-0 last:pb-0 last:border-0';
+      row.innerHTML = `
+        <div class="w-20 h-20 shrink-0 bg-white border border-fj-sand rounded flex items-center justify-center p-2">
+          <img src="${item.image}" alt="${item.name}" class="max-w-full max-h-full object-contain" />
+        </div>
+        <div class="flex-1">
+          <h4 class="font-heading font-bold text-sm text-fj-navy mb-1">${item.name}</h4>
+          <div class="font-heading font-extrabold text-fj-gold text-sm mb-3">${money(item.price)}</div>
+          <div class="flex items-center border border-fj-navy-deep rounded w-fit">
+            <button type="button" data-action="dec" data-slug="${item.slug}" class="qty-btn px-3 py-1 text-fj-navy">&minus;</button>
+            <span class="text-sm font-semibold px-3 border-l border-r border-fj-navy-deep">${item.quantity}</span>
+            <button type="button" data-action="inc" data-slug="${item.slug}" class="qty-btn px-3 py-1 text-fj-navy">+</button>
+          </div>
+        </div>
+        <button type="button" data-action="remove" data-slug="${item.slug}" class="remove-btn text-fj-navy/40 hover:text-fj-navy text-sm h-fit" aria-label="Remove ${item.name}">&times;</button>
+      `;
+      itemsEl.appendChild(row);
+    });
+
+    subtotalEl.textContent = money(subtotal);
+
+    itemsEl.querySelectorAll<HTMLButtonElement>('.qty-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const slug = btn.dataset.slug!;
+        const current = getCart().find((i) => i.slug === slug);
+        if (!current) return;
+        setQuantity(slug, btn.dataset.action === 'inc' ? current.quantity + 1 : current.quantity - 1);
+        render();
+      });
+    });
+    itemsEl.querySelectorAll<HTMLButtonElement>('.remove-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        removeFromCart(btn.dataset.slug!);
+        render();
+      });
+    });
+  }
+
+  document.getElementById('cart-close-btn')?.addEventListener('click', closeDrawer);
+  document.getElementById('cart-continue-btn')?.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  window.addEventListener('cart:open', openDrawer);
+  window.addEventListener('cart:updated', () => {
+    if (!drawer.classList.contains('translate-x-full')) render();
+  });
+</script>

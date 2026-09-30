@@ -1,0 +1,218 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Your Cart — Faithful Journey Solar">
+  <section class="max-w-[1280px] mx-auto px-6 py-12">
+    <h1 class="font-heading font-extrabold uppercase text-3xl text-fj-navy">Your Cart</h1>
+
+    <div id="empty-cart-message" class="hidden mt-8 text-fj-navy/60">
+      Your cart is empty. <a href="/" class="text-fj-gold font-semibold hover:underline">Go find something to add.</a>
+    </div>
+
+    <div id="cart-content" class="hidden mt-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div class="lg:col-span-2">
+        <div id="cart-items" class="divide-y divide-fj-sand border-y border-fj-sand"></div>
+      </div>
+
+      <div>
+        <div class="border border-fj-sand rounded p-6 bg-white">
+          <div class="flex justify-between text-fj-navy">
+            <span>Subtotal</span>
+            <span id="cart-subtotal" class="font-bold">$0.00</span>
+          </div>
+          <div class="flex justify-between text-fj-navy mt-2">
+            <span>Shipping</span>
+            <span id="cart-shipping" class="font-bold text-fj-navy/50">Not yet calculated</span>
+          </div>
+          <div class="flex justify-between text-fj-navy mt-2 pt-2 border-t border-fj-sand text-lg">
+            <span class="font-bold">Total</span>
+            <span id="cart-total" class="font-bold">$0.00</span>
+          </div>
+
+          <form id="shipping-form" class="mt-6 space-y-3">
+            <p class="text-sm font-semibold text-fj-navy">Shipping address</p>
+            <input name="street" required placeholder="Street address" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+            <div class="grid grid-cols-2 gap-2">
+              <input name="city" required placeholder="City" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+              <input name="state" required placeholder="State" maxlength="2" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input name="zip" required placeholder="ZIP code" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+              <input name="country" value="US" readonly class="w-full border border-fj-sand rounded px-3 py-2 text-sm bg-fj-cream" />
+            </div>
+            <button
+              type="submit"
+              id="get-rate-btn"
+              class="w-full border-2 border-fj-navy-deep text-fj-navy font-heading font-bold uppercase tracking-wide text-sm py-3 rounded hover:bg-fj-navy-deep hover:text-fj-cream transition-colors"
+            >
+              Get Shipping Rate
+            </button>
+            <p id="shipping-error" class="hidden text-sm text-red-600"></p>
+          </form>
+
+          <button
+            type="button"
+            id="checkout-btn"
+            disabled
+            class="mt-4 w-full bg-fj-gold text-fj-navy font-heading font-bold uppercase tracking-wide text-sm py-3.5 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-transparent hover:enabled:border-2 hover:enabled:border-fj-gold"
+          >
+            Checkout
+          </button>
+          <p class="mt-2 text-xs text-fj-navy/50 text-center">Get a shipping rate first, then check out securely.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { getCart, removeFromCart, setQuantity, type CartItem } from '../lib/cart';
+
+    const itemsEl = document.getElementById('cart-items')!;
+    const emptyEl = document.getElementById('empty-cart-message')!;
+    const contentEl = document.getElementById('cart-content')!;
+    const subtotalEl = document.getElementById('cart-subtotal')!;
+    const shippingEl = document.getElementById('cart-shipping')!;
+    const totalEl = document.getElementById('cart-total')!;
+    const checkoutBtn = document.getElementById('checkout-btn') as HTMLButtonElement;
+    const getRateBtn = document.getElementById('get-rate-btn') as HTMLButtonElement;
+    const shippingForm = document.getElementById('shipping-form') as HTMLFormElement;
+    const shippingErrorEl = document.getElementById('shipping-error')!;
+
+    const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+
+    let shippingCents: number | null = null;
+    let shippingAddress: Record<string, string> | null = null;
+
+    function render() {
+      const cart = getCart();
+
+      if (cart.length === 0) {
+        emptyEl.classList.remove('hidden');
+        contentEl.classList.add('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+
+      itemsEl.innerHTML = '';
+      let subtotal = 0;
+
+      cart.forEach((item: CartItem) => {
+        subtotal += item.price * item.quantity;
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-4 py-4';
+        row.innerHTML = `
+          <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-contain bg-fj-cream rounded" />
+          <div class="flex-1">
+            <p class="font-semibold text-fj-navy">${item.name}</p>
+            <p class="text-fj-gold font-bold">${money(item.price)}</p>
+          </div>
+          <input type="number" min="1" value="${item.quantity}" data-slug="${item.slug}" class="qty-input w-16 border border-fj-sand rounded px-2 py-1 text-center" />
+          <button type="button" data-slug="${item.slug}" class="remove-btn text-sm text-fj-navy/50 hover:text-red-600">Remove</button>
+        `;
+        itemsEl.appendChild(row);
+      });
+
+      subtotalEl.textContent = money(subtotal);
+
+      // cart changed shape since the last rate was quoted — force a fresh quote
+      shippingCents = null;
+      shippingEl.textContent = 'Not yet calculated';
+      shippingEl.classList.add('text-fj-navy/50');
+      checkoutBtn.disabled = true;
+      totalEl.textContent = money(subtotal);
+
+      itemsEl.querySelectorAll<HTMLInputElement>('.qty-input').forEach((input) => {
+        input.addEventListener('change', () => {
+          setQuantity(input.dataset.slug!, Number(input.value));
+          render();
+        });
+      });
+      itemsEl.querySelectorAll<HTMLButtonElement>('.remove-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          removeFromCart(btn.dataset.slug!);
+          render();
+        });
+      });
+    }
+
+    shippingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      shippingErrorEl.classList.add('hidden');
+      getRateBtn.disabled = true;
+      getRateBtn.textContent = 'Getting rate…';
+
+      const formData = new FormData(shippingForm);
+      const address = {
+        street: String(formData.get('street') || ''),
+        city: String(formData.get('city') || ''),
+        state: String(formData.get('state') || ''),
+        zip: String(formData.get('zip') || ''),
+        country: String(formData.get('country') || 'US'),
+      };
+
+      try {
+        const res = await fetch('/api/quote-shipping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: getCart(), address }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not get a shipping rate.');
+
+        shippingCents = data.shippingCents;
+        shippingAddress = address;
+
+        const subtotal = getCart().reduce((sum, i) => sum + i.price * i.quantity, 0);
+        shippingEl.textContent = money(shippingCents!);
+        shippingEl.classList.remove('text-fj-navy/50');
+        totalEl.textContent = money(subtotal + shippingCents!);
+        checkoutBtn.disabled = false;
+      } catch (err) {
+        shippingErrorEl.textContent = err instanceof Error ? err.message : 'Something went wrong.';
+        shippingErrorEl.classList.remove('hidden');
+      } finally {
+        getRateBtn.disabled = false;
+        getRateBtn.textContent = 'Get Shipping Rate';
+      }
+    });
+
+    checkoutBtn.addEventListener('click', async () => {
+      if (shippingCents === null || !shippingAddress) return;
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = 'Redirecting…';
+
+      try {
+        const res = await fetch('/api/create-authorize-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: getCart(), shippingCents, address: shippingAddress }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.token || !data.paymentUrl) throw new Error(data.error || 'Could not start checkout.');
+
+        // Authorize.net's hosted payment page requires a POST with the token as a form
+        // field — unlike Stripe, it can't just be a GET redirect to a URL.
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = data.paymentUrl;
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'token';
+        tokenInput.value = data.token;
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+      } catch (err) {
+        shippingErrorEl.textContent = err instanceof Error ? err.message : 'Something went wrong.';
+        shippingErrorEl.classList.remove('hidden');
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = 'Checkout';
+      }
+    });
+
+    render();
+  </script>
+</Layout>

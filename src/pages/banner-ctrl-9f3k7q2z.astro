@@ -1,0 +1,164 @@
+---
+export const prerender = false;
+import '../styles/global.css';
+
+const LOCATION_ID = import.meta.env.LOCATION_ID;
+const providedId = Astro.url.searchParams.get('locationId');
+
+// Only a visit carrying the real GHL location ID gets in. Anyone else — bots,
+// stray links, search engines — gets a plain 404, no hint this page exists.
+if (!LOCATION_ID || providedId !== LOCATION_ID) {
+  return new Response('Not found', { status: 404 });
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Site Banner</title>
+  </head>
+  <body class="bg-fj-cream min-h-screen py-10 px-4">
+    <img src="/images/FJSP-Logo-Full-Color.png" alt="Faithful Journey Solar" class="h-10 mx-auto mb-6 block" />
+
+    <div class="max-w-[520px] mx-auto bg-white border border-fj-sand rounded p-8">
+      <h1 class="font-heading font-extrabold uppercase text-xl text-fj-navy mb-1">Site Banner</h1>
+      <p class="text-sm text-fj-navy/60 mb-6">Shows a colored strip at the top of every page on the site.</p>
+
+      <form id="banner-form" class="space-y-5">
+        <label class="flex items-center gap-3 font-semibold text-fj-navy">
+          <input type="checkbox" id="banner-enabled" class="w-5 h-5 accent-fj-gold" />
+          Show banner on the site
+        </label>
+
+        <div>
+          <p class="font-semibold text-fj-navy mb-2 text-sm">Banner type</p>
+          <div class="flex gap-3">
+            <label class="flex-1 flex items-center gap-2 border border-fj-sand rounded px-3 py-2.5 cursor-pointer has-[:checked]:border-fj-navy-deep has-[:checked]:bg-fj-cream">
+              <input type="radio" name="type" value="sale" class="accent-fj-green" checked />
+              <span class="w-3 h-3 rounded-full bg-fj-green"></span>
+              <span class="text-sm font-medium text-fj-navy">Sale</span>
+            </label>
+            <label class="flex-1 flex items-center gap-2 border border-fj-sand rounded px-3 py-2.5 cursor-pointer has-[:checked]:border-fj-navy-deep has-[:checked]:bg-fj-cream">
+              <input type="radio" name="type" value="info" class="accent-banner-blue" />
+              <span class="w-3 h-3 rounded-full bg-banner-blue"></span>
+              <span class="text-sm font-medium text-fj-navy">Info</span>
+            </label>
+            <label class="flex-1 flex items-center gap-2 border border-fj-sand rounded px-3 py-2.5 cursor-pointer has-[:checked]:border-fj-navy-deep has-[:checked]:bg-fj-cream">
+              <input type="radio" name="type" value="system" class="accent-banner-amber" />
+              <span class="w-3 h-3 rounded-full bg-banner-amber"></span>
+              <span class="text-sm font-medium text-fj-navy">System</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label for="banner-message" class="block font-semibold text-fj-navy mb-2 text-sm">Message</label>
+          <input
+            type="text"
+            id="banner-message"
+            maxlength="200"
+            placeholder="Orders placed Dec 20–27 ship starting Jan 2."
+            class="w-full border border-fj-sand rounded px-3 py-2.5 text-sm"
+          />
+        </div>
+
+        <div id="banner-preview" class="hidden rounded px-4 py-3 text-sm font-semibold text-center"></div>
+
+        <button
+          type="submit"
+          id="banner-save-btn"
+          class="w-full bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+        >
+          Save
+        </button>
+        <p id="banner-status" class="text-sm text-center"></p>
+      </form>
+    </div>
+
+    <script>
+      const TYPE_STYLES: Record<string, string> = {
+        sale: 'bg-fj-green text-white',
+        info: 'bg-banner-blue text-white',
+        system: 'bg-banner-amber text-fj-navy',
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const locationId = params.get('locationId') || '';
+
+      const form = document.getElementById('banner-form') as HTMLFormElement;
+      const enabledEl = document.getElementById('banner-enabled') as HTMLInputElement;
+      const messageEl = document.getElementById('banner-message') as HTMLInputElement;
+      const statusEl = document.getElementById('banner-status')!;
+      const previewEl = document.getElementById('banner-preview')!;
+      const saveBtn = document.getElementById('banner-save-btn') as HTMLButtonElement;
+
+      function getSelectedType(): string {
+        return (form.querySelector('input[name="type"]:checked') as HTMLInputElement)?.value || 'info';
+      }
+
+      function updatePreview() {
+        const type = getSelectedType();
+        const message = messageEl.value.trim();
+        if (!message) {
+          previewEl.classList.add('hidden');
+          return;
+        }
+        previewEl.classList.remove('hidden');
+        previewEl.className = `rounded px-4 py-3 text-sm font-semibold text-center ${TYPE_STYLES[type]}`;
+        previewEl.textContent = message;
+      }
+
+      form.addEventListener('input', updatePreview);
+
+      async function load() {
+        try {
+          const res = await fetch('/api/banner');
+          const data = await res.json();
+          enabledEl.checked = Boolean(data.enabled);
+          messageEl.value = data.message || '';
+          const typeInput = form.querySelector(`input[name="type"][value="${data.type}"]`) as HTMLInputElement | null;
+          if (typeInput) typeInput.checked = true;
+          updatePreview();
+        } catch {
+          statusEl.textContent = 'Could not load the current banner.';
+          statusEl.className = 'text-sm text-center text-red-600';
+        }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving…';
+        statusEl.textContent = '';
+
+        try {
+          const res = await fetch('/api/banner', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              locationId,
+              enabled: enabledEl.checked,
+              message: messageEl.value.trim(),
+              type: getSelectedType(),
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+          statusEl.textContent = 'Saved.';
+          statusEl.className = 'text-sm text-center text-fj-green';
+        } catch (err) {
+          statusEl.textContent = err instanceof Error ? err.message : 'Something went wrong.';
+          statusEl.className = 'text-sm text-center text-red-600';
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save';
+        }
+      });
+
+      load();
+    </script>
+  </body>
+</html>
