@@ -60,38 +60,60 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
             <label for="variant-select" class="block text-sm font-semibold text-fj-navy mb-1">
               {product.variantGroupName || 'Options'}
             </label>
-            <select id="variant-select" class="w-full border border-fj-sand rounded px-3 py-2 text-sm">
-              {product.variants.map((v) => (
-                <option
-                  value={v.optionId}
-                  data-price={v.price}
-                  data-weight-oz={v.weightOz}
-                  data-name={v.name}
-                  data-dimensions={v.dimensions ? JSON.stringify(v.dimensions) : ''}
-                >
-                  {v.name}
-                </option>
-              ))}
-            </select>
+            <div class="relative">
+              <select
+                id="variant-select"
+                class="w-full appearance-none bg-white border-2 border-fj-navy-deep rounded px-4 py-2.5 pr-10 text-sm font-semibold text-fj-navy cursor-pointer transition-colors focus:outline-none focus:border-fj-gold"
+              >
+                {product.variants.map((v) => (
+                  <option
+                    value={v.optionId}
+                    data-price={v.price}
+                    data-weight-oz={v.weightOz}
+                    data-name={v.name}
+                    data-dimensions={v.dimensions ? JSON.stringify(v.dimensions) : ''}
+                  >
+                    {v.name}
+                  </option>
+                ))}
+              </select>
+              <svg
+                class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fj-gold"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
           </div>
         )}
 
         <p id="ship-info" class="mt-3 text-sm text-fj-navy/60"></p>
 
-        <div class="mt-6">
+        <div class="mt-6 flex items-center gap-3">
           {product.price !== null ? (
-            <button
-              type="button"
-              id="add-to-cart-btn"
-              class="inline-flex items-center justify-center bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
-              data-slug={product.slug}
-              data-name={product.name}
-              data-image={product.image}
-              data-price={product.price}
-              data-currency={product.currency}
-            >
-              Add to Cart
-            </button>
+            <>
+              <button
+                type="button"
+                id="add-to-cart-btn"
+                class="inline-flex items-center justify-center bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+                data-slug={product.slug}
+                data-name={product.name}
+                data-image={product.image}
+                data-price={product.price}
+                data-currency={product.currency}
+              >
+                Add to Cart
+              </button>
+              <a
+                href="/cart/"
+                id="go-to-cart-link"
+                class="hidden inline-flex items-center justify-center border-2 border-fj-navy-deep text-fj-navy hover:bg-fj-navy-deep hover:text-fj-cream font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+              >
+                Go to Cart
+              </a>
+            </>
           ) : (
             <a
               href={`mailto:info@faithfuljourneysolar.com?subject=${encodeURIComponent('Order: ' + product.name)}`}
@@ -164,6 +186,7 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
       addToCart(item);
       const original = btn.textContent;
       btn.textContent = 'Added!';
+      document.getElementById('go-to-cart-link')?.classList.remove('hidden');
       setTimeout(() => (btn.textContent = original), 1200);
     });
   </script>
