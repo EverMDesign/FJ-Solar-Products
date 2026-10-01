@@ -150,11 +150,24 @@ import Layout from '../layouts/Layout.astro';
       });
     }
 
+    const RATE_LOADING_MESSAGES = ['Getting Rate…', 'Finding cheapest option…', 'Connecting with USPS…', 'Almost done…'];
+    const RATE_MESSAGE_INTERVAL_MS = 1000;
+
     shippingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       shippingErrorEl.classList.add('hidden');
       getRateBtn.disabled = true;
-      getRateBtn.textContent = 'Getting rate…';
+
+      let messageIndex = 0;
+      getRateBtn.textContent = RATE_LOADING_MESSAGES[0];
+      const loadingInterval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % RATE_LOADING_MESSAGES.length;
+        getRateBtn.textContent = RATE_LOADING_MESSAGES[messageIndex];
+      }, RATE_MESSAGE_INTERVAL_MS);
+      // Always let all 4 messages play at least once, even if the real response is faster.
+      const minDisplayTime = new Promise((resolve) =>
+        setTimeout(resolve, RATE_LOADING_MESSAGES.length * RATE_MESSAGE_INTERVAL_MS)
+      );
 
       const formData = new FormData(shippingForm);
       const address = {
@@ -166,11 +179,14 @@ import Layout from '../layouts/Layout.astro';
       };
 
       try {
-        const res = await fetch('/api/quote-shipping', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: getCart(), address }),
-        });
+        const [res] = await Promise.all([
+          fetch('/api/quote-shipping', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: getCart(), address }),
+          }),
+          minDisplayTime,
+        ]);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not get a shipping rate.');
 
@@ -193,6 +209,7 @@ import Layout from '../layouts/Layout.astro';
         shippingErrorEl.textContent = err instanceof Error ? err.message : 'Something went wrong.';
         shippingErrorEl.classList.remove('hidden');
       } finally {
+        clearInterval(loadingInterval);
         getRateBtn.disabled = false;
         getRateBtn.textContent = 'Get Shipping Rate';
       }
