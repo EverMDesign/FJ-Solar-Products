@@ -32,9 +32,9 @@ Every var needs to exist in **two places independently**: local `.env` (for `npm
 | `AUTHORIZE_NET_TRANSACTION_KEY` | ❌ blank | ❌ | Same account settings page as the API Login ID |
 | `AUTHORIZE_NET_SIGNATURE_KEY` | ❌ blank | ❌ | Verifies Authorize.net webhook calls — needed before `/api/authorize-webhook` can trust anything it receives |
 | `AUTHORIZE_NET_ENVIRONMENT` | ✅ (`sandbox`) | ❌ | `sandbox` or `production` — **must stay `sandbox` until fully tested**; the client's real key still runs his current live site |
-| `SHIPSTATION_API_KEY` | ❌ blank | ❌ | Live shipping rate quotes |
-| `SHIP_FROM_STREET` / `_CITY` / `_STATE` / `_ZIP` | ❌ blank | ❌ | Where packages actually ship from — required for real ShipStation rates |
-| `SHIP_FROM_COUNTRY` | ✅ (`US`) | ❌ | Same |
+| `SHIPSTATION_API_KEY` | ✅ | ✅ | Live shipping rate quotes |
+| `SHIP_FROM_STREET` / `_CITY` / `_STATE` / `_ZIP` / `_PHONE` | ✅ | ✅ | Where packages actually ship from (Ocala, FL) — required for real ShipStation rates, phone is required by their API |
+| `SHIP_FROM_COUNTRY` | ✅ (`US`) | ✅ | Same |
 | `VERCEL_API_TOKEN` | ✅ | ✅ | Banner feature — **must be a full-account token**, not project-restricted (a restricted one was tried first and failed every write with 403) |
 | `GLOBAL_CONFIG_ID` | ✅ | ✅ | Which Global Config store holds the banner data (`ecfg_...`) |
 | `GLOBAL_CONFIG` | n/a (local dev falls back gracefully) | ✅ auto-added | Read access to that store — Vercel injects this itself the moment the store is connected to the project in the dashboard; never set it by hand, and don't be surprised it's missing locally |
@@ -46,4 +46,4 @@ The Vercel project has `ssoProtection` enabled with `deploymentType: all_except_
 
 ## Node.js runtime pin
 
-`package.json`'s `engines.node` is pinned to `"20.x"`. Do not change this without reading the gotcha in `CLAUDE.md` first — it directly caused a failed production deploy once already.
+`package.json`'s `engines.node` is pinned to `"24.x"` (as of 2026-10-01, after Vercel discontinued Node 20.x). This required upgrading `astro` to v7 and `@astrojs/vercel` to v11 together — see the gotcha in `CLAUDE.md` before touching either version again.

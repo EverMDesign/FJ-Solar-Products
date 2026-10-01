@@ -2,6 +2,14 @@
 
 All notable changes to this project, newest first. Dates are when the work happened, not a formal release schedule — this is a live site, not a versioned package.
 
+## 2026-10-01
+
+### Changed
+- **Shipping is live.** ShipStation key and Ocala ship-from address/phone configured in both local env and Vercel production. Standard shipping is USPS Ground Advantage only (no carrier choice shown to the customer) with a 30% handling markup on the real rate — both confirmed with Andrew on a call this date. Fixed a real bug found while testing: GHL's box dimension unit (`"in"`) isn't what ShipStation's API accepts (`"inch"`) — was silently causing every quote to fail.
+- **Product variants pulled from GHL.** `fetch-products.mjs` now reads GHL's per-price `variants`/`shippingOptions` (price, weight, box dimensions per option) into `products.json`. Product detail page shows a variant dropdown with live price/weight/dimension updates; cart treats each variant as its own line item. First real example: Auto Generator Start – Onboard Generators (Negative/Positive signal).
+- **Fixed cart price display bug** (pre-existing, not introduced today): `cart.astro`'s subtotal/total ran product prices (plain dollars) through a cents-based formatter, so $329 displayed as $3.29. The actual Authorize.net checkout amount was never affected — display-only bug.
+- **Migrated Astro 4 → 7 and @astrojs/vercel 7 → 11.** Forced by Vercel discontinuing Node 20.x; the old adapter couldn't target Node 24 correctly. Also dropped the abandoned `@astrojs/tailwind` package (capped at Astro ^5) in favor of a plain `postcss.config.mjs`. See `CLAUDE.md` and `docs/deployment.md` for details. Done on a separate branch, tested on a Vercel preview deployment, then merged.
+
 ## 2026-09-30
 
 ### Changed
