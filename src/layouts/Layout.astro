@@ -27,18 +27,26 @@ const { title, description = 'Solar and off-grid power gear from Faithful Journe
         <a href="/" class="flex items-center gap-2">
           <img src="/images/FJSP-Logo-Full-White.png" alt="Faithful Journey Solar" class="h-9" />
         </a>
-        <nav class="hidden md:flex items-center gap-8">
-          <a href="/" class="font-heading font-semibold text-sm uppercase tracking-wide text-fj-cream hover:text-fj-gold transition-colors">
-            Shop
+        <div class="flex items-center gap-6">
+          <a
+            href="https://www.facebook.com/fjsolarproducts"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Faithful Journey Solar on Facebook"
+            class="text-fj-cream hover:text-fj-gold transition-colors"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+            </svg>
           </a>
-        </nav>
-        <button
-          type="button"
-          id="cart-open-btn"
-          class="font-heading font-semibold text-sm uppercase tracking-wide text-fj-cream hover:text-fj-gold transition-colors flex items-center gap-2"
-        >
-          Cart <span id="cart-count" class="bg-fj-gold text-fj-navy text-xs font-bold px-2 py-0.5 rounded-full">0</span>
-        </button>
+          <button
+            type="button"
+            id="cart-open-btn"
+            class="font-heading font-semibold text-sm uppercase tracking-wide text-fj-cream hover:text-fj-gold transition-colors flex items-center gap-2"
+          >
+            Cart <span id="cart-count" class="bg-fj-gold text-fj-navy text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -46,22 +54,24 @@ const { title, description = 'Solar and off-grid power gear from Faithful Journe
       <slot />
     </main>
 
-    <footer class="bg-fj-navy text-fj-sand mt-16 border-t-2 border-fj-gold">
+    <footer class="bg-fj-navy text-fj-sand border-t-2 border-fj-gold">
       <div class="max-w-[1280px] mx-auto px-6 py-16">
-        <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-12 mb-12">
-          <div>
-            <img src="/images/FJSP-Logo-Full-White.png" alt="Faithful Journey Solar" class="h-9 mb-4" />
-            <p class="text-sm max-w-[300px]">Professional-grade solar and electrical equipment for RVs, vans, and off-grid builds.</p>
-          </div>
-          <div>
-            <h4 class="text-white font-heading font-bold uppercase tracking-wide mb-5">Shop</h4>
-            <ul class="space-y-3 text-sm">
-              <li><a href="/#shop" class="hover:text-fj-gold transition-colors">All Products</a></li>
-              <li><a href="/cart/" class="hover:text-fj-gold transition-colors">Your Cart</a></li>
-            </ul>
-          </div>
+        <div class="mb-12 flex flex-col items-center text-center">
+          <img src="/images/FJSP-Logo-Full-White.png" alt="Faithful Journey Solar" class="h-9 mb-4" />
+          <p class="text-sm max-w-[300px] mb-4">Professional-grade solar and electrical equipment for RVs, vans, and off-grid builds.</p>
+          <a
+            href="https://www.facebook.com/fjsolarproducts"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Faithful Journey Solar on Facebook"
+            class="inline-flex text-fj-sand hover:text-fj-gold transition-colors"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+            </svg>
+          </a>
         </div>
-        <div class="border-t border-fj-navy-deep pt-6 flex flex-col sm:flex-row justify-between gap-2 text-xs">
+        <div class="border-t border-fj-navy-deep pt-6 flex justify-center text-xs text-center">
           <span>&copy; {new Date().getFullYear()} Faithful Journey Solar Products. All rights reserved.</span>
         </div>
       </div>
