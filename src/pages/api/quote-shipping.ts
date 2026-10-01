@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import products from '../../data/products.json';
+import { calculateTaxCents } from '../../lib/tax';
 
 export const prerender = false;
 
@@ -133,6 +134,9 @@ export const POST: APIRoute = async ({ request }) => {
   // ParcelGuard is a real pass-through cost, not marked up — Andrew doesn't want to eat it,
   // but doesn't need to profit on it either.
   const insuranceCents = Math.round((rate.insurance_amount?.amount || 0) * 100);
+  // FL sales tax applies to the product subtotal only, not shipping — only when shipping
+  // to a Florida address (see src/lib/tax.ts for the rate and why).
+  const taxCents = calculateTaxCents(Math.round(declaredValue * 100), address.state);
 
   return new Response(
     JSON.stringify({
@@ -141,6 +145,7 @@ export const POST: APIRoute = async ({ request }) => {
       insuranceCents,
       insuredValue: declaredValue,
       markupPercent: Math.round((HANDLING_MARKUP - 1) * 100),
+      taxCents,
       carrier: rate.carrier_friendly_name,
       service: rate.service_type,
     }),

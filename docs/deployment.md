@@ -35,6 +35,8 @@ Every var needs to exist in **two places independently**: local `.env` (for `npm
 | `SHIPSTATION_API_KEY` | ✅ | ✅ | Live shipping rate quotes |
 | `SHIP_FROM_STREET` / `_CITY` / `_STATE` / `_ZIP` / `_PHONE` | ✅ | ✅ | Where packages actually ship from (Ocala, FL) — required for real ShipStation rates, phone is required by their API |
 | `SHIP_FROM_COUNTRY` | ✅ (`US`) | ✅ | Same |
+
+**FL sales tax is hardcoded, not an env var** (`src/lib/tax.ts`, `FL_TAX_RATE = 0.075`) — confirmed with Andrew 2026-10-01, straight from Florida DOR's Marion County rate (6% state + 1.5% county). It's tied to Andrew's **current** ship-from county (Ocala/Marion). Andrew mentioned moving "on the 15th" — once that happens, both this rate *and* the `SHIP_FROM_*` vars above likely need updating to match the new address/county. Check this file hasn't gone stale before trusting either.
 | `VERCEL_API_TOKEN` | ✅ | ✅ | Banner feature — **must be a full-account token**, not project-restricted (a restricted one was tried first and failed every write with 403) |
 | `GLOBAL_CONFIG_ID` | ✅ | ✅ | Which Global Config store holds the banner data (`ecfg_...`) |
 | `GLOBAL_CONFIG` | n/a (local dev falls back gracefully) | ✅ auto-added | Read access to that store — Vercel injects this itself the moment the store is connected to the project in the dashboard; never set it by hand, and don't be surprised it's missing locally |

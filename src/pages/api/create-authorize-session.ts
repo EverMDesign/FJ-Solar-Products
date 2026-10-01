@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import products from '../../data/products.json';
+import { calculateTaxCents } from '../../lib/tax';
 
 export const prerender = false;
 
@@ -52,7 +53,11 @@ export const POST: APIRoute = async ({ request, url }) => {
   });
 
   const shippingAmount = shippingCents / 100;
-  const totalAmount = (subtotal + shippingAmount).toFixed(2);
+  // Recomputed server-side from our own trusted subtotal, never trusted from the client —
+  // only charged when shipping to a Florida address (see src/lib/tax.ts).
+  const taxCents = calculateTaxCents(Math.round(subtotal * 100), address.state);
+  const taxAmount = taxCents / 100;
+  const totalAmount = (subtotal + shippingAmount + taxAmount).toFixed(2);
   const origin = `${url.protocol}//${url.host}`;
 
   const requestBody = {
@@ -69,6 +74,13 @@ export const POST: APIRoute = async ({ request, url }) => {
           amount: shippingAmount.toFixed(2),
           name: 'Shipping',
         },
+        ...(taxCents > 0 && {
+          tax: {
+            amount: taxAmount.toFixed(2),
+            name: 'FL Sales Tax',
+            description: 'Florida sales tax (7.5%)',
+          },
+        }),
         // Our shipping form only collects street/city/state/zip/country (no name) —
         // Authorize.net's hosted page collects the customer's name and card details
         // itself, so this is just a pre-fill of what we already have.

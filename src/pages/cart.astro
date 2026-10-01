@@ -25,6 +25,10 @@ import Layout from '../layouts/Layout.astro';
             <span>Shipping</span>
             <span id="cart-shipping" class="font-bold text-fj-navy/50">Not yet calculated</span>
           </div>
+          <div id="cart-tax-row" class="hidden flex justify-between text-fj-navy mt-2">
+            <span>FL Sales Tax</span>
+            <span id="cart-tax" class="font-bold">$0.00</span>
+          </div>
           <div class="flex justify-between text-fj-navy mt-2 pt-2 border-t border-fj-sand text-lg">
             <span class="font-bold">Total</span>
             <span id="cart-total" class="font-bold">$0.00</span>
@@ -73,6 +77,8 @@ import Layout from '../layouts/Layout.astro';
     const contentEl = document.getElementById('cart-content')!;
     const subtotalEl = document.getElementById('cart-subtotal')!;
     const shippingEl = document.getElementById('cart-shipping')!;
+    const taxRowEl = document.getElementById('cart-tax-row')!;
+    const taxEl = document.getElementById('cart-tax')!;
     const totalEl = document.getElementById('cart-total')!;
     const checkoutBtn = document.getElementById('checkout-btn') as HTMLButtonElement;
     const getRateBtn = document.getElementById('get-rate-btn') as HTMLButtonElement;
@@ -126,6 +132,7 @@ import Layout from '../layouts/Layout.astro';
       shippingCents = null;
       shippingEl.textContent = 'Not yet calculated';
       shippingEl.classList.add('text-fj-navy/50');
+      taxRowEl.classList.add('hidden');
       checkoutBtn.disabled = true;
       totalEl.textContent = money(subtotalCents);
 
@@ -171,9 +178,16 @@ import Layout from '../layouts/Layout.astro';
         shippingAddress = address;
 
         const subtotalCents = getCart().reduce((sum, i) => sum + dollarsToCents(i.price) * i.quantity, 0);
+        const taxCents: number = data.taxCents || 0;
         shippingEl.textContent = money(shippingCents!);
         shippingEl.classList.remove('text-fj-navy/50');
-        totalEl.textContent = money(subtotalCents + shippingCents!);
+        if (taxCents > 0) {
+          taxEl.textContent = money(taxCents);
+          taxRowEl.classList.remove('hidden');
+        } else {
+          taxRowEl.classList.add('hidden');
+        }
+        totalEl.textContent = money(subtotalCents + shippingCents! + taxCents);
         checkoutBtn.disabled = false;
       } catch (err) {
         shippingErrorEl.textContent = err instanceof Error ? err.message : 'Something went wrong.';
