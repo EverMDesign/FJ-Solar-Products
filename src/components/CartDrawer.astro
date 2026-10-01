@@ -91,14 +91,15 @@
         </div>
         <div class="flex-1">
           <h4 class="font-heading font-bold text-sm text-fj-navy mb-1">${item.name}</h4>
+          ${item.variantName ? `<div class="text-xs text-fj-navy/50 mb-1">${item.variantName}</div>` : ''}
           <div class="font-heading font-extrabold text-fj-gold text-sm mb-3">${money(item.price)}</div>
           <div class="flex items-center border border-fj-navy-deep rounded w-fit">
-            <button type="button" data-action="dec" data-slug="${item.slug}" class="qty-btn px-3 py-1 text-fj-navy">&minus;</button>
+            <button type="button" data-action="dec" data-slug="${item.slug}" data-variant="${item.variantOptionId || ''}" class="qty-btn px-3 py-1 text-fj-navy">&minus;</button>
             <span class="text-sm font-semibold px-3 border-l border-r border-fj-navy-deep">${item.quantity}</span>
-            <button type="button" data-action="inc" data-slug="${item.slug}" class="qty-btn px-3 py-1 text-fj-navy">+</button>
+            <button type="button" data-action="inc" data-slug="${item.slug}" data-variant="${item.variantOptionId || ''}" class="qty-btn px-3 py-1 text-fj-navy">+</button>
           </div>
         </div>
-        <button type="button" data-action="remove" data-slug="${item.slug}" class="remove-btn text-fj-navy/40 hover:text-fj-navy text-sm h-fit" aria-label="Remove ${item.name}">&times;</button>
+        <button type="button" data-action="remove" data-slug="${item.slug}" data-variant="${item.variantOptionId || ''}" class="remove-btn text-fj-navy/40 hover:text-fj-navy text-sm h-fit" aria-label="Remove ${item.name}">&times;</button>
       `;
       itemsEl.appendChild(row);
     });
@@ -108,15 +109,16 @@
     itemsEl.querySelectorAll<HTMLButtonElement>('.qty-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const slug = btn.dataset.slug!;
-        const current = getCart().find((i) => i.slug === slug);
+        const variant = btn.dataset.variant || undefined;
+        const current = getCart().find((i) => i.slug === slug && (i.variantOptionId || '') === (variant || ''));
         if (!current) return;
-        setQuantity(slug, btn.dataset.action === 'inc' ? current.quantity + 1 : current.quantity - 1);
+        setQuantity(slug, variant, btn.dataset.action === 'inc' ? current.quantity + 1 : current.quantity - 1);
         render();
       });
     });
     itemsEl.querySelectorAll<HTMLButtonElement>('.remove-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
-        removeFromCart(btn.dataset.slug!);
+        removeFromCart(btn.dataset.slug!, btn.dataset.variant || undefined);
         render();
       });
     });

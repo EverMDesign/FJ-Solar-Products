@@ -79,7 +79,11 @@ import Layout from '../layouts/Layout.astro';
     const shippingForm = document.getElementById('shipping-form') as HTMLFormElement;
     const shippingErrorEl = document.getElementById('shipping-error')!;
 
+    // Product prices in cart data are plain dollars (e.g. 329 = $329.00); shippingCents from
+    // the quote API is real cents. Everything gets converted to cents here before formatting
+    // so the two never get mixed or divided by 100 twice.
     const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+    const dollarsToCents = (dollars: number) => Math.round(dollars * 100);
 
     let shippingCents: number | null = null;
     let shippingAddress: Record<string, string> | null = null;
@@ -96,10 +100,10 @@ import Layout from '../layouts/Layout.astro';
       contentEl.classList.remove('hidden');
 
       itemsEl.innerHTML = '';
-      let subtotal = 0;
+      let subtotalCents = 0;
 
       cart.forEach((item: CartItem) => {
-        subtotal += item.price * item.quantity;
+        subtotalCents += dollarsToCents(item.price) * item.quantity;
 
         const row = document.createElement('div');
         row.className = 'flex items-center gap-4 py-4';
@@ -107,32 +111,33 @@ import Layout from '../layouts/Layout.astro';
           <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-contain bg-fj-cream rounded" />
           <div class="flex-1">
             <p class="font-semibold text-fj-navy">${item.name}</p>
+            ${item.variantName ? `<p class="text-xs text-fj-navy/50">${item.variantName}</p>` : ''}
             <p class="text-fj-gold font-bold">${money(item.price)}</p>
           </div>
-          <input type="number" min="1" value="${item.quantity}" data-slug="${item.slug}" class="qty-input w-16 border border-fj-sand rounded px-2 py-1 text-center" />
-          <button type="button" data-slug="${item.slug}" class="remove-btn text-sm text-fj-navy/50 hover:text-red-600">Remove</button>
+          <input type="number" min="1" value="${item.quantity}" data-slug="${item.slug}" data-variant="${item.variantOptionId || ''}" class="qty-input w-16 border border-fj-sand rounded px-2 py-1 text-center" />
+          <button type="button" data-slug="${item.slug}" data-variant="${item.variantOptionId || ''}" class="remove-btn text-sm text-fj-navy/50 hover:text-red-600">Remove</button>
         `;
         itemsEl.appendChild(row);
       });
 
-      subtotalEl.textContent = money(subtotal);
+      subtotalEl.textContent = money(subtotalCents);
 
       // cart changed shape since the last rate was quoted — force a fresh quote
       shippingCents = null;
       shippingEl.textContent = 'Not yet calculated';
       shippingEl.classList.add('text-fj-navy/50');
       checkoutBtn.disabled = true;
-      totalEl.textContent = money(subtotal);
+      totalEl.textContent = money(subtotalCents);
 
       itemsEl.querySelectorAll<HTMLInputElement>('.qty-input').forEach((input) => {
         input.addEventListener('change', () => {
-          setQuantity(input.dataset.slug!, Number(input.value));
+          setQuantity(input.dataset.slug!, input.dataset.variant || undefined, Number(input.value));
           render();
         });
       });
       itemsEl.querySelectorAll<HTMLButtonElement>('.remove-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-          removeFromCart(btn.dataset.slug!);
+          removeFromCart(btn.dataset.slug!, btn.dataset.variant || undefined);
           render();
         });
       });
@@ -165,10 +170,10 @@ import Layout from '../layouts/Layout.astro';
         shippingCents = data.shippingCents;
         shippingAddress = address;
 
-        const subtotal = getCart().reduce((sum, i) => sum + i.price * i.quantity, 0);
+        const subtotalCents = getCart().reduce((sum, i) => sum + dollarsToCents(i.price) * i.quantity, 0);
         shippingEl.textContent = money(shippingCents!);
         shippingEl.classList.remove('text-fj-navy/50');
-        totalEl.textContent = money(subtotal + shippingCents!);
+        totalEl.textContent = money(subtotalCents + shippingCents!);
         checkoutBtn.disabled = false;
       } catch (err) {
         shippingErrorEl.textContent = err instanceof Error ? err.message : 'Something went wrong.';

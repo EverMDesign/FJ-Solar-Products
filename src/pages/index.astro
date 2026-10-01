@@ -44,16 +44,25 @@ const productsWithMeta = products.map((product, index) => ({ ...product, allInde
             <img src={featuredProduct.image} alt={featuredProduct.name} class="max-h-full object-contain" />
           )}
         </div>
-        <button
-          type="button"
-          class="add-to-cart-btn w-full bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
-          data-slug={featuredProduct.slug}
-          data-name={featuredProduct.name}
-          data-image={featuredProduct.image}
-          data-price={featuredProduct.price}
-        >
-          Add to Cart
-        </button>
+        {featuredProduct.variants?.length ? (
+          <a
+            href={`/products/${featuredProduct.slug}/`}
+            class="block w-full text-center bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+          >
+            Choose Options
+          </a>
+        ) : (
+          <button
+            type="button"
+            class="add-to-cart-btn w-full bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+            data-slug={featuredProduct.slug}
+            data-name={featuredProduct.name}
+            data-image={featuredProduct.image}
+            data-price={featuredProduct.price}
+          >
+            Add to Cart
+          </button>
+        )}
       </div>
     </div>
   </section>
@@ -97,6 +106,7 @@ const productsWithMeta = products.map((product, index) => ({ ...product, allInde
             price={product.price}
             currency={product.currency}
             hasMultiplePrices={product.hasMultiplePrices}
+            hasVariants={Boolean(product.variants?.length)}
             hidden={product.allIndex >= 6}
           />
         ))}

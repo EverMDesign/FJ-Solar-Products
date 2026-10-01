@@ -7,10 +7,11 @@ interface Props {
   price: number | null;
   currency: string;
   hasMultiplePrices: boolean;
+  hasVariants?: boolean;
   hidden?: boolean;
 }
 
-const { slug, name, brand, image, price, currency, hasMultiplePrices, hidden = false } = Astro.props;
+const { slug, name, brand, image, price, currency, hasMultiplePrices, hasVariants = false, hidden = false } = Astro.props;
 
 function formatPrice(amount: number | null, currency: string) {
   if (amount === null) return 'Contact for price';
@@ -39,7 +40,15 @@ function formatPrice(amount: number | null, currency: string) {
     <span class="font-heading font-extrabold text-xl text-fj-gold">
       {formatPrice(price, currency)}{hasMultiplePrices && <span class="text-fj-navy/50 font-normal text-sm"> +</span>}
     </span>
-    {price !== null && (
+    {price !== null && hasVariants ? (
+      <a
+        href={`/products/${slug}/`}
+        aria-label={`Choose options for ${name}`}
+        class="w-10 h-10 rounded border-2 border-fj-navy-deep text-fj-navy flex items-center justify-center text-lg group-hover:bg-fj-navy-deep group-hover:text-fj-cream transition-colors"
+      >
+        +
+      </a>
+    ) : price !== null && (
       <button
         type="button"
         class="add-to-cart-icon w-10 h-10 rounded border-2 border-fj-navy-deep text-fj-navy flex items-center justify-center text-lg group-hover:bg-fj-navy-deep group-hover:text-fj-cream transition-colors"

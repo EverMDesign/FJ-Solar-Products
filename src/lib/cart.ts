@@ -4,9 +4,18 @@ export interface CartItem {
   image: string;
   price: number;
   quantity: number;
+  variantOptionId?: string;
+  variantName?: string;
+  weightOz?: number;
+  dimensions?: { length: number; width: number; height: number; unit: string } | null;
 }
 
 const STORAGE_KEY = 'fj-cart';
+
+// Two variants of the same product (e.g. Negative/Positive signal) are separate cart lines.
+function sameLine(a: Pick<CartItem, 'slug' | 'variantOptionId'>, b: Pick<CartItem, 'slug' | 'variantOptionId'>) {
+  return a.slug === b.slug && (a.variantOptionId || '') === (b.variantOptionId || '');
+}
 
 function readRaw(): CartItem[] {
   try {
@@ -37,7 +46,7 @@ export function getCartCount(): number {
 
 export function addToCart(item: Omit<CartItem, 'quantity'>, quantity = 1) {
   const items = readRaw();
-  const existing = items.find((i) => i.slug === item.slug);
+  const existing = items.find((i) => sameLine(i, item));
   if (existing) {
     existing.quantity += quantity;
   } else {
@@ -46,16 +55,16 @@ export function addToCart(item: Omit<CartItem, 'quantity'>, quantity = 1) {
   writeRaw(items);
 }
 
-export function removeFromCart(slug: string) {
-  writeRaw(readRaw().filter((i) => i.slug !== slug));
+export function removeFromCart(slug: string, variantOptionId?: string) {
+  writeRaw(readRaw().filter((i) => !sameLine(i, { slug, variantOptionId })));
 }
 
-export function setQuantity(slug: string, quantity: number) {
+export function setQuantity(slug: string, variantOptionId: string | undefined, quantity: number) {
   const items = readRaw();
-  const existing = items.find((i) => i.slug === slug);
+  const existing = items.find((i) => sameLine(i, { slug, variantOptionId }));
   if (!existing) return;
   if (quantity <= 0) {
-    writeRaw(items.filter((i) => i.slug !== slug));
+    writeRaw(items.filter((i) => !sameLine(i, { slug, variantOptionId })));
     return;
   }
   existing.quantity = quantity;

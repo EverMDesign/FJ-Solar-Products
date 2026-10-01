@@ -11,10 +11,37 @@
       "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/d608da3b-adce-4882-96a1-12ec84804aa2.webp"
     ],
     "price": 329,
-    "priceLabel": "Negative Signal",
+    "priceLabel": "Negative signal. ",
     "currency": "USD",
-    "hasMultiplePrices": false,
-    "weightOz": 16
+    "hasMultiplePrices": true,
+    "weightOz": 18.08,
+    "variantGroupName": "Signal Type",
+    "variants": [
+      {
+        "optionId": "6x7t35hksjc",
+        "name": "Negative signal.",
+        "price": 329,
+        "weightOz": 18.08,
+        "dimensions": {
+          "length": 8,
+          "width": 6,
+          "height": 4,
+          "unit": "in"
+        }
+      },
+      {
+        "optionId": "a6xru89rt3",
+        "name": "Positive signal.",
+        "price": 329,
+        "weightOz": 18.08,
+        "dimensions": {
+          "length": 8,
+          "width": 6,
+          "height": 4,
+          "unit": "in"
+        }
+      }
+    ]
   },
   {
     "id": "6ab165fd791299e19f54cb32",

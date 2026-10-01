@@ -40,6 +40,20 @@ function slugify(name) {
     .replace(/(^-|-$)/g, '');
 }
 
+// GHL stores shipping weight per price (variant) as { value, unit }. Convert to ounces
+// since that's the unit ShipStation calls expect everywhere in this codebase.
+function ozFromWeight(weight) {
+  if (!weight || typeof weight.value !== 'number') return null;
+  switch (weight.unit) {
+    case 'lb': return Math.round(weight.value * 16 * 100) / 100;
+    case 'kg': return Math.round(weight.value * 35.274 * 100) / 100;
+    case 'g': return Math.round(weight.value * 0.035274 * 100) / 100;
+    case 'oz':
+    default:
+      return weight.value;
+  }
+}
+
 async function listProducts() {
   const res = await fetch(`${API_BASE}/products/?locationId=${LOCATION_ID}&limit=100`, { headers });
   const data = await res.json();
@@ -90,6 +104,21 @@ async function main() {
     // that override is kept on every future run.
     const defaultBrand = full.name.includes('Victron') ? 'Victron' : 'FJ Solar';
 
+    // Real GHL variants (e.g. "Signal Type": Negative/Positive) carry their own price and,
+    // when Andrew has set it, their own shipping weight + box dimensions per option.
+    const variantPrices = prices.filter(p => (p.variantOptionIds || []).length > 0);
+    const variants = variantPrices.map(p => {
+      const prevVariant = previous?.variants?.find(v => v.optionId === p.variantOptionIds[0]);
+      return {
+        optionId: p.variantOptionIds[0],
+        name: p.name.trim(),
+        price: p.amount,
+        weightOz: ozFromWeight(p.shippingOptions?.weight) ?? prevVariant?.weightOz ?? 16,
+        dimensions: p.shippingOptions?.dimensions || prevVariant?.dimensions || null,
+      };
+    });
+    const variantGroupName = full.variants?.[0]?.name?.trim() || null;
+
     results.push({
       id: full._id,
       slug: slugify(full.name),
@@ -102,9 +131,10 @@ async function main() {
       priceLabel: lowestPrice ? lowestPrice.name : '',
       currency: lowestPrice ? lowestPrice.currency : 'USD',
       hasMultiplePrices: prices.length > 1,
-      // Needed for real ShipStation shipping quotes. GHL doesn't store product weight,
-      // so this starts as a placeholder — correct it by hand once, it's kept on every future run.
-      weightOz: previous?.weightOz ?? 16,
+      // Needed for real ShipStation shipping quotes. Pulled from GHL's per-price shippingOptions
+      // when Andrew has set it; otherwise a placeholder kept across runs — correct it by hand once.
+      weightOz: variants[0]?.weightOz ?? ozFromWeight(lowestPrice?.shippingOptions?.weight) ?? previous?.weightOz ?? 16,
+      ...(variants.length > 0 ? { variantGroupName, variants } : {}),
     });
   }
 
