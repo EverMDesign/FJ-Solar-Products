@@ -14,14 +14,14 @@
     "priceLabel": "Negative signal. ",
     "currency": "USD",
     "hasMultiplePrices": true,
-    "weightOz": 18.08,
+    "weightOz": 29,
     "variantGroupName": "Signal Type",
     "variants": [
       {
         "optionId": "6x7t35hksjc",
         "name": "Negative signal.",
         "price": 329,
-        "weightOz": 18.08,
+        "weightOz": 29,
         "dimensions": {
           "length": 8,
           "width": 6,
@@ -33,7 +33,7 @@
         "optionId": "a6xru89rt3",
         "name": "Positive signal.",
         "price": 329,
-        "weightOz": 18.08,
+        "weightOz": 29,
         "dimensions": {
           "length": 8,
           "width": 6,

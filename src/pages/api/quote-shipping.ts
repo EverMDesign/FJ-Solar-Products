@@ -23,6 +23,7 @@ const HANDLING_MARKUP = 1.3;
 interface CartItemInput {
   slug: string;
   quantity: number;
+  price: number;
   weightOz?: number;
   dimensions?: { length: number; width: number; height: number; unit: string } | null;
 }
@@ -50,6 +51,15 @@ export const POST: APIRoute = async ({ request }) => {
     return sum + (product?.weightOz || 16) * item.quantity;
   }, 0);
 
+  // Andrew's ShipStation account auto-insures every shipment via ParcelGuard — he doesn't
+  // want to absorb that cost, so it gets passed to the customer. Insured for the real cart
+  // value (not a flat guess) so Andrew is actually covered if a high-value order is lost.
+  const declaredValue = items.reduce((sum, item) => {
+    const product = products.find((p) => p.slug === item.slug);
+    const price = item.price ?? product?.price ?? 0;
+    return sum + price * item.quantity;
+  }, 0);
+
   // GHL stores dimension units abbreviated ("in", "cm") — ShipStation's API rejects
   // anything but the full word ("inch", "centimeter").
   const DIMENSION_UNITS: Record<string, string> = { in: 'inch', cm: 'centimeter' };
@@ -57,6 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Use the box dimensions of the first cart line that has them — fine for a single-product
   // cart (today's real case); a mixed multi-box cart would need real bin-packing, not built.
   const boxDimensions = items.find((item) => item.dimensions)?.dimensions;
+  const insuredValue = { currency: 'usd', amount: declaredValue };
   const packages = boxDimensions
     ? [
         {
@@ -67,9 +78,10 @@ export const POST: APIRoute = async ({ request }) => {
             height: boxDimensions.height,
             unit: DIMENSION_UNITS[boxDimensions.unit] || boxDimensions.unit,
           },
+          insured_value: insuredValue,
         },
       ]
-    : [{ weight: { value: totalWeightOz, unit: 'ounce' } }];
+    : [{ weight: { value: totalWeightOz, unit: 'ounce' }, insured_value: insuredValue }];
 
   const shipstationRes = await fetch('https://api.shipstation.com/v2/rates', {
     method: 'POST',
@@ -83,6 +95,7 @@ export const POST: APIRoute = async ({ request }) => {
         service_codes: [USPS_GROUND_ADVANTAGE],
       },
       shipment: {
+        insurance_provider: 'parcelguard',
         ship_from: {
           name: SHIP_FROM.name,
           phone: SHIP_FROM.phone,
@@ -115,9 +128,19 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'No shipping options found for that address.' }), { status: 404 });
   }
 
+  const rawShippingCents = Math.round(rate.shipping_amount.amount * 100);
+  const markedUpShippingCents = Math.round(rate.shipping_amount.amount * HANDLING_MARKUP * 100);
+  // ParcelGuard is a real pass-through cost, not marked up — Andrew doesn't want to eat it,
+  // but doesn't need to profit on it either.
+  const insuranceCents = Math.round((rate.insurance_amount?.amount || 0) * 100);
+
   return new Response(
     JSON.stringify({
-      shippingCents: Math.round(rate.shipping_amount.amount * HANDLING_MARKUP * 100),
+      shippingCents: markedUpShippingCents + insuranceCents,
+      rawShippingCents,
+      insuranceCents,
+      insuredValue: declaredValue,
+      markupPercent: Math.round((HANDLING_MARKUP - 1) * 100),
       carrier: rate.carrier_friendly_name,
       service: rate.service_type,
     }),

@@ -45,7 +45,19 @@ function slugify(name) {
 function ozFromWeight(weight) {
   if (!weight || typeof weight.value !== 'number') return null;
   switch (weight.unit) {
-    case 'lb': return Math.round(weight.value * 16 * 100) / 100;
+    case 'lb': {
+      // Andrew enters this as pounds.ounces (e.g. 1.13 = "1 lb 13 oz"), not true decimal
+      // pounds — confirmed 2026-10-01 after a real ShipStation rate mismatch traced back
+      // to this. 1.13 is NOT 1.13lb (18.08oz); it's 16oz + 13oz = 29oz.
+      const wholePounds = Math.trunc(weight.value);
+      let ouncesPart = Math.round((Math.abs(weight.value) - Math.abs(wholePounds)) * 100);
+      let totalWholePounds = wholePounds;
+      if (ouncesPart >= 16) {
+        totalWholePounds += Math.floor(ouncesPart / 16);
+        ouncesPart %= 16;
+      }
+      return totalWholePounds * 16 + ouncesPart;
+    }
     case 'kg': return Math.round(weight.value * 35.274 * 100) / 100;
     case 'g': return Math.round(weight.value * 0.035274 * 100) / 100;
     case 'oz':

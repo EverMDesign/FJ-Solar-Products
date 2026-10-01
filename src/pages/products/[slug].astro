@@ -151,7 +151,7 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
 
     btn?.addEventListener('click', () => {
       const dimensions = btn.dataset.dimensions ? JSON.parse(btn.dataset.dimensions) : null;
-      addToCart({
+      const item = {
         slug: btn.dataset.slug || '',
         name: btn.dataset.name || '',
         image: btn.dataset.image || '',
@@ -160,7 +160,8 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
         variantName: btn.dataset.variantName || undefined,
         weightOz: btn.dataset.weightOz ? Number(btn.dataset.weightOz) : undefined,
         dimensions,
-      });
+      };
+      addToCart(item);
       const original = btn.textContent;
       btn.textContent = 'Added!';
       setTimeout(() => (btn.textContent = original), 1200);
