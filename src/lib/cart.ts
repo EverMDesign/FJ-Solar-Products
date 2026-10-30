@@ -8,6 +8,7 @@ export interface CartItem {
   variantName?: string;
   weightOz?: number;
   dimensions?: { length: number; width: number; height: number; unit: string } | null;
+  // Note: price contains the variant price if variant is selected, otherwise product base price
 }
 
 const STORAGE_KEY = 'fj-cart';

@@ -200,7 +200,8 @@ import Layout from '../layouts/Layout.astro';
         shippingCents = data.shippingCents;
         shippingAddress = address;
 
-        const subtotalCents = getCart().reduce((sum, i) => sum + dollarsToCents(i.price) * i.quantity, 0);
+        // Use variant price if available, otherwise product base price from cart item
+        const subtotalCents = getCart().reduce((sum, i) => sum + dollarsToCents(i.price ?? 0) * i.quantity, 0);
         const taxCents: number = data.taxCents || 0;
         shippingEl.textContent = money(shippingCents!);
         shippingEl.classList.remove('text-fj-navy/50');

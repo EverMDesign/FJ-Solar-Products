@@ -149,7 +149,7 @@
       "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7246f923-e9d8-42b4-aa73-0c548e4c1eca.webp"
     ],
     "price": 329,
-    "priceLabel": "15' / No Wago / Westinghouse",
+    "priceLabel": "15' / No / Westinghouse",
     "currency": "USD",
     "hasMultiplePrices": true,
     "sku": "AGS-PORT",
@@ -165,8 +165,8 @@
       {
         "name": "WAGO Electrical Connectors",
         "options": [
-          "Add Wago",
-          "No Wago"
+          "Yes",
+          "No"
         ]
       },
       {
@@ -181,10 +181,10 @@
     "variants": [
       {
         "optionId": "blutk8l4197",
-        "name": "15' / Add Wago / Westinghouse",
+        "name": "15' / Yes / Westinghouse",
         "options": [
           "15'",
-          "Add Wago",
+          "Yes",
           "Westinghouse"
         ],
         "price": 334,
@@ -198,10 +198,10 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / Add Wago / Westinghouse",
+        "name": "30' / Yes / Westinghouse",
         "options": [
           "30'",
-          "Add Wago",
+          "Yes",
           "Westinghouse"
         ],
         "price": 354,
@@ -215,10 +215,10 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / No Wago / Westinghouse",
+        "name": "15' / No / Westinghouse",
         "options": [
           "15'",
-          "No Wago",
+          "No",
           "Westinghouse"
         ],
         "price": 329,
@@ -232,10 +232,10 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / No Wago / Westinghouse",
+        "name": "30' / No / Westinghouse",
         "options": [
           "30'",
-          "No Wago",
+          "No",
           "Westinghouse"
         ],
         "price": 349,
@@ -249,10 +249,10 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / Add Wago / Genmax",
+        "name": "15' / Yes / Genmax",
         "options": [
           "15'",
-          "Add Wago",
+          "Yes",
           "Genmax"
         ],
         "price": 334,
@@ -266,10 +266,10 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / No Wago / Genmax",
+        "name": "15' / No / Genmax",
         "options": [
           "15'",
-          "No Wago",
+          "No",
           "Genmax"
         ],
         "price": 329,
@@ -283,10 +283,10 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / Add Wago / Genmax",
+        "name": "30' / Yes / Genmax",
         "options": [
           "30'",
-          "Add Wago",
+          "Yes",
           "Genmax"
         ],
         "price": 354,
@@ -300,10 +300,10 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / No Wago / Genmax",
+        "name": "30' / No / Genmax",
         "options": [
           "30'",
-          "No Wago",
+          "No",
           "Genmax"
         ],
         "price": 349,
@@ -317,10 +317,10 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / Add Wago / Duromax",
+        "name": "15' / Yes / Duromax",
         "options": [
           "15'",
-          "Add Wago",
+          "Yes",
           "Duromax"
         ],
         "price": 334,
@@ -334,10 +334,10 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / No Wago / Duromax",
+        "name": "15' / No / Duromax",
         "options": [
           "15'",
-          "No Wago",
+          "No",
           "Duromax"
         ],
         "price": 329,
@@ -351,10 +351,10 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / Add Wago / Duromax",
+        "name": "30' / Yes / Duromax",
         "options": [
           "30'",
-          "Add Wago",
+          "Yes",
           "Duromax"
         ],
         "price": 354,
@@ -368,10 +368,10 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / No Wago / Duromax",
+        "name": "30' / No / Duromax",
         "options": [
           "30'",
-          "No Wago",
+          "No",
           "Duromax"
         ],
         "price": 349,

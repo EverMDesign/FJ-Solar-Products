@@ -7,6 +7,9 @@ export const prerender = false;
 interface CartItemInput {
   slug: string;
   quantity: number;
+  variantOptionId?: string;
+  variantName?: string;
+  price?: number;
 }
 
 const SANDBOX_API_URL = 'https://apitest.authorize.net/xml/v1/request.api';
@@ -35,20 +38,36 @@ export const POST: APIRoute = async ({ request, url }) => {
     return new Response(JSON.stringify({ error: 'Get a shipping rate before checking out.' }), { status: 400 });
   }
 
-  // Prices always come from our own product data, never trusted from the client.
+  // Prices and variants always come from our own product data/cart, never trusted from the client.
   let subtotal = 0;
   const lineItem = items.map((item) => {
     const product = products.find((p) => p.slug === item.slug);
     if (!product || product.price === null) {
       throw new Error(`Unknown or unavailable product: ${item.slug}`);
     }
-    subtotal += product.price * item.quantity;
+
+    // If item has a variant, use its price; otherwise use product base price.
+    // Variant pricing comes from the cart (client sent it), but we trust
+    // our own product/variant definitions for the final price calculation.
+    let unitPrice = product.price;
+    let displayName = product.name;
+
+    if (item.variantName && item.variantOptionId) {
+      const variant = product.variants?.find((v) => v.optionId === item.variantOptionId);
+      if (variant) {
+        unitPrice = variant.price;
+        displayName = `${product.name} - ${variant.name}`;
+      }
+    }
+
+    subtotal += unitPrice * item.quantity;
     return {
       // Authorize.net caps itemId and name at 31 characters each.
-      itemId: product.slug.slice(0, 31),
-      name: product.name.slice(0, 31),
+      // Use slug-variant as itemId so we can reconstruct the full combo in webhook.
+      itemId: (item.variantOptionId ? `${item.slug}:${item.variantOptionId}` : product.slug).slice(0, 31),
+      name: displayName.slice(0, 31),
       quantity: item.quantity,
-      unitPrice: product.price.toFixed(2),
+      unitPrice: unitPrice.toFixed(2),
     };
   });
 
