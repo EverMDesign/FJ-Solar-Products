@@ -21,7 +21,16 @@ interface CartItemInput {
 
 export const POST: APIRoute = async ({ request }) => {
   const apiKey = import.meta.env.SHIPSTATION_API_KEY;
+  const shipFromStreet = import.meta.env.SHIP_FROM_STREET;
+  const shipFromCity = import.meta.env.SHIP_FROM_CITY;
+
   if (!apiKey) {
+    console.error('ShipStation API key not configured');
+    return new Response(JSON.stringify({ error: 'Shipping is not configured yet.' }), { status: 500 });
+  }
+
+  if (!shipFromStreet || !shipFromCity) {
+    console.error('SHIP_FROM address not configured:', { street: !!shipFromStreet, city: !!shipFromCity });
     return new Response(JSON.stringify({ error: 'Shipping is not configured yet.' }), { status: 500 });
   }
 
