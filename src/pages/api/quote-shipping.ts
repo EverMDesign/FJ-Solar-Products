@@ -128,6 +128,13 @@ export const POST: APIRoute = async ({ request }) => {
 
     const data = await shipstationRes.json();
     if (!shipstationRes.ok) {
+      console.error('ShipStation API error:', {
+        status: shipstationRes.status,
+        statusText: shipstationRes.statusText,
+        data: data,
+        shipFrom: SHIP_FROM,
+        hasApiKey: !!apiKey,
+      });
       return new Response(JSON.stringify({ error: 'Could not get a shipping rate. Try again in a moment.' }), { status: 502 });
     }
 
