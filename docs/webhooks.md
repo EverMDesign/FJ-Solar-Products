@@ -32,8 +32,8 @@ Authorize.net Payment
 
 - **Event ID:** `af0fe111-5d3a-4bd2-a4cc-17e588a21140`
 - **Event Type:** `net.authorize.payment.authcapture.created`
-- **URL:** `https://fj-solar-products.vercel.app/api/authorize-webhook`
-- **Status:** ✅ Registered (2026-10-29)
+- **URL:** `https://www.fjsolarproducts.com/api/authorize-webhook`
+- **Status:** ✅ Registered (2026-10-29) — **Updated to live domain (2026-10-30)**
 
 ### How It Works
 
@@ -80,9 +80,9 @@ Authorize.net Payment
 ### Registration
 
 - **Event Type:** `shipmentshipped`
-- **URL:** `https://fj-solar-products.vercel.app/api/shipstation-webhook`
+- **URL:** `https://www.fjsolarproducts.com/api/shipstation-webhook`
 - **Friendly Name:** `FJ Solar - Mark Order Complete`
-- **Status:** ✅ Registered (manual setup required in ShipStation)
+- **Status:** ✅ Registered (manual setup in ShipStation) — **URL updated to live domain (2026-10-30)**
 
 ### How It Works
 
