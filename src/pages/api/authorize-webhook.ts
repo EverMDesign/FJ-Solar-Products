@@ -77,30 +77,34 @@ async function upsertGhlContact(details: any): Promise<string | null> {
   // field's HTML as-is into the email body, where a plain newline collapses to a space.
   // Verify this assumption with a real test email before relying on it (see CHANGELOG).
   // Look up full product names and variants from products.json using itemId (slug or slug:variantId).
-  // Authorize.net truncates names to 31 chars, so we restore the full names and variant combos here for GHL.
+  // Use item.description (if available) for the full untruncated name, otherwise reconstruct from itemId.
   const itemsHtml = getLineItems(transaction)
     .map((item: any) => {
-      const itemId = item.itemId || '';
-      let displayName = item.name || itemId;
+      let displayName = item.description || item.name || item.itemId;
 
-      // itemId might be "slug" or "slug:variantId" if variant was selected
-      if (itemId.includes(':')) {
-        const [slug, variantId] = itemId.split(':');
-        const fullProduct = products.find((p) => p.slug === slug);
-        if (fullProduct) {
-          const variant = fullProduct.variants?.find((v) => v.optionId === variantId);
-          if (variant) {
-            // Reconstruct full variant combo: "Product Name – Variant 1 / Variant 2"
-            displayName = `${fullProduct.name} – ${variant.name}`;
-          } else {
+      // If no description provided, reconstruct from itemId
+      if (!item.description) {
+        const itemId = item.itemId || '';
+
+        // itemId might be "slug" or "slug:variantId" if variant was selected
+        if (itemId.includes(':')) {
+          const [slug, variantId] = itemId.split(':');
+          const fullProduct = products.find((p) => p.slug === slug);
+          if (fullProduct) {
+            const variant = fullProduct.variants?.find((v) => v.optionId === variantId);
+            if (variant) {
+              // Reconstruct full variant combo: "Product Name – Variant 1 / Variant 2"
+              displayName = `${fullProduct.name} – ${variant.name}`;
+            } else {
+              displayName = fullProduct.name;
+            }
+          }
+        } else {
+          // No variant, just lookup the product name
+          const fullProduct = products.find((p) => p.slug === itemId);
+          if (fullProduct) {
             displayName = fullProduct.name;
           }
-        }
-      } else {
-        // No variant, just lookup the product name
-        const fullProduct = products.find((p) => p.slug === itemId);
-        if (fullProduct) {
-          displayName = fullProduct.name;
         }
       }
 

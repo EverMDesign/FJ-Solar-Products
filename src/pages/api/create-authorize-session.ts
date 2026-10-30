@@ -62,12 +62,14 @@ export const POST: APIRoute = async ({ request, url }) => {
 
     subtotal += unitPrice * item.quantity;
     return {
-      // Authorize.net caps itemId and name at 31 characters each.
-      // Use slug-variant as itemId so we can reconstruct the full combo in webhook.
+      // Authorize.net caps itemId and name at 31 characters. Store the full combo in a
+      // custom field so GHL gets the complete name. itemId is slug or slug:variantId for webhook reconstruction.
       itemId: (item.variantOptionId ? `${item.slug}:${item.variantOptionId}` : product.slug).slice(0, 31),
       name: displayName.slice(0, 31),
       quantity: item.quantity,
       unitPrice: unitPrice.toFixed(2),
+      // Store full name as custom field so webhook can preserve it for GHL
+      description: displayName,
     };
   });
 
