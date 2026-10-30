@@ -135,13 +135,25 @@ export const POST: APIRoute = async ({ request }) => {
       }),
     });
 
-    const data = await shipstationRes.json();
+    let data;
+    try {
+      data = await shipstationRes.json();
+    } catch (e) {
+      console.error('ShipStation response not JSON:', shipstationRes.status, await shipstationRes.text());
+      return new Response(JSON.stringify({ error: 'Could not get a shipping rate. Try again in a moment.' }), { status: 502 });
+    }
+
     if (!shipstationRes.ok) {
       console.error('ShipStation API error:', {
         status: shipstationRes.status,
         statusText: shipstationRes.statusText,
-        data: data,
-        shipFrom: SHIP_FROM,
+        error: data?.errors || data?.error_message || data,
+        shipFrom: {
+          street: SHIP_FROM.addressLine1,
+          city: SHIP_FROM.cityLocality,
+          state: SHIP_FROM.stateProvince,
+          zip: SHIP_FROM.postalCode,
+        },
         hasApiKey: !!apiKey,
       });
       return new Response(JSON.stringify({ error: 'Could not get a shipping rate. Try again in a moment.' }), { status: 502 });
