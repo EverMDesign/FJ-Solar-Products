@@ -23,6 +23,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   const environment = import.meta.env.AUTHORIZE_NET_ENVIRONMENT || 'sandbox';
 
   if (!apiLoginId || !transactionKey) {
+    console.error('Authorize.net credentials missing:', { hasLoginId: !!apiLoginId, hasKey: !!transactionKey });
     return new Response(JSON.stringify({ error: 'Checkout is not configured yet.' }), { status: 500 });
   }
 
@@ -190,10 +191,24 @@ export const POST: APIRoute = async ({ request, url }) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
   });
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    console.error('Authorize.net response not JSON:', res.status, await res.text());
+    return new Response(JSON.stringify({ error: 'Could not start checkout.' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
   if (data.messages?.resultCode !== 'Ok' || !data.token) {
-    console.error('Authorize.net getHostedPaymentPageRequest failed:', JSON.stringify(data));
+    console.error('Authorize.net getHostedPaymentPageRequest failed:', {
+      resultCode: data.messages?.resultCode,
+      errors: data.messages?.message,
+      hasToken: !!data.token,
+      fullResponse: data,
+    });
     return new Response(JSON.stringify({ error: 'Could not start checkout.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
