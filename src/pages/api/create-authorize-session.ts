@@ -138,9 +138,8 @@ export const POST: APIRoute = async ({ request, url }) => {
             // with no field ever shown to enter it in (real bug hit 2026-10-29). We also
             // want this email regardless: it feeds the GHL contact, the ShipStation
             // shipment's ship_to.email, and authorize-webhook.ts's customer.email lookup.
-            // Phone is also required for order fulfillment and contact records.
             settingName: 'hostedPaymentCustomerOptions',
-            settingValue: JSON.stringify({ showEmail: true, requiredEmail: true, showPhone: true, requiredPhone: true }),
+            settingValue: JSON.stringify({ showEmail: true, requiredEmail: true }),
           },
           {
             // Hide shipping address on the Authorize.net form since we already
