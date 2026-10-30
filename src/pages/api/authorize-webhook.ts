@@ -101,15 +101,16 @@ async function upsertGhlContact(details: any): Promise<string | null> {
   const subtotalAmount = totalAmount - shippingAmount - taxAmount;
   const money = (n: number) => `$${n.toFixed(2)}`;
 
-  // Determine product-based tags from line items
+  // Determine product-based tags from line items. Match on itemId (slug) instead of name
+  // because Authorize.net truncates names to 31 chars, cutting off words like "fan kit".
   const lineItems = getLineItems(transaction);
   const productTags: string[] = [];
   lineItems.forEach((item: any) => {
-    const itemName = (item.name || item.itemId || '').toLowerCase();
-    if (itemName.includes('auto generator start')) {
+    const itemId = (item.itemId || '').toLowerCase();
+    if (itemId.includes('auto-generator-start')) {
       productTags.push('fj_ags_purchase');
     }
-    if (itemName.includes('external fan kit')) {
+    if (itemId === 'victron-multiplus-ii-external-fan-kit') {
       productTags.push('fj_ext-kit_purchase');
     }
   });
