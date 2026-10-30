@@ -109,7 +109,7 @@
       "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7246f923-e9d8-42b4-aa73-0c548e4c1eca.webp"
     ],
     "price": 329,
-    "priceLabel": "15' / No / Westinghouse",
+    "priceLabel": "15' / No Wago / Westinghouse",
     "currency": "USD",
     "hasMultiplePrices": true,
     "sku": "AGS-PORT",
@@ -118,7 +118,7 @@
     "variants": [
       {
         "optionId": "blutk8l4197",
-        "name": "15' / Yes / Westinghouse",
+        "name": "15' / Add Wago / Westinghouse",
         "price": 334,
         "weightOz": 16,
         "dimensions": {
@@ -130,7 +130,7 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / Yes / Westinghouse",
+        "name": "30' / Add Wago / Westinghouse",
         "price": 354,
         "weightOz": 16,
         "dimensions": {
@@ -142,7 +142,7 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / No / Westinghouse",
+        "name": "15' / No Wago / Westinghouse",
         "price": 329,
         "weightOz": 16,
         "dimensions": {
@@ -154,7 +154,7 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / No / Westinghouse",
+        "name": "30' / No Wago / Westinghouse",
         "price": 349,
         "weightOz": 16,
         "dimensions": {
@@ -166,7 +166,7 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / Yes / Genmax",
+        "name": "15' / Add Wago / Genmax",
         "price": 334,
         "weightOz": 16,
         "dimensions": {
@@ -178,7 +178,7 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / No / Genmax",
+        "name": "15' / No Wago / Genmax",
         "price": 329,
         "weightOz": 16,
         "dimensions": {
@@ -190,7 +190,7 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / Yes / Genmax",
+        "name": "30' / Add Wago / Genmax",
         "price": 354,
         "weightOz": 16,
         "dimensions": {
@@ -202,7 +202,7 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / No / Genmax",
+        "name": "30' / No Wago / Genmax",
         "price": 349,
         "weightOz": 16,
         "dimensions": {
@@ -214,7 +214,7 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / Yes / Duromax",
+        "name": "15' / Add Wago / Duromax",
         "price": 334,
         "weightOz": 16,
         "dimensions": {
@@ -226,7 +226,7 @@
       },
       {
         "optionId": "blutk8l4197",
-        "name": "15' / No / Duromax",
+        "name": "15' / No Wago / Duromax",
         "price": 329,
         "weightOz": 16,
         "dimensions": {
@@ -238,7 +238,7 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / Yes / Duromax",
+        "name": "30' / Add Wago / Duromax",
         "price": 354,
         "weightOz": 16,
         "dimensions": {
@@ -250,7 +250,7 @@
       },
       {
         "optionId": "a8yhgaspqs6",
-        "name": "30' / No / Duromax",
+        "name": "30' / No Wago / Duromax",
         "price": 349,
         "weightOz": 16,
         "dimensions": {
