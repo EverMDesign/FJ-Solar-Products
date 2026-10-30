@@ -12,10 +12,8 @@ registered (`GET /rest/v1/webhooks` returned `[]`). Fixed:
       `net.authorize.payment.authcapture.created`. See `docs/checkout.md`'s "Webhook
       registration" section for how to check/update/delete it.
 - [x] **Updated Authorize.net webhook URL to live domain** — `PUT` call completed (2026-10-30)
-- [ ] **Update ShipStation webhook URL in dashboard** — change from
-      `https://fj-solar-products.vercel.app/api/shipstation-webhook` to
-      `https://www.fjsolarproducts.com/api/shipstation-webhook` in ShipStation settings
-      (Settings > Webhooks, just edit the URL field, no need to recreate)
+- [x] **Updated ShipStation webhook URL in dashboard** — changed to
+      `https://www.fjsolarproducts.com/api/shipstation-webhook` (2026-10-30)
 - [ ] The next real transaction is the first real test of whether the webhook actually
       fires correctly end-to-end (signature verification, GHL contact/Opportunity,
       ShipStation shipment) — watch for it and check GHL/ShipStation afterward
