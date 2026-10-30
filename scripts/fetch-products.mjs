@@ -110,6 +110,11 @@ async function main() {
     const sortedPrices = [...prices].sort((a, b) => a.amount - b.amount);
     const lowestPrice = sortedPrices[0] || null;
 
+    // Debug: check price fields for SKU
+    if (summary.name.includes('Cable') || summary.name.includes('Fan Kit')) {
+      console.log(`  Price fields for ${summary.name}:`, lowestPrice ? Object.keys(lowestPrice).slice(0, 20) : 'no prices');
+    }
+
     const previous = existingById.get(full._id);
     // Default guess: anything named "Victron ..." is a Victron product, everything
     // else is one of FJ Solar's own items. Override by hand in products.json if wrong —
@@ -143,6 +148,8 @@ async function main() {
       priceLabel: lowestPrice ? lowestPrice.name : '',
       currency: lowestPrice ? lowestPrice.currency : 'USD',
       hasMultiplePrices: prices.length > 1,
+      // SKU from GHL pricing details (Inventory section) — used for ShipStation shipments.
+      ...(lowestPrice?.sku ? { sku: lowestPrice.sku } : {}),
       // Needed for real ShipStation shipping quotes. Pulled from GHL's per-price shippingOptions
       // when Andrew has set it; otherwise a placeholder kept across runs — correct it by hand once.
       weightOz: variants[0]?.weightOz ?? ozFromWeight(lowestPrice?.shippingOptions?.weight) ?? previous?.weightOz ?? 16,

@@ -293,12 +293,14 @@ async function createShipStationShipment(details: any, opportunityId: string): P
       totalWeightOz += (product.weightOz || 16) * quantity;
       declaredValue += (product.price || 0) * quantity;
       if (!boxDimensions && product.dimensions) boxDimensions = product.dimensions;
-      shipmentItems.push({ sku: product.slug, name: product.name, quantity, unit_price: product.price || 0 });
+      // Use GHL's SKU if available, fall back to product slug.
+      const sku = product.sku || product.slug;
+      shipmentItems.push({ sku, name: product.name, quantity, unit_price: product.price || 0 });
     } else {
       // Unknown/unmatched item — ship something rather than nothing, with a conservative guess.
       console.error('ShipStation shipment: could not match line item to a product', item.itemId);
       totalWeightOz += 16 * quantity;
-      declaredValue += Number(item.unitPrice || 0) * quantity;
+      declaredValue += Number(item.unitValue || 0) * quantity;
       shipmentItems.push({
         sku: item.itemId || 'unknown',
         name: item.name || item.itemId || 'Unknown item',

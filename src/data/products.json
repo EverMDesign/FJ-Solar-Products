@@ -11,17 +11,17 @@
       "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/d608da3b-adce-4882-96a1-12ec84804aa2.webp"
     ],
     "price": 329,
-    "priceLabel": "Negative signal. ",
+    "priceLabel": "Negative / No",
     "currency": "USD",
     "hasMultiplePrices": true,
-    "weightOz": 29,
+    "weightOz": 96,
     "variantGroupName": "Signal Type",
     "variants": [
       {
         "optionId": "6x7t35hksjc",
-        "name": "Negative signal.",
-        "price": 329,
-        "weightOz": 29,
+        "name": "Negative / Yes",
+        "price": 338,
+        "weightOz": 96,
         "dimensions": {
           "length": 8,
           "width": 6,
@@ -31,9 +31,57 @@
       },
       {
         "optionId": "a6xru89rt3",
-        "name": "Positive signal.",
+        "name": "Positive (Pre Configured) / Yes",
+        "price": 385,
+        "weightOz": 96,
+        "dimensions": {
+          "length": 8,
+          "width": 6,
+          "height": 4,
+          "unit": "in"
+        }
+      },
+      {
+        "optionId": "mpk5nnv29ul",
+        "name": "Positive (DIY) / Yes",
+        "price": 338,
+        "weightOz": 96,
+        "dimensions": {
+          "length": 8,
+          "width": 6,
+          "height": 4,
+          "unit": "in"
+        }
+      },
+      {
+        "optionId": "6x7t35hksjc",
+        "name": "Negative / No",
         "price": 329,
-        "weightOz": 29,
+        "weightOz": 96,
+        "dimensions": {
+          "length": 8,
+          "width": 6,
+          "height": 4,
+          "unit": "in"
+        }
+      },
+      {
+        "optionId": "a6xru89rt3",
+        "name": "Positive (Pre Configured) / No",
+        "price": 379,
+        "weightOz": 96,
+        "dimensions": {
+          "length": 8,
+          "width": 6,
+          "height": 4,
+          "unit": "in"
+        }
+      },
+      {
+        "optionId": "mpk5nnv29ul",
+        "name": "Positive (DIY) / No",
+        "price": 329,
+        "weightOz": 96,
         "dimensions": {
           "length": 8,
           "width": 6,
@@ -60,10 +108,97 @@
       "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7246f923-e9d8-42b4-aa73-0c548e4c1eca.webp"
     ],
     "price": 329,
-    "priceLabel": "Default",
+    "priceLabel": "15' / No / Westinghouse",
     "currency": "USD",
-    "hasMultiplePrices": false,
-    "weightOz": 16
+    "hasMultiplePrices": true,
+    "weightOz": 16,
+    "variantGroupName": "Cable Length",
+    "variants": [
+      {
+        "optionId": "blutk8l4197",
+        "name": "15' / Yes / Westinghouse",
+        "price": 334,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "a8yhgaspqs6",
+        "name": "30' / Yes / Westinghouse",
+        "price": 354,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "blutk8l4197",
+        "name": "15' / No / Westinghouse",
+        "price": 329,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "a8yhgaspqs6",
+        "name": "30' / No / Westinghouse",
+        "price": 349,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "blutk8l4197",
+        "name": "15' / Yes / Genmax",
+        "price": 334,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "blutk8l4197",
+        "name": "15' / No / Genmax",
+        "price": 329,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "a8yhgaspqs6",
+        "name": "30' / Yes / Genmax",
+        "price": 354,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "a8yhgaspqs6",
+        "name": "30' / No / Genmax",
+        "price": 349,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "blutk8l4197",
+        "name": "15' / Yes / Duromax",
+        "price": 334,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "blutk8l4197",
+        "name": "15' / No / Duromax",
+        "price": 329,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "a8yhgaspqs6",
+        "name": "30' / Yes / Duromax",
+        "price": 354,
+        "weightOz": 16,
+        "dimensions": null
+      },
+      {
+        "optionId": "a8yhgaspqs6",
+        "name": "30' / No / Duromax",
+        "price": 349,
+        "weightOz": 16,
+        "dimensions": null
+      }
+    ]
   },
   {
     "id": "6ab165ff2bfb4e37de1ae17e",
@@ -79,6 +214,7 @@
     "priceLabel": "Default",
     "currency": "USD",
     "hasMultiplePrices": false,
+    "sku": "VIC-DIR-CAB",
     "weightOz": 16
   },
   {
@@ -146,14 +282,42 @@
       "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/1496e9f5-8bcf-4b50-9dea-69ae64665e30.webp"
     ],
     "price": 69.99,
-    "priceLabel": "Default",
+    "priceLabel": "12v",
     "currency": "USD",
-    "hasMultiplePrices": false,
-    "weightOz": 16,
+    "hasMultiplePrices": true,
+    "sku": "EXT-FAN-12V",
+    "weightOz": 10,
     "hsCode": "8414.59.15",
     "internationalShipping": {
       "service": "usps_first_class_international"
-    }
+    },
+    "variantGroupName": "Voltage",
+    "variants": [
+      {
+        "optionId": "wc92d8ztob8",
+        "name": "12v",
+        "price": 69.99,
+        "weightOz": 10,
+        "dimensions": {
+          "length": 10,
+          "width": 6,
+          "height": 3,
+          "unit": "in"
+        }
+      },
+      {
+        "optionId": "b8t4liiqrwc",
+        "name": "24v",
+        "price": 69.99,
+        "weightOz": 16,
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
+      }
+    ]
   },
   {
     "id": "6ab166031277448b610380ea",
