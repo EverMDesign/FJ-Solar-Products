@@ -2,7 +2,7 @@
   {
     "id": "6ab165ec791299e19f54c8e8",
     "slug": "auto-generator-start-onboard-generators",
-    "name": "Auto Generator Start – Onboard Generators",
+    "name": "Auto Generator Start - Onboard Generators",
     "brand": "FJ Solar",
     "description": "This interface box connects Victron devices to onboard generators. It interprets start/stop signals from Victron systems and converts them using four adjustable relays into signals the generator recognizes. By default, it sends negative signals; positive signal versions are available.\n\nKey Features:\n• No power cycling needed after unexpected shutdown\n• User-friendly operation\n• Weather-resistant IP65 enclosure\n• Compatible with 12v, 24v, and 48v systems\n• Works with Onan, NPS, RVMP, and marine generators\n\nRequirements: Victron Cerbo GX with SmartShunt or BMV-712; generator with two signal wires and negative wire.\n\nCompatibility Notes: Negative signal works across all voltages. Positive signal typically 12vdc only. Onan QD3200 incompatible. RVMP and marine require modifications.",
     "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/0430887f-b183-4a3c-8727-a8a8cf333e53.webp",
@@ -135,7 +135,7 @@
   {
     "id": "6ab165fd791299e19f54cb32",
     "slug": "auto-generator-start-portable-generators",
-    "name": "Auto Generator Start – Portable Generators",
+    "name": "Auto Generator Start - Portable Generators",
     "brand": "FJ Solar",
     "description": "This device serves as an interface between Victron battery monitoring systems and compatible portable generators. The unit tracks battery state of charge or system load, automatically signaling the generator to start when batteries reach critically low levels and stopping when sufficiently charged.\n\nKey Features:\n• Quick-connect plugs for simplified setup\n• Standard 15-foot interconnect cable (custom lengths available)\n• Works with Victron Cerbo GX paired with SmartShunt or BMV-712\n\nCompatibility:\n• Westinghouse portable generators with Smart Switch connector\n• Duromax portable generators with ATS connector\n• Genmax portable generators with ATS connector",
     "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/81d248c3-bccd-4601-9092-f9c32a709947.webp",
@@ -407,7 +407,7 @@
     "slug": "victron-bmv-712",
     "name": "Victron BMV-712",
     "brand": "Victron",
-    "description": "Smart Battery Monitor with built-in Bluetooth. The BMV-712 connects to the VictronConnect smartphone app for customization, data monitoring, historical review, and software updates.\n\nKey Features:\n• Bluetooth built-in\n• Easy to install — all electrical connections via quick connect PCB on the current shunt\n• Midpoint voltage monitoring for series-connected batteries\n• Minimal current draw (0.7Ah/month @ 12V; 0.6Ah/month @ 24V)\n• Bi-stable alarm relay\n• Battery voltage, current, power, amp-hours, and state of charge tracking\n• 500 Amp quick connect shunt and connection kit\n• VE.Direct communication port\n• Input voltage range: 6.5–70V\n\nIncluded: RJ12 cable (10m), battery cable with fuse (2m), front bezels, securing ring, mounting screws.",
+    "description": "Smart Battery Monitor with built-in Bluetooth. The BMV-712 connects to the VictronConnect smartphone app for customization, data monitoring, historical review, and software updates.\n\nKey Features:\n• Bluetooth built-in\n• Easy to install — all electrical connections via quick connect PCB on the current shunt\n• Midpoint voltage monitoring for series-connected batteries\n• Minimal current draw (0.7Ah/month @ 12V; 0.6Ah/month @ 24V)\n• Bi-stable alarm relay\n• Battery voltage, current, power, amp-hours, and state of charge tracking\n• 500 Amp quick connect shunt and connection kit\n• VE.Direct communication port\n• Input voltage range: 6.5-70V\n\nIncluded: RJ12 cable (10m), battery cable with fuse (2m), front bezels, securing ring, mounting screws.",
     "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp",
     "images": [
       "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp"
