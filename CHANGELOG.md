@@ -2,6 +2,42 @@
 
 All notable changes to this project, newest first. Dates are when the work happened, not a formal release schedule — this is a live site, not a versioned package.
 
+## 2026-10-30 (Auto-Gen Purchase email template)
+
+### Added
+- **New professional email template** `templates/auto-gen-purchase-email.html` — FJ Solar branded thank-you email for individual product orders with:
+  - Dynamic customer greeting and order confirmation
+  - Order summary with line items, pricing breakdown, and shipping address (auto-populated from `{{contact.*}}` custom fields)
+  - Product Resources & Support section with links to manuals, FAQs, technical support, and warranty info
+  - Responsive design optimized for desktop and mobile
+  - Brand colors (navy `#1a3a52`, gold `#d4a574`)
+  - Contact info with email, phone, and support hours
+  - Social media links (footer)
+- **Setup guide** `docs/AUTO-GEN-PURCHASE-TEMPLATE.md` — complete instructions for:
+  - Creating the template in EverReach/GHL
+  - Replacing placeholder URLs with real support links
+  - Adding product images (optional)
+  - Understanding all merge tags and custom field references
+  - Setting up automated workflows to send on order creation
+  - Testing and troubleshooting
+  - Customizing colors and resources for different product types
+
+### How to Use
+1. Copy `templates/auto-gen-purchase-email.html` HTML into EverReach's code editor
+2. Follow setup steps in `docs/AUTO-GEN-PURCHASE-TEMPLATE.md`
+3. Update placeholder URLs (support email, phone, FAQ links, etc.)
+4. Create an EverReach automation to send on "New Order" stage
+5. Test with a real order before enabling
+
+### Merge Tags
+Uses all 7 auto-populated GHL contact custom fields:
+- `{{contact.firstName}}` — customer name
+- `{{contact.order_number}}` — Authorize.net transaction ID
+- `{{contact.last_order_items}}` — line items (HTML `<br>` formatted)
+- `{{contact.order_subtotal}}`, `{{contact.order_shipping}}`, `{{contact.order_tax}}`, `{{contact.order_total}}` — pricing breakdown
+
+See `docs/custom-fields-system.md` for field reference.
+
 ## 2026-10-30 (rest of the order-alert email fields)
 
 ### Added

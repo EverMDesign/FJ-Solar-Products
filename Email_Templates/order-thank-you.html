@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Thank You For Your Order — FJ Solar Products</title>
+<!--[if mso]>
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
+<style>
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+  body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; background-color: #E7DBC3; }
+  a { color: #EBAF16; }
+  @media screen and (max-width: 600px) {
+    .email-container { width: 100% !important; }
+    .fluid-padding { padding-left: 20px !important; padding-right: 20px !important; }
+  }
+</style>
+<!-- outlook-fixes-applied --></head>
+<body style="margin:0; padding:0; background-color:#E7DBC3;">
+<div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+  Thanks for your order, {{contact.first_name}} — here's what happens next, plus your install docs and videos.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#E7DBC3;">
+<tr>
+<td align="center" style="padding:32px 16px;">
+
+  <table role="presentation" class="email-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#FFFFFF;">
+
+    <!-- Header -->
+    <tr>
+      <td align="center" style="background-color:#060E1A; padding:28px;">
+        <img src="https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/6ae4be48736386d0dc78a283.png" width="180" alt="FJ Solar Products" style="display:block; width:180px; max-width:180px;">
+      </td>
+    </tr>
+
+    <!-- Hero -->
+    <tr>
+      <td align="center" style="background-color:#54876C; padding:28px 40px;">
+        <p style="margin:0; font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:24px; font-weight:800; color:#F3EBDD;">
+          Thank you, {{contact.first_name}}!
+        </p>
+        <p style="margin:8px 0 0 0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:15px; color:#F3EBDD;">
+          Your order is confirmed and on its way.
+        </p>
+      </td>
+    </tr>
+
+    <!-- Order summary -->
+    <tr>
+      <td class="fluid-padding" style="padding:32px 40px 8px 40px;">
+        <p style="margin:0 0 16px 0; font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#546A61;">
+          Order #{{contact.order_number}}
+        </p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2F2F2; border:1px solid #E7DBC3; border-radius:6px;">
+          <tr>
+            <td style="padding:20px 24px; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.7; color:#172636;">
+              <p style="margin:0 0 12px 0;">
+                <strong>Items Ordered:</strong><br>
+                {{contact.last_order_items}}
+              </p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0 0 0; padding-top:12px; border-top:1px solid #E7DBC3;">
+                <tr>
+                  <td style="font-family:'Inter',Arial,Helvetica,sans-serif; font-size:13px; color:#546A61;">Subtotal:</td>
+                  <td align="right" style="font-family:'Inter',Arial,Helvetica,sans-serif; font-size:13px; color:#172636;">{{contact.order_subtotal}}</td>
+                </tr>
+                <tr>
+                  <td style="font-family:'Inter',Arial,Helvetica,sans-serif; font-size:13px; color:#546A61;">Shipping:</td>
+                  <td align="right" style="font-family:'Inter',Arial,Helvetica,sans-serif; font-size:13px; color:#172636;">{{contact.order_shipping}}</td>
+                </tr>
+                <tr>
+                  <td style="font-family:'Inter',Arial,Helvetica,sans-serif; font-size:13px; color:#546A61;">Tax:</td>
+                  <td align="right" style="font-family:'Inter',Arial,Helvetica,sans-serif; font-size:13px; color:#172636;">{{contact.order_tax}}</td>
+                </tr>
+                <tr>
+                  <td style="padding-top:8px; border-top:1px solid #E7DBC3; font-family:'Montserrat',Arial,Helvetica,sans-serif; font-weight:800; font-size:15px; color:#060E1A;">
+                    Total Paid:
+                  </td>
+                  <td align="right" style="padding-top:8px; border-top:1px solid #E7DBC3; font-family:'Montserrat',Arial,Helvetica,sans-serif; font-weight:800; font-size:15px; color:#060E1A;">
+                    {{contact.order_total}}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Shipping Address -->
+    <tr>
+      <td class="fluid-padding" style="padding:16px 40px 8px 40px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2F2F2; border:1px solid #E7DBC3; border-radius:6px;">
+          <tr>
+            <td style="padding:20px 24px;">
+              <p style="margin:0 0 10px 0; font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#546A61;">
+                Shipping To
+              </p>
+              <p style="margin:0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.6; color:#172636;">
+                {{contact.shipping_address}}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- What happens next -->
+    <tr>
+      <td class="fluid-padding" style="padding:28px 40px 8px 40px;">
+        <p style="margin:0 0 16px 0; font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:18px; font-weight:700; color:#060E1A;">
+          Here's what happens next
+        </p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td valign="top" width="32" style="font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:14px; font-weight:800; color:#EBAF16;">1.</td>
+            <td style="padding-bottom:12px; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.6; color:#172636;">
+              We're packing your order and will have it with the carrier shortly.
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="32" style="font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:14px; font-weight:800; color:#EBAF16;">2.</td>
+            <td style="padding-bottom:12px; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.6; color:#172636;">
+              You'll get tracking updates by email as soon as it ships — no need to ask, ShipStation sends those automatically.
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="32" style="font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:14px; font-weight:800; color:#EBAF16;">3.</td>
+            <td style="padding-bottom:4px; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.6; color:#172636;">
+              Below you'll find the install docs and walkthrough videos for what you ordered — bookmark this email.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Support -->
+    <tr>
+      <td class="fluid-padding" align="center" style="padding:28px 40px 32px 40px;">
+        <p style="margin:0 0 16px 0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.6; color:#172636;">
+          Questions about your install? We're here to help.
+        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center" style="background-color:#060E1A; border-radius:4px;">
+              <a href="mailto:{{location.email}}" style="display:inline-block; padding:13px 28px; font-family:'Montserrat',Arial,Helvetica,sans-serif; font-size:14px; font-weight:700; color:#F3EBDD; text-decoration:none;">Contact Support</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td style="background-color:#060E1A; padding:24px 40px; text-align:center;">
+        <p style="margin:0 0 6px 0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:12px; color:#E7DBC3;">
+          {{location.name}} &nbsp;|&nbsp; {{location.phone}} &nbsp;|&nbsp; {{location.email}}
+        </p>
+      </td>
+    </tr>
+
+  </table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>

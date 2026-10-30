@@ -94,6 +94,21 @@ async function upsertGhlContact(details: any): Promise<string | null> {
   const subtotalAmount = totalAmount - shippingAmount - taxAmount;
   const money = (n: number) => `$${n.toFixed(2)}`;
 
+  // Determine product-based tags from line items
+  const lineItems = getLineItems(transaction);
+  const productTags: string[] = [];
+  lineItems.forEach((item: any) => {
+    const itemName = (item.name || item.itemId || '').toLowerCase();
+    if (itemName.includes('auto generator start')) {
+      productTags.push('fj_ags_purchase');
+    }
+    if (itemName.includes('external fan kit')) {
+      productTags.push('fj_ext-kit_purchase');
+    }
+  });
+  // Remove duplicates
+  const uniqueProductTags = [...new Set(productTags)];
+
   const body = {
     locationId: LOCATION_ID,
     firstName: billTo.firstName || undefined,
@@ -108,7 +123,7 @@ async function upsertGhlContact(details: any): Promise<string | null> {
     // 'fjsp-new-order' is what the EverReach workflow watches for to fire the
     // new-order-alert email to Andrew (see new-order-alert.html) — don't rename
     // without updating that workflow's trigger too.
-    tags: ['Customer', 'FJ Solar Store', 'fjsp-new-order'],
+    tags: ['Customer', 'FJ Solar Store', 'fjsp-new-order', ...uniqueProductTags],
     source: 'FJ Solar Store',
     customFields: [
       itemsHtml && { id: LAST_ORDER_ITEMS_FIELD_ID, fieldValue: itemsHtml },
@@ -142,37 +157,66 @@ async function upsertGhlContact(details: any): Promise<string | null> {
   return data.contact?.id ?? null;
 }
 
-// Writes an itemized order summary to the contact's timeline — so a repeat customer's
+// Writes a detailed order summary to the contact's timeline — so a repeat customer's
 // full purchase history is visible on their GHL contact page, not just a dollar total on
 // each Opportunity card. Every order creates a new Opportunity (see createNewOrderOpportunity
 // below) linked to the same upserted contact, so GHL's contact page already lists every
-// order a repeat customer has made; this note is what makes each one show *what* they bought.
+// order a repeat customer has made; this note is what makes each one show *what* they bought,
+// at what cost, and all shipping/billing details.
 async function addOrderNoteToContact(contactId: string, details: any): Promise<void> {
   const PIT_TOKEN = import.meta.env.PIT_TOKEN;
   const API_BASE = import.meta.env.GHL_API_BASE || 'https://services.leadconnectorhq.com';
 
   const transaction = details?.transaction || {};
-  const shipTo = transaction.shipTo || transaction.billTo || {};
+  const billTo = transaction.billTo || {};
+  const shipTo = transaction.shipTo || billTo;
+  const email = transaction.customer?.email || billTo.email || '';
+  const phone = billTo.phoneNumber || '';
   const lineItems = getLineItems(transaction);
 
   const itemLines = lineItems
     .map((item: any) => `- ${item.name || item.itemId} x${item.quantity} @ $${Number(item.unitPrice || 0).toFixed(2)}`)
     .join('\n');
+
+  const shippingAmount = Number(transaction.shipping?.amount ?? 0);
+  const taxAmount = Number(transaction.tax?.amount ?? 0);
+  const totalAmount = Number(transaction.authAmount ?? 0);
+  const subtotalAmount = totalAmount - shippingAmount - taxAmount;
+  const money = (n: number) => `$${n.toFixed(2)}`;
+
   const shipToName = `${shipTo.firstName || ''} ${shipTo.lastName || ''}`.trim();
   const shipAddress = [shipTo.address, `${shipTo.city || ''}, ${shipTo.state || ''} ${shipTo.zip || ''}`.trim()]
     .filter(Boolean)
     .join('\n');
+  const billToName = `${billTo.firstName || ''} ${billTo.lastName || ''}`.trim();
+  const billAddress = [billTo.address, `${billTo.city || ''}, ${billTo.state || ''} ${billTo.zip || ''}`.trim()]
+    .filter(Boolean)
+    .join('\n');
 
   const body = [
-    `New order #${transaction.transId || 'unknown'} — $${Number(transaction.authAmount ?? 0).toFixed(2)}`,
+    `Order #${transaction.transId || 'unknown'}`,
     '',
-    'Items:',
-    itemLines || '(no line items on the transaction)',
+    'CONTACT INFO:',
+    billToName,
+    phone && `Phone: ${phone}`,
+    email && `Email: ${email}`,
     '',
-    'Shipping to:',
+    'ITEMS ORDERED:',
+    itemLines || '(no line items)',
+    '',
+    'BILLING ADDRESS:',
+    billAddress || '(not provided)',
+    '',
+    'SHIPPING ADDRESS:',
     shipToName,
-    shipAddress,
-  ].join('\n');
+    shipAddress || '(not provided)',
+    '',
+    'ORDER SUMMARY:',
+    `Subtotal: ${money(subtotalAmount)}`,
+    `Shipping: ${money(shippingAmount)}`,
+    `Tax: ${money(taxAmount)}`,
+    `Total: ${money(totalAmount)}`,
+  ].filter(Boolean).join('\n');
 
   const res = await fetch(`${API_BASE}/contacts/${contactId}/notes`, {
     method: 'POST',

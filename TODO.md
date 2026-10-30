@@ -13,6 +13,10 @@ registered (`GET /rest/v1/webhooks` returned `[]`). Fixed:
       registration" section for how to check/update/delete it.
 - [ ] **Must update the webhook URL when the custom domain goes live** — one `PUT` call,
       doesn't need redoing from scratch (see docs)
+- [ ] **ShipStation webhook URL also needs updating when custom domain goes live** — registered
+      at `https://fj-solar-products.vercel.app/api/shipstation-webhook`, change to
+      `https://<custom-domain>/api/shipstation-webhook` in ShipStation settings (just update
+      the URL field, no need to recreate the webhook)
 - [ ] The next real transaction is the first real test of whether the webhook actually
       fires correctly end-to-end (signature verification, GHL contact/Opportunity,
       ShipStation shipment) — watch for it and check GHL/ShipStation afterward

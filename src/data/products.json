@@ -14,6 +14,7 @@
     "priceLabel": "Negative / No",
     "currency": "USD",
     "hasMultiplePrices": true,
+    "sku": "AGS-NEG",
     "weightOz": 96,
     "variantGroupName": "Signal Type",
     "variants": [
@@ -111,6 +112,7 @@
     "priceLabel": "15' / No / Westinghouse",
     "currency": "USD",
     "hasMultiplePrices": true,
+    "sku": "AGS-PORT",
     "weightOz": 16,
     "variantGroupName": "Cable Length",
     "variants": [
@@ -119,84 +121,144 @@
         "name": "15' / Yes / Westinghouse",
         "price": 334,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / Yes / Westinghouse",
         "price": 354,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "blutk8l4197",
         "name": "15' / No / Westinghouse",
         "price": 329,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / No / Westinghouse",
         "price": 349,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "blutk8l4197",
         "name": "15' / Yes / Genmax",
         "price": 334,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "blutk8l4197",
         "name": "15' / No / Genmax",
         "price": 329,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / Yes / Genmax",
         "price": 354,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / No / Genmax",
         "price": 349,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "blutk8l4197",
         "name": "15' / Yes / Duromax",
         "price": 334,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "blutk8l4197",
         "name": "15' / No / Duromax",
         "price": 329,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / Yes / Duromax",
         "price": 354,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       },
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / No / Duromax",
         "price": 349,
         "weightOz": 16,
-        "dimensions": null
+        "dimensions": {
+          "length": null,
+          "width": null,
+          "height": null,
+          "unit": "cm"
+        }
       }
     ]
   },
@@ -214,7 +276,7 @@
     "priceLabel": "Default",
     "currency": "USD",
     "hasMultiplePrices": false,
-    "sku": "VIC-DIR-CAB",
+    "sku": "VIC-ASS030530218",
     "weightOz": 16
   },
   {
@@ -231,6 +293,7 @@
     "priceLabel": "Default",
     "currency": "USD",
     "hasMultiplePrices": false,
+    "sku": "VIC-BAM030712000",
     "weightOz": 16
   },
   {
@@ -247,6 +310,7 @@
     "priceLabel": "Default",
     "currency": "USD",
     "hasMultiplePrices": false,
+    "sku": "VIC-BPP900450110",
     "weightOz": 16
   },
   {
@@ -263,6 +327,7 @@
     "priceLabel": "Touch 50",
     "currency": "USD",
     "hasMultiplePrices": false,
+    "sku": "VIC-BPP900455050",
     "weightOz": 16
   },
   {
@@ -333,6 +398,7 @@
     "priceLabel": "Default",
     "currency": "USD",
     "hasMultiplePrices": false,
+    "sku": "VIC-SHU050150050",
     "weightOz": 16
   }
 ]
