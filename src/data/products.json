@@ -190,10 +190,10 @@
         "price": 334,
         "weightOz": 16,
         "dimensions": {
-          "length": null,
-          "width": null,
-          "height": null,
-          "unit": "cm"
+          "length": 10,
+          "width": 30,
+          "height": 10,
+          "unit": "in"
         }
       },
       {
