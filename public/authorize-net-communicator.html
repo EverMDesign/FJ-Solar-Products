@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    Authorize.net's Accept Hosted page embeds this file in a nested, invisible iframe
+    when hostedPaymentIFrameCommunicatorUrl is set. It postMessages event strings
+    (e.g. "action=resizeWindow&height=650", "action=cancel", "action=transactResponse&response=...")
+    to THIS frame; our job is only to relay them up to the real top-level page at
+    window.parent.parent (us). See https://developer.authorize.net/api/reference/features/accept_hosted.html
+  -->
+  <script type="text/javascript">
+    function relay(str) {
+      if (!str || !window.parent || !window.parent.parent) return;
+      window.parent.parent.postMessage(str, window.location.origin);
+    }
+
+    window.addEventListener('message', function (event) {
+      relay(event.data);
+    }, false);
+
+    // Some events arrive as a URL hash change instead of postMessage.
+    if (window.location.hash && window.location.hash.length > 1) {
+      relay(window.location.hash.substring(1));
+    }
+    window.onhashchange = function () {
+      relay(window.location.hash.substring(1));
+    };
+  </script>
+</head>
+<body></body>
+</html>

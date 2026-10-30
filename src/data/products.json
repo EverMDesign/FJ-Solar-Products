@@ -149,7 +149,11 @@
     "priceLabel": "Default",
     "currency": "USD",
     "hasMultiplePrices": false,
-    "weightOz": 16
+    "weightOz": 16,
+    "hsCode": "8414.59.15",
+    "internationalShipping": {
+      "service": "usps_first_class_international"
+    }
   },
   {
     "id": "6ab166031277448b610380ea",

@@ -1,0 +1,116 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Checkout — Faithful Journey Solar" noindex={true}>
+  <section class="max-w-[720px] mx-auto px-6 py-12">
+    <h1 class="font-heading font-extrabold uppercase text-3xl text-fj-navy mb-8">Checkout</h1>
+
+    <div id="checkout-error" class="hidden border border-red-300 bg-red-50 text-red-700 text-sm rounded p-4 mb-6"></div>
+
+    <div id="checkout-loading" class="text-fj-navy/60 text-sm">Loading secure checkout…</div>
+
+    <div id="checkout-frame-wrap" class="hidden">
+      <iframe id="checkout-iframe" name="checkout-iframe" title="Secure payment" class="w-full border-0 block" style="height: 700px;"></iframe>
+    </div>
+
+    <a href="/cart/" class="inline-block mt-6 text-sm text-fj-navy/60 hover:text-fj-navy underline">&larr; Back to cart</a>
+  </section>
+
+  <script>
+    import { getCart, clearCart } from '../lib/cart';
+
+    const errorEl = document.getElementById('checkout-error')!;
+    const loadingEl = document.getElementById('checkout-loading')!;
+    const frameWrapEl = document.getElementById('checkout-frame-wrap')!;
+    const iframeEl = document.getElementById('checkout-iframe') as HTMLIFrameElement;
+
+    function showError(message: string) {
+      loadingEl.classList.add('hidden');
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    }
+
+    // cart.astro stashes these in sessionStorage right before navigating here —
+    // a full page navigation can't carry this data any other way.
+    const raw = sessionStorage.getItem('fj-checkout-session');
+    const items = getCart();
+
+    if (!raw || items.length === 0) {
+      showError('Your checkout session expired. Please go back to your cart and try again.');
+    } else {
+      const { shippingCents, address } = JSON.parse(raw);
+
+      fetch('/api/create-authorize-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, shippingCents, address }),
+      })
+        .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+          if (!ok || !data.token || !data.paymentUrl) {
+            throw new Error(data.error || 'Could not start checkout.');
+          }
+
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = data.paymentUrl;
+          form.target = 'checkout-iframe';
+          const tokenInput = document.createElement('input');
+          tokenInput.type = 'hidden';
+          tokenInput.name = 'token';
+          tokenInput.value = data.token;
+          form.appendChild(tokenInput);
+          document.body.appendChild(form);
+
+          loadingEl.classList.add('hidden');
+          frameWrapEl.classList.remove('hidden');
+          form.submit();
+          form.remove();
+        })
+        .catch((err) => {
+          showError(err instanceof Error ? err.message : 'Something went wrong.');
+        });
+    }
+
+    // Authorize.net's hosted page relays completion events to us via postMessage,
+    // through public/authorize-net-communicator.html. See create-authorize-session.ts's
+    // hostedPaymentIFrameCommunicatorUrl comment for the full mechanism.
+    window.addEventListener('message', (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (typeof event.data !== 'string') return;
+      const params = new URLSearchParams(event.data);
+      const action = params.get('action');
+      if (action === 'resizeWindow') {
+        const height = params.get('height');
+        if (height) iframeEl.style.height = `${height}px`;
+      } else if (action === 'cancel') {
+        window.location.href = '/cart/?canceled=1';
+      } else if (action === 'transactResponse') {
+        sessionStorage.removeItem('fj-checkout-session');
+        clearCart();
+        window.location.href = '/thank-you/';
+      }
+    });
+
+    // Fallback for the known occasional case where transactResponse never fires: if
+    // the hosted page instead navigates the iframe itself to our own domain, follow it
+    // at the top level.
+    iframeEl.addEventListener('load', () => {
+      let href: string | undefined;
+      try {
+        href = iframeEl.contentWindow?.location.href;
+      } catch {
+        return; // Still cross-origin on Authorize.net's domain — expected, ignore.
+      }
+      if (!href) return;
+      if (href.includes('/thank-you')) {
+        sessionStorage.removeItem('fj-checkout-session');
+        clearCart();
+        window.location.href = '/thank-you/';
+      } else if (href.includes('canceled=1')) {
+        window.location.href = '/cart/?canceled=1';
+      }
+    });
+  </script>
+</Layout>

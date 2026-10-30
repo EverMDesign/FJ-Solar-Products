@@ -6,7 +6,7 @@ For the full picture, see `README.md` (overview + where things live) and `docs/`
 
 ## At the start of every session
 
-Read `TODO.md` and list its open (unchecked) items back to the user before doing anything else — especially anything under "⚠ DO NOT DEPLOY" if that section still exists, since that's a live blocker. This gives them something to pick from instead of having to re-open the file themselves. Keep it short: section headers and item summaries, not the full multi-line detail under each one.
+Read `TODO.md` and `REVISIT.md`, and list their open (unchecked) items back to the user before doing anything else — especially anything under "⚠ DO NOT DEPLOY" in `TODO.md` if that section still exists, since that's a live blocker. This gives them something to pick from instead of having to re-open the files themselves. Keep it short: section headers and item summaries, not the full multi-line detail under each one.
 
 ## Critical gotchas (things that already broke)
 

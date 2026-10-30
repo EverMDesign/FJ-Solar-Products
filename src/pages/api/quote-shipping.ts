@@ -1,23 +1,10 @@
 import type { APIRoute } from 'astro';
 import products from '../../data/products.json';
 import { calculateTaxCents } from '../../lib/tax';
+import { SHIP_FROM, USPS_CARRIER_ID, USPS_GROUND_ADVANTAGE, DIMENSION_UNITS, normalizeUsState } from '../../lib/shipstation';
 
 export const prerender = false;
 
-const SHIP_FROM = {
-  name: 'Faithful Journey Solar',
-  phone: import.meta.env.SHIP_FROM_PHONE || '',
-  addressLine1: import.meta.env.SHIP_FROM_STREET || '',
-  cityLocality: import.meta.env.SHIP_FROM_CITY || '',
-  stateProvince: import.meta.env.SHIP_FROM_STATE || '',
-  postalCode: import.meta.env.SHIP_FROM_ZIP || '',
-  countryCode: import.meta.env.SHIP_FROM_COUNTRY || 'US',
-};
-
-// Andrew's standard shipping (confirmed 2026-10-01): USPS Ground Advantage only, no carrier
-// choice shown to the customer. Expedited (FedEx/UPS) is a planned later addition, not built yet.
-const USPS_CARRIER_ID = 'se-4619801';
-const USPS_GROUND_ADVANTAGE = 'usps_ground_advantage';
 // Covers ShipStation's discounted-rate margin + handling — Andrew's number, confirmed 2026-10-01.
 const HANDLING_MARKUP = 1.3;
 
@@ -60,10 +47,6 @@ export const POST: APIRoute = async ({ request }) => {
     const price = item.price ?? product?.price ?? 0;
     return sum + price * item.quantity;
   }, 0);
-
-  // GHL stores dimension units abbreviated ("in", "cm") — ShipStation's API rejects
-  // anything but the full word ("inch", "centimeter").
-  const DIMENSION_UNITS: Record<string, string> = { in: 'inch', cm: 'centimeter' };
 
   // Use the box dimensions of the first cart line that has them — fine for a single-product
   // cart (today's real case); a mixed multi-box cart would need real bin-packing, not built.
@@ -110,7 +93,7 @@ export const POST: APIRoute = async ({ request }) => {
           name: 'Customer',
           address_line1: address.street,
           city_locality: address.city,
-          state_province: address.state,
+          state_province: normalizeUsState(address.state, address.country || 'US'),
           postal_code: address.zip,
           country_code: address.country || 'US',
         },

@@ -146,6 +146,10 @@ async function main() {
       // Needed for real ShipStation shipping quotes. Pulled from GHL's per-price shippingOptions
       // when Andrew has set it; otherwise a placeholder kept across runs — correct it by hand once.
       weightOz: variants[0]?.weightOz ?? ozFromWeight(lowestPrice?.shippingOptions?.weight) ?? previous?.weightOz ?? 16,
+      // GHL has no field for these — set by hand in products.json (customs HS code +
+      // international carrier service), kept across every future run like `brand`.
+      ...(previous?.hsCode ? { hsCode: previous.hsCode } : {}),
+      ...(previous?.internationalShipping ? { internationalShipping: previous.internationalShipping } : {}),
       ...(variants.length > 0 ? { variantGroupName, variants } : {}),
     });
   }

@@ -1,0 +1,59 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+export const prerender = false;
+
+// Authorize.net's hosted page returns here via an auto-submitting POST (not a plain GET
+// redirect) when `hostedPaymentReturnOptions.showReceipt` is false — the POST body carries
+// a `response` field with the transaction result as a JSON string. Field names below are
+// based on Authorize.net's general docs, not a confirmed real response — same unverified-
+// assumption caveat as `authorize-webhook.ts`'s billTo/customer fields (see docs/checkout.md).
+// If the shape doesn't match, we just fall back to the generic thank-you message below —
+// this page should never fail to render for a customer who already paid.
+let transId: string | null = null;
+let last4: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const raw = formData.get('response');
+    if (typeof raw === 'string') {
+      const data = JSON.parse(raw);
+      transId = data.transId ?? data.transactionResponse?.transId ?? null;
+      const account = data.accountNumber ?? data.transactionResponse?.accountNumber ?? null;
+      if (typeof account === 'string') last4 = account.slice(-4);
+    }
+  } catch {
+    // Unexpected response shape — show the generic message instead of erroring out.
+  }
+}
+---
+
+<Layout title="Thank You — Faithful Journey Solar" noindex={true}>
+  <section class="max-w-[640px] mx-auto px-6 py-20 text-center">
+    <h1 class="font-heading font-extrabold uppercase text-3xl text-fj-navy mb-4">Thank You For Your Order!</h1>
+    <p class="text-fj-navy/70">
+      Your payment was successful. We're getting your order ready to ship, and a confirmation
+      will be sent to your email shortly.
+    </p>
+    {
+      transId && (
+        <p class="text-sm text-fj-navy/50 mt-6">
+          Order reference: <span class="font-semibold text-fj-navy">{transId}</span>
+          {last4 && <> &middot; Card ending in {last4}</>}
+        </p>
+      )
+    }
+    <a
+      href="/"
+      class="inline-flex items-center justify-center mt-10 bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors"
+    >
+      Continue Shopping
+    </a>
+  </section>
+
+  <script>
+    import { clearCart } from '../lib/cart';
+    clearCart();
+  </script>
+</Layout>

@@ -2,9 +2,126 @@
 
 All notable changes to this project, newest first. Dates are when the work happened, not a formal release schedule — this is a live site, not a versioned package.
 
+## 2026-10-30 (rest of the order-alert email fields)
+
+### Added
+- **Confirmed via a real test email**: `<br>`-joined HTML does render as real line breaks in EverReach's merge fields — the Items row worked correctly. But found the real `new-order-alert.html` template (pulled from the client's Drive) uses `{{custom_values.order_number}}`, `{{custom_values.shipping_address}}`, `{{custom_values.order_subtotal}}`, `{{custom_values.order_shipping}}`, `{{custom_values.order_tax}}`, `{{custom_values.order_total}}` — true location-wide Custom Values, same wrong mechanism flagged before, which is why those fields were blank (nothing has ever populated them; they'd also be wrong under concurrent orders even if something did).
+- Created 6 more contact-level custom fields, same pattern as Last Order Items: Order Number, Shipping Address, Order Subtotal, Order Shipping, Order Tax, Order Total (all TEXT except Shipping Address, LARGE_TEXT). `upsertGhlContact()` now populates all of them every order — subtotal/shipping/tax/total computed from `transaction.authAmount`/`shipping.amount`/`tax.amount` (tax defaults to $0 when the field is absent, which it is for non-FL orders — confirmed against a real transaction, not a guess).
+- Verified the full set end-to-end against real transaction data, written to the real test contact.
+- **Critical remaining step, not something I can do**: the *live* EverReach template still has the old `{{custom_values.X}}` tags for everything except Items (which was apparently hand-edited already). These won't start working just because the fields are populated — the template itself needs each tag swapped:
+  - `{{custom_values.order_number}}` → `{{contact.order_number}}`
+  - `{{custom_values.shipping_address}}` → `{{contact.shipping_address}}`
+  - `{{custom_values.order_subtotal}}` → `{{contact.order_subtotal}}`
+  - `{{custom_values.order_shipping}}` → `{{contact.order_shipping}}`
+  - `{{custom_values.order_tax}}` → `{{contact.order_tax}}`
+  - `{{custom_values.order_total}}` → `{{contact.order_total}}`
+
+## 2026-10-30 ("Last Order Items" custom field for order emails)
+
+### Added
+- **New EverReach custom field** `Last Order Items` (id `vPKiThQLwX2I5S3FmSkc`, type `LARGE_TEXT`, merge tag `{{contact.last_order_items}}`) — created via the real API after confirming with Ever first, since it's standing account configuration. For the new-order-alert (to Andrew) and an order-confirmation (to the customer) email templates to show line items, since GHL's real Custom Values are location-wide (shared across every contact) and would be wrong here — a per-contact Custom Field is the correct mechanism.
+- `upsertGhlContact()` now populates this field on every order, `<br>`-joined (not `\n`) since a plain newline collapses to a space in HTML — verified the field stores the literal `<br>` tags correctly via a real API call.
+- **Not yet verified**: whether EverReach's email merge-field substitution renders that stored HTML as real line breaks, or escapes it into visible `&lt;br&gt;` text. Needs a real test email with `{{contact.last_order_items}}` in a template — can't be confirmed from this codebase.
+
+## 2026-10-29 (ShipStation shipment had no item/SKU info)
+
+### Fixed
+- **Real gap noticed after the shipment-creation flow was otherwise fully working**: no product/SKU info ever showed up on the ShipStation shipment — only weight and a generic package. The shipment creation code only ever built `packages` (weight/dimensions/insured value), never the actual line items. Verified directly against the live API which field actually makes items show up in the UI (a real test shipment, then cancelled): it's a top-level `items` array (`sku`, `name`, `quantity`, `unit_price` as a plain number) — not `packages[].products`, a different, unrelated field that looked like the obvious candidate but isn't it. Now built from the same line-item loop already computing weight/declared value, using our own `products.json` for the authoritative sku/name/price (falling back to Authorize.net's echoed values only for an unmatched item, same pattern as the weight/value fallback).
+
+## 2026-10-29 (third real order: full state name broke ShipStation)
+
+### Fixed
+- **Real bug, third test order**: the duplicate-Opportunity fallback worked correctly (confirmed in logs), but ShipStation then rejected the shipment: `"ship_to state_province must be two characters... field_value":"Texas"`. Authorize.net's hosted-page "State" field (both Billing and Shipping) is free text, not a locked dropdown — our own `/cart/` form enforces `maxlength=2`, but nothing stops a customer typing the full state name into Authorize.net's own page. Added `normalizeUsState()` to `lib/shipstation.ts` (full US state names → 2-letter codes, case-insensitive, non-US addresses pass through unchanged) and applied it everywhere a state gets sent to ShipStation — both the real webhook shipment and the `/cart/` rate-quote call (defensive, in case `maxlength` ever gets bypassed e.g. by autofill). Verified against the exact failing input (`"Texas"` → `"TX"`) before deploying.
+
+## 2026-10-29 (second real order: duplicate Opportunity blocked ShipStation sync)
+
+### Fixed
+- **Real bug found testing a second order for the same (test) contact**: GHL rejected creating a second open Opportunity with `OPPORTUNITY_NO_DUPLICATE` — by default GHL won't create a second open Opportunity for the same contact in the same pipeline/stage unless "Allow Duplicate Opportunity" is turned on account-wide (Settings > Business Info > General). Since `createNewOrderOpportunity` returning `null` on failure meant `createShipStationShipment` never ran, the entire ShipStation sync silently broke for any repeat customer with an already-open order. Fixed: GHL's error response conveniently includes `meta.existingId` (the existing open Opportunity's id) — now falls back to reusing that id so the shipment still gets created and correctly linked, without requiring an account-wide setting change that would affect every pipeline, not just this one. Confirmed the order note itself worked correctly despite the Opportunity failure (it runs earlier in the chain, before the Opportunity step).
+- **Known nuance, not fixed**: when this fallback path is taken, the existing Opportunity's `monetaryValue` isn't updated to reflect the new order's amount — it still shows only the first order's total. Worth deciding later whether repeat orders before the first ships should update that value, or whether enabling "Allow Duplicate Opportunity" so each order gets its own pipeline card is actually what Andrew wants — a real business-logic choice, not just a code fix.
+
+## 2026-10-29 (order history on the GHL contact)
+
+### Added
+- **Itemized order note on the GHL contact for every sale.** New `addOrderNoteToContact()`, `POST /contacts/{id}/notes` — writes order number, total, line items, and shipping address to the contact's timeline. Repeat customers already got a new Opportunity per order (confirmed working); this is what makes each one show *what* they bought, not just a dollar total. Verified the note's exact formatted text against the real first order's transaction data. Could not verify the live API call itself (writing to Andrew's real GHL account, blocked by the sandbox's External System Writes policy, same as other GHL/ShipStation write tests this session) — unverified until it fires on the next real order, same caveat as everything else in this file.
+- Extracted `getLineItems()` as a shared helper (used by both the note and the ShipStation shipment) instead of duplicating the array-vs-`{lineItem:[...]}` parsing fix in two places.
+
+## 2026-10-29 (first real order: lineItems shape + ShipStation UI visibility)
+
+### Fixed
+- **Real bug confirmed from the actual first order's transaction data**: `transaction.lineItems` is a plain array in Authorize.net's real response, not `{lineItem: [...]}` as the code assumed — the line-item loop in `createShipStationShipment()` silently processed zero items every time, which is why that shipment showed the 16oz/$0 fallback instead of the real product's weight/price. Fixed, and verified by replaying the exact real transaction data through the corrected parsing logic (correctly resolves to VE.Direct Cable, 16oz, $18.99). Confirmed good news along the way: `billTo`, `shipTo`, and `customer.email` field names were all exactly right — the biggest previously-flagged "unverified assumption" in this integration turned out to be correct.
+- **Real bug**: Andrew couldn't see the new shipment in ShipStation's Orders UI at all, despite it existing and being correct via the API. Root cause: ShipStation requires an explicit `create_sales_order: true` on the shipment request, or it only ever exists as an API-level record with no corresponding Orders-UI entry (confirmed: the first real shipment's `sales_order_ids` was `[]`). Added the flag, verified against the live API that `sales_order_ids` now actually populates, then cancelled the test shipment. Note: this doesn't retroactively fix the first real order's shipment (`se-486603863`) — that one still won't show in the Orders UI; only shipments created after this fix will.
+
+## 2026-10-29 (webhook was never registered)
+
+### Fixed
+- **The first real sale went through, but nothing synced to GHL or ShipStation.** Checked directly: no new GHL contact today (newest was Oct 26), every ShipStation shipment today was the known uncorrelated rate-quote side effect, not a real linked one. Root cause: `GET /rest/v1/webhooks` on the live Authorize.net account returned `[]` — the webhook was never registered, so Authorize.net had nothing to call. Registered it via Authorize.net's REST Webhooks API (webhook id `af0fe111-5d3a-4bd2-a4cc-17e588a21140`, watching `net.authorize.payment.authcapture.created`, pointed at the current production domain). See `docs/checkout.md` for how to update the URL later when the custom domain goes live (one `PUT` call, confirmed via their docs before doing any of this).
+
+## 2026-10-29 (real-order bugs: missing email + shipping address fields)
+
+### Fixed
+- **Real bug hit while attempting a real order**: Authorize.net's hosted form said "Email is required" on submit, but showed no email field at all to enter one — `hostedPaymentCustomerOptions` (`showEmail`/`requiredEmail`, both default `false`) was never set in `create-authorize-session.ts`, so the field stayed hidden while Andrew's account-level settings apparently still required it. Added `{"showEmail": true, "requiredEmail": true}`. Verified the fix directly against the live Authorize.net API before redeploying — the Email field now renders on the hosted form. We want this field regardless: it feeds the GHL contact, `authorize-webhook.ts`'s `customer.email` lookup, and the ShipStation shipment's `ship_to.email`.
+- **Second real bug, same pattern, hit immediately after**: "Ship To First Name is required" — same issue, a Ship To section Andrew's account requires but we never showed. Added `hostedPaymentShippingAddressOptions: {"show": true, "required": true}`, and started sending a `shipTo` block in `transactionRequest` (same address as `billTo` — this flow only ever collects one address from the customer). Verified against the live API: the Shipping Address section now appears, pre-filled with street/city/state/zip/country from our data, leaving only First/Last Name for the customer to type (unavoidable — we don't collect a name anywhere on our own site). `authorize-webhook.ts`'s ShipStation shipment creation now prefers `transaction.shipTo` over `billTo` for the actual ship-to address, since it's now the more accurate source.
+- **Known minor UX quirk, not fixed**: Authorize.net's hosted form shows a "Shipping Address different than Billing Address" checkbox pre-checked by default, even though `billTo` and `shipTo` are submitted identically — likely just checks itself whenever a Ship To section is shown at all, regardless of whether the values match. Cosmetic only, doesn't block checkout.
+
+## 2026-10-29 (ShipStation order sync)
+
+### Added
+- **A real sale now creates a real, correlated ShipStation shipment.** `authorize-webhook.ts` calls new `createShipStationShipment()` right after creating the GHL Opportunity — real customer name/email/address, real weight/dimensions matched from `products.json`, linked to the Opportunity via ShipStation's `external_shipment_id` field. Does not purchase a label (Andrew still does that manually in ShipStation). Verified the request/response shape with a real test call against ShipStation's live API, then cancelled the test shipment.
+- Extracted shared ShipStation constants (`SHIP_FROM`, carrier/service codes, dimension-unit mapping) into `src/lib/shipstation.ts`, used by both `quote-shipping.ts` and the webhook.
+
+### Fixed
+- **Found a real latent bug**: Authorize.net truncates line-item `itemId` (our product slug) to 31 characters, and 3 of 8 real products have slugs longer than that — an exact-match lookup back to `products.json` would've silently failed for those. New `findProductBySlugPrefix()` compares against the same truncation.
+- **Corrected a wrong field name from `REVISIT.md`'s own earlier notes**: the link-back field is `external_shipment_id`, not `external_order_id` as previously assumed — verified directly against ShipStation's real API before shipping the fix.
+
+## 2026-10-29 (checkout UX)
+
+### Added
+- **Checkout now happens embedded on our own site instead of redirecting to Authorize.net.** New `/checkout/` page (`src/pages/checkout.astro`) — Authorize.net's Accept Hosted page loads inside a full-width iframe on a page with our normal header/footer/logo, instead of navigating away to `accept.authorize.net`. Cart's "Checkout" button now stashes `{shippingCents, address}` in `sessionStorage` and navigates there (a full page nav can't carry JS state any other way).
+- **Added `public/authorize-net-communicator.html`** — required relay file for Authorize.net's iframe completion events (`hostedPaymentIFrameCommunicatorUrl`). Forwards `postMessage` events up to `checkout.astro`, which listens for `action=transactResponse` to clear the cart and redirect to `/thank-you/`.
+- **Added a fallback for `transactResponse` not firing** (a [documented reliability gap](https://community.developer.cybersource.com/t5/Integration-and-Testing/Not-getting-transactResponse-event-when-using-IFrameCommunicator/m-p/59657) in Accept Hosted's iframe mode): `checkout.astro` also watches the iframe's own `load` event and follows it to `/thank-you/` at the top level if it ever navigates back to our domain on its own.
+- **Styled the hosted form's accent color** to `#EBAF16` (fj-gold) via `hostedPaymentStyleOptions` — the only customization Accept Hosted allows (PCI SAQ-A tradeoff).
+
+### Fixed
+- **Found and fixed a real Accept Hosted bug**: embedding the hosted page in anything narrower than roughly the old modal's 520px width causes the Order Summary to render with blank dollar amounts next to Shipping/Tax/Total — confirmed by testing (full-page and full-width-embed both show correct amounts, a 520px modal didn't). The actual charged amount was never wrong either way (computed server-side), but customers need to see the price before paying. Built a modal version first, found this bug, then rebuilt as a full-width page instead — see `docs/checkout.md`'s width note before ever going back to a popup/modal for this.
+
+## 2026-10-29 (later)
+
+### Deployed
+- **Pushed to production.** `npx vercel deploy --prod --yes`, now live at
+  `https://fj-solar-products.vercel.app` — Stripe → Authorize.net swap is officially out of
+  "scaffolded, untested" and into "real checkout, live credentials." Pre-deploy checklist run
+  first: clean `npm run build`, no leftover `STRIPE_*` vars anywhere, post-deploy smoke test
+  on `/`, `/cart/`, `/api/banner`, and the banner admin page (all passed).
+- Added `AUTHORIZE_NET_API_LOGIN_ID` / `TRANSACTION_KEY` / `SIGNATURE_KEY` / `ENVIRONMENT` to
+  Vercel's Production env vars (Secret type, matching `PIT_TOKEN`/`VERCEL_API_TOKEN`). Claude
+  Code's sandbox blocks writing to Vercel's secret store directly, so Ever ran the
+  `vercel env add` commands by hand instead.
+- Confirmed `/api/create-authorize-session` returns a real token on the live production
+  domain (not "not configured yet").
+- **Still open, needs one real completed transaction on the live site to verify**: the
+  webhook's assumed `billTo`/`customer.email` field names, and whether a GHL contact gets
+  created correctly. See `TODO.md`.
+
+## 2026-10-29
+
+### Changed
+- **Live Authorize.net credentials received and wired in — straight to production, no sandbox.** Andrew doesn't have a separate sandbox.authorize.net account; at Ever's direction we're testing directly against his real production credentials rather than waiting on a sandbox signup. `AUTHORIZE_NET_API_LOGIN_ID`/`TRANSACTION_KEY`/`SIGNATURE_KEY` added to local `.env`, `AUTHORIZE_NET_ENVIRONMENT` set to `production`. **These are live keys — any completed checkout from here on is a real charge.** Still need to mirror these in Vercel before deploying.
+- **Fixed a real bug in `create-authorize-session.ts`**: the `tax` object was placed after `shipping` in the `transactionRequest` body. Authorize.net's JSON API still validates against an ordered XML schema under the hood — `tax` must come before `shipping` in the object, or the API rejects the whole request with `E00003: invalid child element 'tax'`. Found by testing the real endpoint; confirmed fixed by reproducing the exact same request shape directly against Authorize.net's API.
+- **Verified the Accept Hosted payment page loads correctly** against live production credentials: posted a real token to `accept.authorize.net/payment/payment` for a test cart (1 unit @ $329 + $15 shipping + $0.65 FL tax = $344.65 total) and confirmed the hosted page rendered with the correct order summary and pre-filled billing address. Stopped there deliberately — no card details entered, no transaction completed, so the webhook's assumed `billTo`/`customer.email` field names (flagged 2026-09-30) are still unverified against a real `getTransactionDetails` response, and GHL contact sync is still unconfirmed. Both need an actual completed transaction to verify.
+- Confirmed `localhost` can't be used as the Authorize.net hosted-page return URL (`E00013`) — expected, not a bug; this only works once tested against a real deployed domain.
+- Incidentally confirmed `SHIPSTATION_API_KEY` and all `SHIP_FROM_*` vars are already populated in `.env.local` (Vercel-pulled) — the "needed" status for these in `TODO.md` was stale; they're just not mirrored into `.env`.
+
 ## 2026-10-01
 
 ### Changed
+- **Fixed a second spot with the same dollars/cents cart bug.** The per-line-item price in `cart.astro` (`$329` showing as `$3.29`) was missed when the subtotal/total version of this bug was fixed earlier today — same root cause (a plain-dollar price run through the cents-based `money()` formatter), different line of code. Checked every remaining `money()` call site in the file; this was the last one.
+- **Header/footer cleanup.** Removed the "Shop" nav link and the footer's link column (both redundant with the logo/cart already being clickable), removed an unwanted `mt-16` gap above the footer, centered the remaining footer content, added a Facebook link (facebook.com/fjsolarproducts) to both header and footer.
+- **Variant dropdown restyled.** Custom FJ-brand border and gold chevron instead of the native browser `<select>` look — kept the real `<select>` element itself (not a custom listbox) so mobile/keyboard/screen-reader behavior stays free and correct.
+- **"Go to Cart" button** now appears next to the "Added!" confirmation after adding an item to cart.
+- **Sticky footer fix** in `Layout.astro` — footer was sitting right under short page content instead of pinned to the bottom of the viewport. Site-wide fix, most visible on the cart page.
+- **Shipping-rate button loading animation.** Cycles 4 messages ("Getting Rate…", "Finding cheapest option…", "Connecting with USPS…", "Almost done…") at 1s each, always plays the full cycle even if the real response comes back faster.
+- **Explored and reverted a fake "test mode" checkout** (simulated order completion when Authorize.net isn't configured, so the cart flow could be clicked through for a demo). Andrew wants to wait for real Authorize.net sandbox credentials instead — checkout is back to its original "Checkout is not configured yet." behavior, no trace of the test-mode code left in either `create-authorize-session.ts` or `cart.astro`.
+- **Flagged an unverified risk while discussing real Authorize.net checkout**: the hosted payment page is expected to collect the customer's name, email, and phone itself (we only send address fields), and the webhook assumes those come back to sync a GHL contact — but this has never been checked against a real response. Worth explicitly requiring those fields via `hostedPaymentBillingAddressOptions` once sandbox credentials exist, rather than trusting Authorize.net's un-configured defaults.
 - **ParcelGuard shipment insurance now passed through to the customer.** Andrew's ShipStation account auto-insures every shipment and he doesn't want to absorb that cost. `quote-shipping.ts` now requests ParcelGuard insurance for the real cart value (not a flat guess) and adds it to the customer's total at actual cost, no markup. Found by Andrew manually checking a rate in ShipStation and spotting a real $1.09 discrepancy — traced to this, not a bug in the math.
 - **Fixed GHL weight unit parsing.** GHL enters weight as pounds.ounces (`1.13` = "1 lb 13 oz"), not true decimal pounds. Was converting to 18.08oz instead of the correct 29oz. `fetch-products.mjs`'s `ozFromWeight()` fixed; re-ran against the onboard generator product.
 - **FL sales tax added.** 7.5% (Marion County, confirmed against Florida DOR's official 2026 rate table) charged only when shipping to a Florida address — everywhere else, no tax. New `src/lib/tax.ts`, used by both the cart preview and the real Authorize.net charge (computed server-side, not trusted from the client). Tied to Andrew's current Ocala location — needs revisiting after his move "on the 15th."

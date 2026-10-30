@@ -1,49 +1,93 @@
 # FJ Solar Store — Next Steps
 
-## ⚠ DO NOT DEPLOY (as of 2026-09-30)
+## ✅ First real sale + webhook registered (2026-10-29)
 
-The last local changes (Stripe removed, Authorize.net scaffolded in) have **not** been pushed
-to Vercel — deliberately held back. Do not run `vercel deploy --prod` until all of these are done:
+A real customer completed a real order today. The GHL/ShipStation sync code (built earlier
+today) did **not** fire for it — the Authorize.net webhook had never actually been
+registered (`GET /rest/v1/webhooks` returned `[]`). Fixed:
 
-- [ ] Get real (even just sandbox) Authorize.net credentials and confirm checkout actually
-      works locally first — see the Authorize.net checklist right below this
-- [ ] Re-run `npm run build` locally one more time right before deploying, to catch anything
-      that broke since this was last verified
-- [ ] Double check `.env` has no leftover blank `STRIPE_*` vars and Vercel's Project
-      Settings → Environment Variables doesn't either (they were never added there, but
-      worth a quick look since Stripe was removed from the code)
-- [ ] Once deployed, smoke-test `/`, `/cart/`, and the banner admin page again the same way
-      we did after the last deploy — a code change this size is worth re-checking end to end
+- [x] Registered the webhook via Authorize.net's REST Webhooks API — id
+      `af0fe111-5d3a-4bd2-a4cc-17e588a21140`, pointed at
+      `https://fj-solar-products.vercel.app/api/authorize-webhook`, watching
+      `net.authorize.payment.authcapture.created`. See `docs/checkout.md`'s "Webhook
+      registration" section for how to check/update/delete it.
+- [ ] **Must update the webhook URL when the custom domain goes live** — one `PUT` call,
+      doesn't need redoing from scratch (see docs)
+- [ ] The next real transaction is the first real test of whether the webhook actually
+      fires correctly end-to-end (signature verification, GHL contact/Opportunity,
+      ShipStation shipment) — watch for it and check GHL/ShipStation afterward
+- [ ] Also two fixed real bugs hit during the first real order attempt, see
+      `CHANGELOG.md` 2026-10-29: Authorize.net required email and a Ship To name/address
+      with no fields shown for either — both now fixed and deployed
 
-The live site at `https://fj-solar-products.vercel.app` currently still runs the **previous**
-deployed version (Stripe-based, also not fully configured) — it has not changed.
+## ✅ Deployed to production (2026-10-29)
+
+All blockers below are cleared — Stripe → Authorize.net swap is now live at
+`https://fj-solar-products.vercel.app`:
+
+- [x] Real (live/production) Authorize.net credentials confirmed working, both locally and
+      against the real API
+- [x] `npm run build` ran clean right before deploying
+- [x] No leftover `STRIPE_*` vars in `.env`, `.env.local`, or Vercel Project Settings
+- [x] `AUTHORIZE_NET_API_LOGIN_ID` / `TRANSACTION_KEY` / `SIGNATURE_KEY` / `ENVIRONMENT` added
+      to Vercel Project Settings (Production, Secret type) — Ever couldn't write these via
+      Claude Code (blocked by the sandbox's Secret-Store Writes policy), so Andrew/Ever added
+      them manually via `vercel env add`
+- [x] Deployed via `npx vercel deploy --prod --yes` — live at the production alias
+- [x] Post-deploy smoke test: `/` (200), `/cart/` (200), `/api/banner` (200, valid JSON),
+      banner admin page (404 without `locationId`, 200 with the real one)
+- [x] Confirmed `/api/create-authorize-session` is live and working in production (not
+      "not configured yet") — got a real token back from a test request
+
+**Still open after this deploy** — see "Needed before real orders can go through" below for
+the webhook/GHL-sync verification that still needs one real completed transaction.
+
+## ✅ Checkout UX rebuild + ShipStation sale sync — deployed (2026-10-29)
+
+Live in production — `/checkout/`'s full-width embedded iframe checkout, and real
+ShipStation shipments created per sale. See `docs/checkout.md` for the full mechanism.
+
+- [x] New `/checkout/` page — Accept Hosted loads in a full-width iframe on our own page
+      (header/footer/logo visible) instead of redirecting off-site
+- [x] `public/authorize-net-communicator.html` added (required for iframe completion events)
+- [x] Found and fixed a real Accept Hosted bug: blank Order Summary dollar amounts at narrow
+      iframe widths (confirmed — don't go back to a small modal for this, see docs)
+- [x] Hosted form accent color styled to fj-gold
+- [x] Real ShipStation shipment created per sale, linked to the GHL Opportunity via
+      `external_shipment_id` — see `REVISIT.md`'s ShipStation sync section for details and
+      what's still open (auto-advancing the Opportunity on label purchase)
+- [x] Build runs clean, deployed via `vercel deploy --prod --yes`
+- [x] Re-verified the full checkout flow against the live production domain (not just local
+      dev) — correct Order Summary amounts, correct billing pre-fill, fj-gold Pay button, our
+      header/logo visible, URL stayed on our own domain throughout
 
 ## Needed before real orders can go through
 
 - [x] ~~Stripe~~ — removed 2026-09-30. Checkout now runs on Authorize.net's Accept Hosted
-      page instead. Code is scaffolded and builds clean, but is **completely untested** —
-      no Authorize.net credentials of any kind exist yet, not even a sandbox key. See
-      `docs/checkout.md` for the full mechanism and what specifically needs verifying once
-      real credentials show up.
-- [ ] Get an Authorize.net **sandbox/test** API Login ID + Transaction Key (not the live
-      one — that's still running the client's current site) and add them to `.env`:
-      `AUTHORIZE_NET_API_LOGIN_ID`, `AUTHORIZE_NET_TRANSACTION_KEY`
-- [ ] Get the Authorize.net Signature Key (same account settings page) and add it as
-      `AUTHORIZE_NET_SIGNATURE_KEY` — needed to verify webhook calls are real
-- [ ] Once sandbox keys are in, run one real test transaction and confirm:
-      - [ ] The hosted payment page actually loads with the right amount
+      page instead. See `docs/checkout.md` for the full mechanism.
+- [x] Authorize.net credentials added to `.env` (2026-10-29) — **live/production**, not
+      sandbox. Andrew has no separate sandbox.authorize.net account; at Ever's direction
+      we're testing straight against production. `AUTHORIZE_NET_ENVIRONMENT=production`.
+      **Any completed checkout from here on is a real charge.**
+- [x] Fixed a real bug found while testing (2026-10-29): `tax` was placed after `shipping`
+      in `create-authorize-session.ts`'s request body, which Authorize.net's schema
+      rejects (`E00003`). Fixed by moving `tax` before `shipping`.
+- [x] Hosted payment page confirmed loading correctly (2026-10-29) — posted a real token
+      to `accept.authorize.net/payment/payment`, confirmed correct order summary and
+      pre-filled billing address. Stopped before entering card details — no transaction
+      was completed.
+- [ ] **Still unverified — needs one real completed transaction:**
       - [ ] `src/pages/api/authorize-webhook.ts`'s field names for customer/billing info
             (`billTo`, `customer.email`) actually match a real `getTransactionDetails`
             response — these were written from documentation, never checked against a
-            live response, since no sandbox account existed yet
-      - [ ] A contact correctly shows up in GHL after a test purchase
-- [ ] Only once everything above is confirmed working in sandbox: get the client's real
-      Authorize.net API credentials, set `AUTHORIZE_NET_ENVIRONMENT=production`, and do
-      one final real test purchase before pointing customers at it
-- [ ] Add `SHIPSTATION_API_KEY` to `.env`
-- [ ] Fill in `SHIP_FROM_STREET` / `SHIP_FROM_CITY` / `SHIP_FROM_STATE` / `SHIP_FROM_ZIP` in `.env`
-      (where packages actually ship from)
-- [ ] Mirror all of the above env vars in Vercel Project Settings — `.env` only works locally
+            live response
+      - [ ] A contact correctly shows up in GHL after a real purchase
+- [x] `SHIPSTATION_API_KEY` already set in `.env.local` (Vercel-pulled) — this item was
+      stale, not actually blocking.
+- [x] `SHIP_FROM_STREET` / `SHIP_FROM_CITY` / `SHIP_FROM_STATE` / `SHIP_FROM_ZIP` already
+      set in `.env.local` (Ocala, FL) — same as above, already done.
+- [x] `AUTHORIZE_NET_*` env vars mirrored in Vercel Project Settings and deployed to
+      production (2026-10-29) — see "Deployed to production" at the top of this file
 - [ ] Fix the placeholder product weights in `src/data/products.json` (all 8 are set to
       16oz right now) — real shipping rates depend on this
 - [ ] Double check "VE.Direct Cable" is filed under the right brand filter (currently "FJ Solar",
@@ -74,6 +118,11 @@ deployed version (Stripe-based, also not fully configured) — it has not change
 
 ## Housekeeping
 
+- [ ] Fix footer copyright text — currently "© 2026 Faithful Journey Solar Products. All
+      rights reserved." Should read "FJ Solar Products" instead.
+- [ ] Look into the variance on different products showing from EverReach — some products
+      appear inconsistently; needs investigation into the sync/fetch path before concluding
+      whether it's a GHL-side data issue or `scripts/fetch-products.mjs`
 - [ ] `git init` this project + first commit — it still isn't a git repo
 - [ ] Compress `fjsp-shop-hero.webp` (currently ~1MB) for faster homepage loads
 - [ ] Set up the auto-refresh timer so new GHL products show up without a manual rebuild:
@@ -141,6 +190,13 @@ deployed version (Stripe-based, also not fully configured) — it has not change
 - [ ] Product videos (Auto Gen Start, Fan Kit): no dev work needed yet — client is recording
       them himself. Once he sends video files/links, add a `video` field to the relevant
       products in `src/data/products.json` and embed it on that product's page.
+
+## Checkout UX
+
+- [ ] Look into customizing the Authorize.net card-entry experience — right now checkout
+      redirects to Authorize.net's hosted Accept Hosted page off-site. Investigate whether
+      Accept.js or a similar embeddable option supports an on-site lightbox/modal for card
+      entry instead of the redirect, and what that would take to swap in.
 
 ## Later / not started
 

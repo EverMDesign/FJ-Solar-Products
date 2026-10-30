@@ -37,11 +37,11 @@ import Layout from '../layouts/Layout.astro';
           <form id="shipping-form" class="mt-6 space-y-3">
             <p class="text-sm font-semibold text-fj-navy">Shipping address</p>
             <input name="street" required placeholder="Street address" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input name="city" required placeholder="City" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
               <input name="state" required placeholder="State" maxlength="2" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input name="zip" required placeholder="ZIP code" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
               <input name="country" value="US" readonly class="w-full border border-fj-sand rounded px-3 py-2 text-sm bg-fj-cream" />
             </div>
@@ -118,7 +118,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="flex-1">
             <p class="font-semibold text-fj-navy">${item.name}</p>
             ${item.variantName ? `<p class="text-xs text-fj-navy/50">${item.variantName}</p>` : ''}
-            <p class="text-fj-gold font-bold">${money(item.price)}</p>
+            <p class="text-fj-gold font-bold">${money(dollarsToCents(item.price))}</p>
           </div>
           <input type="number" min="1" value="${item.quantity}" data-slug="${item.slug}" data-variant="${item.variantOptionId || ''}" class="qty-input w-16 border border-fj-sand rounded px-2 py-1 text-center" />
           <button type="button" data-slug="${item.slug}" data-variant="${item.variantOptionId || ''}" class="remove-btn text-sm text-fj-navy/50 hover:text-red-600">Remove</button>
@@ -215,38 +215,12 @@ import Layout from '../layouts/Layout.astro';
       }
     });
 
-    checkoutBtn.addEventListener('click', async () => {
+    checkoutBtn.addEventListener('click', () => {
       if (shippingCents === null || !shippingAddress) return;
-      checkoutBtn.disabled = true;
-      checkoutBtn.textContent = 'Redirecting…';
-
-      try {
-        const res = await fetch('/api/create-authorize-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: getCart(), shippingCents, address: shippingAddress }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.token || !data.paymentUrl) throw new Error(data.error || 'Could not start checkout.');
-
-        // Authorize.net's hosted payment page requires a POST with the token as a form
-        // field — unlike Stripe, it can't just be a GET redirect to a URL.
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = data.paymentUrl;
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = 'token';
-        tokenInput.value = data.token;
-        form.appendChild(tokenInput);
-        document.body.appendChild(form);
-        form.submit();
-      } catch (err) {
-        shippingErrorEl.textContent = err instanceof Error ? err.message : 'Something went wrong.';
-        shippingErrorEl.classList.remove('hidden');
-        checkoutBtn.disabled = false;
-        checkoutBtn.textContent = 'Checkout';
-      }
+      // checkout.astro needs this after a full page navigation, which can't carry
+      // JS variables — getCart() alone isn't enough since it doesn't have the rate.
+      sessionStorage.setItem('fj-checkout-session', JSON.stringify({ shippingCents, address: shippingAddress }));
+      window.location.href = '/checkout/';
     });
 
     render();

@@ -58,7 +58,12 @@ export const POST: APIRoute = async ({ request, url }) => {
   const taxCents = calculateTaxCents(Math.round(subtotal * 100), address.state);
   const taxAmount = taxCents / 100;
   const totalAmount = (subtotal + shippingAmount + taxAmount).toFixed(2);
-  const origin = `${url.protocol}//${url.host}`;
+  // Authorize.net's hosted-page API rejects `localhost` as a return/cancel URL
+  // (E00013) — harmless in prod (never localhost there), but blocks local testing
+  // entirely. Swap in the real prod domain for just this field when testing locally;
+  // the actual POST handling still happens on whatever origin made this request.
+  const isLocalDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  const origin = isLocalDev ? 'https://fj-solar-products.vercel.app' : `${url.protocol}//${url.host}`;
 
   const requestBody = {
     getHostedPaymentPageRequest: {
@@ -70,10 +75,9 @@ export const POST: APIRoute = async ({ request, url }) => {
         transactionType: 'authCaptureTransaction',
         amount: totalAmount,
         lineItems: { lineItem },
-        shipping: {
-          amount: shippingAmount.toFixed(2),
-          name: 'Shipping',
-        },
+        // Authorize.net's JSON API still maps to an ordered XML schema — `tax` must
+        // come before `shipping` in this object or the request is rejected with
+        // "invalid child element 'tax'" (E00003), even though both are valid elements.
         ...(taxCents > 0 && {
           tax: {
             amount: taxAmount.toFixed(2),
@@ -81,10 +85,25 @@ export const POST: APIRoute = async ({ request, url }) => {
             description: 'Florida sales tax (7.5%)',
           },
         }),
+        shipping: {
+          amount: shippingAmount.toFixed(2),
+          name: 'Shipping',
+        },
         // Our shipping form only collects street/city/state/zip/country (no name) —
         // Authorize.net's hosted page collects the customer's name and card details
-        // itself, so this is just a pre-fill of what we already have.
+        // itself, so this is just a pre-fill of what we already have. Same address
+        // object for both: this flow only ever collects one address from the customer
+        // (the one used for the real ShipStation rate), there's no separate billing step.
+        // Element order matters here (see the `tax`-before-`shipping` comment above) —
+        // billTo must come before shipTo, confirmed against the real API's schema error.
         billTo: {
+          address: address.street || '',
+          city: address.city || '',
+          state: address.state || '',
+          zip: address.zip || '',
+          country: address.country || 'US',
+        },
+        shipTo: {
           address: address.street || '',
           city: address.city || '',
           state: address.state || '',
@@ -95,10 +114,43 @@ export const POST: APIRoute = async ({ request, url }) => {
       hostedPaymentSettings: {
         setting: [
           {
+            // Required for the embedded-iframe checkout modal (see cart.astro) — this is
+            // how Authorize.net tells our page a payment succeeded/was canceled, via
+            // postMessage relayed through public/authorize-net-communicator.html. url/
+            // cancelUrl below become a fallback only: if that postMessage never fires
+            // (a known occasional issue with Accept Hosted), the hosted page navigates
+            // the iframe itself to one of these, and cart.astro's iframe `load` handler
+            // catches that case and finishes the redirect at the top level.
+            settingName: 'hostedPaymentIFrameCommunicatorUrl',
+            settingValue: JSON.stringify({ url: `${origin}/authorize-net-communicator.html` }),
+          },
+          {
+            // Accept Hosted's only styling lever — one accent color for buttons/field
+            // lines. No further customization is possible (PCI SAQ-A tradeoff).
+            settingName: 'hostedPaymentStyleOptions',
+            settingValue: JSON.stringify({ bgColor: '#EBAF16' }),
+          },
+          {
+            // showEmail/requiredEmail both default to false — without this, Andrew's
+            // account-level settings apparently still required an email on submit, but
+            // with no field ever shown to enter it in (real bug hit 2026-10-29). We also
+            // want this email regardless: it feeds the GHL contact, the ShipStation
+            // shipment's ship_to.email, and authorize-webhook.ts's customer.email lookup.
+            settingName: 'hostedPaymentCustomerOptions',
+            settingValue: JSON.stringify({ showEmail: true, requiredEmail: true }),
+          },
+          {
+            // Hide shipping address on the Authorize.net form since we already
+            // collected it on the /cart/ page. The shipTo object above still gets
+            // passed to Authorize.net and ShipStation — it's just not shown for editing.
+            settingName: 'hostedPaymentShippingAddressOptions',
+            settingValue: JSON.stringify({ show: false }),
+          },
+          {
             settingName: 'hostedPaymentReturnOptions',
             settingValue: JSON.stringify({
               showReceipt: false,
-              url: `${origin}/cart/?success=1`,
+              url: `${origin}/thank-you/`,
               cancelUrl: `${origin}/cart/?canceled=1`,
             }),
           },
