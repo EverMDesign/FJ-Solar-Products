@@ -2,6 +2,12 @@
 import Layout from '../../layouts/Layout.astro';
 import products from '../../data/products.json';
 
+// Default variant selections per product
+const PRODUCT_DEFAULTS: Record<string, string[]> = {
+  'auto-generator-start-onboard-generators': ['Negative', 'No'],
+  'auto-generator-start-portable-generators': ['15\'', 'No', 'Westinghouse'],
+};
+
 export function getStaticPaths() {
   return products.map((product) => ({
     params: { slug: product.slug },
@@ -56,8 +62,11 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
         </p>
 
         {product.variantGroups && product.variantGroups.length > 0 && product.variants && product.variants.length > 0 && (
-          <div class="mt-4 max-w-xs space-y-3" data-variants={JSON.stringify(product.variants)} data-variant-group-count={product.variantGroups?.length || 0}>
-            {product.variantGroups.map((group, idx) => (
+          <div class="mt-4 max-w-xs space-y-3" data-variants={JSON.stringify(product.variants)} data-variant-group-count={product.variantGroups?.length || 0} data-defaults={JSON.stringify(PRODUCT_DEFAULTS[product.slug] || [])}>
+            {product.variantGroups.map((group, idx) => {
+              const defaults = PRODUCT_DEFAULTS[product.slug] || [];
+              const defaultValue = defaults[idx] || '';
+              return (
               <div key={idx}>
                 <label for={`variant-group-${idx}`} class="block text-sm font-semibold text-fj-navy mb-1">
                   {group.name}
@@ -67,6 +76,7 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
                     id={`variant-group-${idx}`}
                     class="variant-select w-full appearance-none bg-white border-2 border-fj-navy-deep rounded px-4 py-2.5 pr-10 text-sm font-semibold text-fj-navy cursor-pointer transition-colors focus:outline-none focus:border-fj-gold"
                     data-group-index={idx}
+                    value={defaultValue}
                   >
                     <option value="">Select {group.name}</option>
                     {group.options?.map((option) => (
@@ -83,7 +93,8 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
                   </svg>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
 
@@ -202,6 +213,9 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
     selects.forEach((select) => {
       select.addEventListener('change', updatePriceFromSelections);
     });
+
+    // Trigger price update on load to apply default selections
+    updatePriceFromSelections();
 
     btn?.addEventListener('click', () => {
       const dimensions = btn.dataset.dimensions ? JSON.parse(btn.dataset.dimensions) : null;
