@@ -124,17 +124,28 @@ async function main() {
     // Real GHL variants (e.g. "Signal Type": Negative/Positive) carry their own price and,
     // when Andrew has set it, their own shipping weight + box dimensions per option.
     const variantPrices = prices.filter(p => (p.variantOptionIds || []).length > 0);
+
+    // Parse variant names into separate options and keep price mapping
     const variants = variantPrices.map(p => {
       const prevVariant = previous?.variants?.find(v => v.optionId === p.variantOptionIds[0]);
+      const variantName = p.name.trim();
+      const parsedOptions = variantName.split(' / ').map(s => s.trim());
+
       return {
         optionId: p.variantOptionIds[0],
-        name: p.name.trim(),
+        name: variantName,
+        options: parsedOptions,  // Individual dimension values (e.g., ["Negative", "Yes"])
         price: p.amount,
         weightOz: ozFromWeight(p.shippingOptions?.weight) ?? prevVariant?.weightOz ?? 16,
         dimensions: p.shippingOptions?.dimensions || prevVariant?.dimensions || null,
       };
     });
-    const variantGroupName = full.variants?.[0]?.name?.trim() || null;
+
+    // Capture all variant groups with their available options from GHL
+    const variantGroups = full.variants?.map(g => ({
+      name: g.name?.trim(),
+      options: (g.options || []).map(o => o.name)
+    })) || [];
 
     results.push({
       id: full._id,
@@ -157,7 +168,7 @@ async function main() {
       // international carrier service), kept across every future run like `brand`.
       ...(previous?.hsCode ? { hsCode: previous.hsCode } : {}),
       ...(previous?.internationalShipping ? { internationalShipping: previous.internationalShipping } : {}),
-      ...(variants.length > 0 ? { variantGroupName, variants } : {}),
+      ...(variants.length > 0 ? { variantGroups, variants } : {}),
     });
   }
 

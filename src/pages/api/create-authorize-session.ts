@@ -82,7 +82,7 @@ export const POST: APIRoute = async ({ request, url }) => {
           tax: {
             amount: taxAmount.toFixed(2),
             name: 'FL Sales Tax',
-            description: 'Florida sales tax (7.5%)',
+            description: 'Florida sales tax (6.5%)',
           },
         }),
         shipping: {

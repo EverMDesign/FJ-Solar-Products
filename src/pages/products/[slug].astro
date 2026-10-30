@@ -55,37 +55,35 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
           )}
         </p>
 
-        {product.variants && product.variants.length > 0 && (
-          <div class="mt-4 max-w-xs">
-            <label for="variant-select" class="block text-sm font-semibold text-fj-navy mb-1">
-              {product.variantGroupName || 'Options'}
-            </label>
-            <div class="relative">
-              <select
-                id="variant-select"
-                class="w-full appearance-none bg-white border-2 border-fj-navy-deep rounded px-4 py-2.5 pr-10 text-sm font-semibold text-fj-navy cursor-pointer transition-colors focus:outline-none focus:border-fj-gold"
-              >
-                {product.variants.map((v) => (
-                  <option
-                    value={v.optionId}
-                    data-price={v.price}
-                    data-weight-oz={v.weightOz}
-                    data-name={v.name}
-                    data-dimensions={v.dimensions ? JSON.stringify(v.dimensions) : ''}
+        {product.variantGroups && product.variantGroups.length > 0 && product.variants && product.variants.length > 0 && (
+          <div class="mt-4 max-w-xs space-y-3" data-variants={JSON.stringify(product.variants)} data-variant-group-count={product.variantGroups?.length || 0}>
+            {product.variantGroups.map((group, idx) => (
+              <div key={idx}>
+                <label for={`variant-group-${idx}`} class="block text-sm font-semibold text-fj-navy mb-1">
+                  {group.name}
+                </label>
+                <div class="relative">
+                  <select
+                    id={`variant-group-${idx}`}
+                    class="variant-select w-full appearance-none bg-white border-2 border-fj-navy-deep rounded px-4 py-2.5 pr-10 text-sm font-semibold text-fj-navy cursor-pointer transition-colors focus:outline-none focus:border-fj-gold"
+                    data-group-index={idx}
                   >
-                    {v.name}
-                  </option>
-                ))}
-              </select>
-              <svg
-                class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fj-gold"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
+                    <option value="">Select {group.name}</option>
+                    {group.options?.map((option) => (
+                      <option value={option}>{option}</option>
+                    ))}
+                  </select>
+                  <svg
+                    class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fj-gold"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -134,26 +132,61 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
   <script>
     import { addToCart } from '../../lib/cart';
 
+    type Variant = {
+      optionId: string;
+      name: string;
+      options: string[];
+      price: number;
+      weightOz: number;
+      dimensions: any;
+    };
+
+    const variantsContainer = document.querySelector('[data-variants]');
+    const variantsData: Variant[] = variantsContainer ? JSON.parse(variantsContainer.getAttribute('data-variants') || '[]') : [];
+    const variantGroupCount = variantsContainer ? parseInt(variantsContainer.getAttribute('data-variant-group-count') || '0') : 0;
+
     const btn = document.getElementById('add-to-cart-btn') as HTMLButtonElement | null;
-    const select = document.getElementById('variant-select') as HTMLSelectElement | null;
     const priceEl = document.getElementById('product-price');
     const shipInfoEl = document.getElementById('ship-info');
+    const selects = Array.from(document.querySelectorAll('.variant-select')) as HTMLSelectElement[];
 
     function formatPrice(amount: number) {
       return new Intl.NumberFormat('en-US', { style: 'currency', currency: btn?.dataset.currency || 'USD' }).format(amount);
     }
 
-    function applyVariant(option: HTMLOptionElement) {
+    function findVariantByOptions(selectedOptions: string[]): Variant | undefined {
+      return variantsData.find((v) => {
+        const vOptions = v.name.split(' / ').map((s: string) => s.trim());
+        return vOptions.length === selectedOptions.length &&
+               vOptions.every((opt: string, idx: number) => opt === selectedOptions[idx]);
+      });
+    }
+
+    function updatePriceFromSelections() {
+      const selectedOptions = selects
+        .filter((s) => s.value)
+        .map((s) => s.value);
+
+      // Only update if all dropdowns are filled
+      if (selectedOptions.length === variantGroupCount) {
+        const matched = findVariantByOptions(selectedOptions);
+        if (matched) {
+          applyVariant(matched);
+        }
+      }
+    }
+
+    function applyVariant(variant: Variant) {
       if (!btn) return;
-      const price = Number(option.dataset.price);
-      const weightOz = Number(option.dataset.weightOz) || 0;
-      const dimensions = option.dataset.dimensions ? JSON.parse(option.dataset.dimensions) : null;
+      const price = variant.price;
+      const weightOz = variant.weightOz || 0;
+      const dimensions = variant.dimensions || null;
 
       btn.dataset.price = String(price);
-      btn.dataset.variantOptionId = option.value;
-      btn.dataset.variantName = option.dataset.name || '';
+      btn.dataset.variantOptionId = variant.optionId;
+      btn.dataset.variantName = variant.name;
       btn.dataset.weightOz = String(weightOz);
-      btn.dataset.dimensions = option.dataset.dimensions || '';
+      btn.dataset.dimensions = dimensions ? JSON.stringify(dimensions) : '';
 
       if (priceEl) priceEl.textContent = formatPrice(price);
       if (shipInfoEl) {
@@ -166,10 +199,9 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
       }
     }
 
-    if (select) {
-      select.addEventListener('change', () => applyVariant(select.options[select.selectedIndex]));
-      applyVariant(select.options[select.selectedIndex]);
-    }
+    selects.forEach((select) => {
+      select.addEventListener('change', updatePriceFromSelections);
+    });
 
     btn?.addEventListener('click', () => {
       const dimensions = btn.dataset.dimensions ? JSON.parse(btn.dataset.dimensions) : null;

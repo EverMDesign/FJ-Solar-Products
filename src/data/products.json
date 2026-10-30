@@ -16,11 +16,31 @@
     "hasMultiplePrices": true,
     "sku": "AGS-NEG",
     "weightOz": 96,
-    "variantGroupName": "Signal Type",
+    "variantGroups": [
+      {
+        "name": "Signal Type",
+        "options": [
+          "Negative",
+          "Positive (Pre Configured)",
+          "Positive (DIY)"
+        ]
+      },
+      {
+        "name": "WAGO Electrical Connectors",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      }
+    ],
     "variants": [
       {
         "optionId": "6x7t35hksjc",
         "name": "Negative / Yes",
+        "options": [
+          "Negative",
+          "Yes"
+        ],
         "price": 338,
         "weightOz": 96,
         "dimensions": {
@@ -33,6 +53,10 @@
       {
         "optionId": "a6xru89rt3",
         "name": "Positive (Pre Configured) / Yes",
+        "options": [
+          "Positive (Pre Configured)",
+          "Yes"
+        ],
         "price": 385,
         "weightOz": 96,
         "dimensions": {
@@ -45,6 +69,10 @@
       {
         "optionId": "mpk5nnv29ul",
         "name": "Positive (DIY) / Yes",
+        "options": [
+          "Positive (DIY)",
+          "Yes"
+        ],
         "price": 338,
         "weightOz": 96,
         "dimensions": {
@@ -57,6 +85,10 @@
       {
         "optionId": "6x7t35hksjc",
         "name": "Negative / No",
+        "options": [
+          "Negative",
+          "No"
+        ],
         "price": 329,
         "weightOz": 96,
         "dimensions": {
@@ -69,6 +101,10 @@
       {
         "optionId": "a6xru89rt3",
         "name": "Positive (Pre Configured) / No",
+        "options": [
+          "Positive (Pre Configured)",
+          "No"
+        ],
         "price": 379,
         "weightOz": 96,
         "dimensions": {
@@ -81,6 +117,10 @@
       {
         "optionId": "mpk5nnv29ul",
         "name": "Positive (DIY) / No",
+        "options": [
+          "Positive (DIY)",
+          "No"
+        ],
         "price": 329,
         "weightOz": 96,
         "dimensions": {
@@ -114,11 +154,39 @@
     "hasMultiplePrices": true,
     "sku": "AGS-PORT",
     "weightOz": 16,
-    "variantGroupName": "Cable Length",
+    "variantGroups": [
+      {
+        "name": "Cable Length",
+        "options": [
+          "15'",
+          "30'"
+        ]
+      },
+      {
+        "name": "WAGO Electrical Connectors",
+        "options": [
+          "Add Wago",
+          "No Wago"
+        ]
+      },
+      {
+        "name": "Generator Brand",
+        "options": [
+          "Westinghouse",
+          "Genmax",
+          "Duromax"
+        ]
+      }
+    ],
     "variants": [
       {
         "optionId": "blutk8l4197",
         "name": "15' / Add Wago / Westinghouse",
+        "options": [
+          "15'",
+          "Add Wago",
+          "Westinghouse"
+        ],
         "price": 334,
         "weightOz": 16,
         "dimensions": {
@@ -131,6 +199,11 @@
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / Add Wago / Westinghouse",
+        "options": [
+          "30'",
+          "Add Wago",
+          "Westinghouse"
+        ],
         "price": 354,
         "weightOz": 16,
         "dimensions": {
@@ -143,6 +216,11 @@
       {
         "optionId": "blutk8l4197",
         "name": "15' / No Wago / Westinghouse",
+        "options": [
+          "15'",
+          "No Wago",
+          "Westinghouse"
+        ],
         "price": 329,
         "weightOz": 16,
         "dimensions": {
@@ -155,6 +233,11 @@
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / No Wago / Westinghouse",
+        "options": [
+          "30'",
+          "No Wago",
+          "Westinghouse"
+        ],
         "price": 349,
         "weightOz": 16,
         "dimensions": {
@@ -167,6 +250,11 @@
       {
         "optionId": "blutk8l4197",
         "name": "15' / Add Wago / Genmax",
+        "options": [
+          "15'",
+          "Add Wago",
+          "Genmax"
+        ],
         "price": 334,
         "weightOz": 16,
         "dimensions": {
@@ -179,6 +267,11 @@
       {
         "optionId": "blutk8l4197",
         "name": "15' / No Wago / Genmax",
+        "options": [
+          "15'",
+          "No Wago",
+          "Genmax"
+        ],
         "price": 329,
         "weightOz": 16,
         "dimensions": {
@@ -191,6 +284,11 @@
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / Add Wago / Genmax",
+        "options": [
+          "30'",
+          "Add Wago",
+          "Genmax"
+        ],
         "price": 354,
         "weightOz": 16,
         "dimensions": {
@@ -203,6 +301,11 @@
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / No Wago / Genmax",
+        "options": [
+          "30'",
+          "No Wago",
+          "Genmax"
+        ],
         "price": 349,
         "weightOz": 16,
         "dimensions": {
@@ -215,6 +318,11 @@
       {
         "optionId": "blutk8l4197",
         "name": "15' / Add Wago / Duromax",
+        "options": [
+          "15'",
+          "Add Wago",
+          "Duromax"
+        ],
         "price": 334,
         "weightOz": 16,
         "dimensions": {
@@ -227,6 +335,11 @@
       {
         "optionId": "blutk8l4197",
         "name": "15' / No Wago / Duromax",
+        "options": [
+          "15'",
+          "No Wago",
+          "Duromax"
+        ],
         "price": 329,
         "weightOz": 16,
         "dimensions": {
@@ -239,6 +352,11 @@
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / Add Wago / Duromax",
+        "options": [
+          "30'",
+          "Add Wago",
+          "Duromax"
+        ],
         "price": 354,
         "weightOz": 16,
         "dimensions": {
@@ -251,6 +369,11 @@
       {
         "optionId": "a8yhgaspqs6",
         "name": "30' / No Wago / Duromax",
+        "options": [
+          "30'",
+          "No Wago",
+          "Duromax"
+        ],
         "price": 349,
         "weightOz": 16,
         "dimensions": {
@@ -356,11 +479,22 @@
     "internationalShipping": {
       "service": "usps_first_class_international"
     },
-    "variantGroupName": "Voltage",
+    "variantGroups": [
+      {
+        "name": "Voltage",
+        "options": [
+          "12v",
+          "24v"
+        ]
+      }
+    ],
     "variants": [
       {
         "optionId": "wc92d8ztob8",
         "name": "12v",
+        "options": [
+          "12v"
+        ],
         "price": 69.99,
         "weightOz": 10,
         "dimensions": {
@@ -373,6 +507,9 @@
       {
         "optionId": "b8t4liiqrwc",
         "name": "24v",
+        "options": [
+          "24v"
+        ],
         "price": 69.99,
         "weightOz": 16,
         "dimensions": {
