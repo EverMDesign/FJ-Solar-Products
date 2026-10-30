@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import crypto from 'node:crypto';
 import { SHIP_FROM, USPS_CARRIER_ID, USPS_GROUND_ADVANTAGE, DIMENSION_UNITS, findProductBySlugPrefix, normalizeUsState } from '../../lib/shipstation';
+import products from '../../data/products.json';
 
 export const prerender = false;
 
@@ -75,8 +76,14 @@ async function upsertGhlContact(details: any): Promise<string | null> {
   // <br>-joined, not \n — EverReach's merge-field substitution is expected to render the
   // field's HTML as-is into the email body, where a plain newline collapses to a space.
   // Verify this assumption with a real test email before relying on it (see CHANGELOG).
+  // Look up full product names from products.json using itemId (slug); Authorize.net
+  // truncates names to 31 chars, so we restore the full names here for GHL.
   const itemsHtml = getLineItems(transaction)
-    .map((item: any) => `${item.name || item.itemId} x${item.quantity} @ $${Number(item.unitPrice || 0).toFixed(2)}`)
+    .map((item: any) => {
+      const fullProduct = products.find((p) => p.slug === item.itemId);
+      const displayName = fullProduct?.name || item.name || item.itemId;
+      return `${displayName} x${item.quantity} @ $${Number(item.unitPrice || 0).toFixed(2)}`;
+    })
     .join('<br>');
   const shippingAddressHtml = [
     `${shipTo.firstName || ''} ${shipTo.lastName || ''}`.trim(),
