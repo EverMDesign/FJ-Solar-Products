@@ -189,16 +189,7 @@ export const POST: APIRoute = async ({ request, url }) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
   });
-  let data;
-  try {
-    data = await res.json();
-  } catch (e) {
-    console.error('Authorize.net response not JSON:', res.status, await res.text());
-    return new Response(JSON.stringify({ error: 'Could not start checkout.' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const data = await res.json();
 
   if (data.messages?.resultCode !== 'Ok' || !data.token) {
     console.error('Authorize.net getHostedPaymentPageRequest failed:', {
