@@ -56,36 +56,8 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
         </p>
 
         {product.variants && product.variants.length > 0 && (
-          <div class="mt-4 max-w-xs">
-            <label for="variant-select" class="block text-sm font-semibold text-fj-navy mb-1">
-              {product.variantGroupName || 'Options'}
-            </label>
-            <div class="relative">
-              <select
-                id="variant-select"
-                class="w-full appearance-none bg-white border-2 border-fj-navy-deep rounded px-4 py-2.5 pr-10 text-sm font-semibold text-fj-navy cursor-pointer transition-colors focus:outline-none focus:border-fj-gold"
-              >
-                {product.variants.map((v) => (
-                  <option
-                    value={v.optionId}
-                    data-price={v.price}
-                    data-weight-oz={v.weightOz}
-                    data-name={v.name}
-                    data-dimensions={v.dimensions ? JSON.stringify(v.dimensions) : ''}
-                  >
-                    {v.name}
-                  </option>
-                ))}
-              </select>
-              <svg
-                class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fj-gold"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
+          <div class="mt-4 max-w-xs space-y-3" id="variants-container">
+            <!-- Variants will be rendered here by script -->
           </div>
         )}
 
@@ -131,16 +103,190 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
     </div>
   </section>
 
-  <script>
+  <script define:vars={{ product }}>
     import { addToCart } from '../../lib/cart';
 
     const btn = document.getElementById('add-to-cart-btn') as HTMLButtonElement | null;
-    const select = document.getElementById('variant-select') as HTMLSelectElement | null;
+    const containerEl = document.getElementById('variants-container') as HTMLDivElement | null;
     const priceEl = document.getElementById('product-price');
     const shipInfoEl = document.getElementById('ship-info');
 
     function formatPrice(amount: number) {
       return new Intl.NumberFormat('en-US', { style: 'currency', currency: btn?.dataset.currency || 'USD' }).format(amount);
+    }
+
+    // Parse variant names by " / " delimiter to extract dimensions
+    function parseVariantDimensions(variants: any[]): { names: string[]; options: string[][] } | null {
+      if (!variants.length) return null;
+
+      const firstName = variants[0].name;
+      const parts = firstName.split(' / ');
+      if (parts.length <= 1) return null; // No multi-dimensional variants
+
+      const numDimensions = parts.length;
+      const dimensionNames = parts;
+      const dimensionOptions: string[][] = Array(numDimensions)
+        .fill(null)
+        .map(() => []);
+
+      variants.forEach((v) => {
+        const parts = v.name.split(' / ');
+        parts.forEach((part, idx) => {
+          if (!dimensionOptions[idx].includes(part)) {
+            dimensionOptions[idx].push(part);
+          }
+        });
+      });
+
+      return { names: dimensionNames, options: dimensionOptions };
+    }
+
+    function renderVariantSelects() {
+      if (!containerEl || !product.variants || product.variants.length === 0) return;
+
+      const parsed = parseVariantDimensions(product.variants);
+
+      if (!parsed) {
+        // Single dimension variants - use simple dropdown
+        const select = document.createElement('select');
+        select.id = 'variant-select';
+        select.className =
+          'w-full appearance-none bg-white border-2 border-fj-navy-deep rounded px-4 py-2.5 pr-10 text-sm font-semibold text-fj-navy cursor-pointer transition-colors focus:outline-none focus:border-fj-gold';
+
+        const label = document.createElement('label');
+        label.htmlFor = 'variant-select';
+        label.className = 'block text-sm font-semibold text-fj-navy mb-1';
+        label.textContent = product.variantGroupName || 'Options';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+
+        product.variants.forEach((v: any) => {
+          const option = document.createElement('option');
+          option.value = v.optionId;
+          option.dataset.price = v.price;
+          option.dataset.weightOz = v.weightOz;
+          option.dataset.name = v.name;
+          option.dataset.dimensions = v.dimensions ? JSON.stringify(v.dimensions) : '';
+          option.textContent = v.name;
+          select.appendChild(option);
+        });
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fj-gold');
+        svg.setAttribute('viewBox', '0 0 20 20');
+        svg.setAttribute('fill', 'none');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M5 7.5L10 12.5L15 7.5');
+        path.setAttribute('stroke', 'currentColor');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        svg.appendChild(path);
+
+        wrapper.appendChild(select);
+        wrapper.appendChild(svg);
+        containerEl.appendChild(label);
+        containerEl.appendChild(wrapper);
+
+        select.addEventListener('change', () => applyVariant(select.options[select.selectedIndex]));
+        applyVariant(select.options[select.selectedIndex]);
+        return;
+      }
+
+      // Multi-dimensional variants - create separate dropdowns
+      const selects: HTMLSelectElement[] = [];
+
+      parsed.names.forEach((name, idx) => {
+        const label = document.createElement('label');
+        label.className = 'block text-sm font-semibold text-fj-navy mb-1';
+        label.textContent = name;
+
+        const select = document.createElement('select');
+        select.className =
+          'w-full appearance-none bg-white border-2 border-fj-navy-deep rounded px-4 py-2.5 pr-10 text-sm font-semibold text-fj-navy cursor-pointer transition-colors focus:outline-none focus:border-fj-gold';
+        select.dataset.dimensionIndex = String(idx);
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = `Select ${name}`;
+        select.appendChild(defaultOption);
+
+        parsed.options[idx].forEach((option) => {
+          const opt = document.createElement('option');
+          opt.value = option;
+          opt.textContent = option;
+          select.appendChild(opt);
+        });
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fj-gold');
+        svg.setAttribute('viewBox', '0 0 20 20');
+        svg.setAttribute('fill', 'none');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M5 7.5L10 12.5L15 7.5');
+        path.setAttribute('stroke', 'currentColor');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        svg.appendChild(path);
+
+        wrapper.appendChild(select);
+        wrapper.appendChild(svg);
+        containerEl.appendChild(label);
+        containerEl.appendChild(wrapper);
+        selects.push(select);
+      });
+
+      function updateVariantFromSelects() {
+        const selections = selects.map((s) => s.value);
+        if (selections.some((s) => !s)) {
+          // Not all selections made yet
+          if (priceEl) priceEl.textContent = formatPrice(product.price);
+          if (shipInfoEl) shipInfoEl.textContent = '';
+          return;
+        }
+
+        const selectedName = selections.join(' / ');
+        const matchedVariant = product.variants.find((v: any) => v.name === selectedName);
+
+        if (matchedVariant) {
+          applyVariantData(matchedVariant);
+        }
+      }
+
+      function applyVariantData(variant: any) {
+        if (!btn) return;
+        const price = Number(variant.price);
+        const weightOz = Number(variant.weightOz) || 0;
+        const dimensions = variant.dimensions || null;
+
+        btn.dataset.price = String(price);
+        btn.dataset.variantOptionId = variant.optionId;
+        btn.dataset.variantName = variant.name;
+        btn.dataset.weightOz = String(weightOz);
+        btn.dataset.dimensions = dimensions ? JSON.stringify(dimensions) : '';
+
+        if (priceEl) priceEl.textContent = formatPrice(price);
+        if (shipInfoEl) {
+          const lb = (weightOz / 16).toFixed(2);
+          shipInfoEl.textContent = dimensions
+            ? `Ships in a ${dimensions.length} × ${dimensions.width} × ${dimensions.height} ${dimensions.unit} box, ${lb} lb`
+            : weightOz
+            ? `Ships at ${lb} lb`
+            : '';
+        }
+      }
+
+      selects.forEach((select) => {
+        select.addEventListener('change', updateVariantFromSelects);
+      });
+
+      // Set initial display
+      if (priceEl) priceEl.textContent = formatPrice(product.price);
     }
 
     function applyVariant(option: HTMLOptionElement) {
@@ -166,10 +312,7 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
       }
     }
 
-    if (select) {
-      select.addEventListener('change', () => applyVariant(select.options[select.selectedIndex]));
-      applyVariant(select.options[select.selectedIndex]);
-    }
+    renderVariantSelects();
 
     btn?.addEventListener('click', () => {
       const dimensions = btn.dataset.dimensions ? JSON.parse(btn.dataset.dimensions) : null;
