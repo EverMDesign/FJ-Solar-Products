@@ -208,8 +208,12 @@ async function addOrderNoteToContact(contactId: string, details: any): Promise<v
   const phone = billTo.phoneNumber || '';
   const lineItems = getLineItems(transaction);
 
+  // Use full untruncated names from item.description when available
   const itemLines = lineItems
-    .map((item: any) => `- ${item.name || item.itemId} x${item.quantity} @ $${Number(item.unitPrice || 0).toFixed(2)}`)
+    .map((item: any) => {
+      const displayName = item.description || item.name || item.itemId;
+      return `- ${displayName} x${item.quantity} @ $${Number(item.unitPrice || 0).toFixed(2)}`;
+    })
     .join('\n');
 
   const shippingAmount = Number(transaction.shipping?.amount ?? 0);
