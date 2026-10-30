@@ -89,14 +89,14 @@ export const POST: APIRoute = async ({ request, url }) => {
           amount: shippingAmount.toFixed(2),
           name: 'Shipping',
         },
-        // Our shipping form only collects street/city/state/zip/country (no name) —
-        // Authorize.net's hosted page collects the customer's name and card details
-        // itself, so this is just a pre-fill of what we already have. Same address
-        // object for both: this flow only ever collects one address from the customer
+        // Our shipping form collects name + address — same address object for both
+        // billTo and shipTo since this flow only collects one address from the customer
         // (the one used for the real ShipStation rate), there's no separate billing step.
         // Element order matters here (see the `tax`-before-`shipping` comment above) —
         // billTo must come before shipTo, confirmed against the real API's schema error.
         billTo: {
+          firstName: address.firstName || '',
+          lastName: address.lastName || '',
           address: address.street || '',
           city: address.city || '',
           state: address.state || '',
@@ -104,6 +104,8 @@ export const POST: APIRoute = async ({ request, url }) => {
           country: address.country || 'US',
         },
         shipTo: {
+          firstName: address.firstName || '',
+          lastName: address.lastName || '',
           address: address.street || '',
           city: address.city || '',
           state: address.state || '',

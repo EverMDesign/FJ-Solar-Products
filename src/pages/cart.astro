@@ -35,6 +35,11 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
           <form id="shipping-form" class="mt-6 space-y-3">
+            <p class="text-sm font-semibold text-fj-navy">Your name</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input name="firstName" required placeholder="First name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+              <input name="lastName" required placeholder="Last name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+            </div>
             <p class="text-sm font-semibold text-fj-navy">Shipping address</p>
             <input name="street" required placeholder="Street address" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -171,6 +176,8 @@ import Layout from '../layouts/Layout.astro';
 
       const formData = new FormData(shippingForm);
       const address = {
+        firstName: String(formData.get('firstName') || ''),
+        lastName: String(formData.get('lastName') || ''),
         street: String(formData.get('street') || ''),
         city: String(formData.get('city') || ''),
         state: String(formData.get('state') || ''),
