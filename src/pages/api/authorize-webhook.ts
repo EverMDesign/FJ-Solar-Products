@@ -136,23 +136,17 @@ async function upsertGhlContact(details: any, orderNumber: string): Promise<stri
 
   // Determine product-based tags from line items. Match on itemId (slug) instead of name
   // because Authorize.net truncates names to 31 chars, cutting off words like "fan kit".
-  // Use .includes() to match even when variant ID is appended (e.g., "slug:variantId").
   const lineItems = getLineItems(transaction);
   const productTags: string[] = [];
-  console.log('Line items for tagging:', lineItems.map((item: any) => ({ itemId: item.itemId, productCode: item.productCode })));
   lineItems.forEach((item: any) => {
     const itemId = (item.itemId || '').toLowerCase();
-    console.log('Checking itemId:', itemId);
     if (itemId.includes('auto-generator-start')) {
-      console.log('Matched AGS, adding fj_ags_purchase');
       productTags.push('fj_ags_purchase');
     }
     if (itemId.includes('victron-multiplus-ii-external-fan-kit')) {
-      console.log('Matched external fan kit, adding fj_ext-kit_purchase');
       productTags.push('fj_ext-kit_purchase');
     }
   });
-  console.log('Final product tags:', productTags);
   // Remove duplicates
   const uniqueProductTags = [...new Set(productTags)];
 
