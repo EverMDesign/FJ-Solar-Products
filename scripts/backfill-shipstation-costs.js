@@ -45,11 +45,12 @@ async function updateShipment(shipmentId, costSummary) {
   const shipment = await getShipmentById(shipmentId);
 
   const total = costSummary.product + costSummary.shipping + costSummary.tax;
+  const money = (n) => ({ currency: 'usd', amount: Number(n.toFixed(2)) });
   const updated = {
     ...shipment,
-    amount_paid: Number(total.toFixed(2)),
-    shipping_paid: Number(costSummary.shipping.toFixed(2)),
-    tax_paid: Number(costSummary.tax.toFixed(2)),
+    amount_paid: money(total),
+    shipping_paid: money(costSummary.shipping),
+    tax_paid: money(costSummary.tax),
   };
 
   const res = await fetch(`https://api.shipstation.com/v2/shipments/${shipmentId}`, {
@@ -108,9 +109,9 @@ async function main() {
     const result = await updateShipment(shipmentId, { product, shipping, tax });
 
     console.log(`\n✅ Shipment ${shipmentId} updated successfully`);
-    console.log(`   Amount Paid: $${result.amount_paid}`);
-    console.log(`   Shipping Paid: $${result.shipping_paid}`);
-    console.log(`   Tax Paid: $${result.tax_paid}`);
+    console.log(`   Amount Paid: ${result.amount_paid?.currency} ${result.amount_paid?.amount}`);
+    console.log(`   Shipping Paid: ${result.shipping_paid?.currency} ${result.shipping_paid?.amount}`);
+    console.log(`   Tax Paid: ${result.tax_paid?.currency} ${result.tax_paid?.amount}`);
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);

@@ -423,6 +423,9 @@ async function createShipStationShipment(details: any, orderNumber: string, oppo
   const taxAmount = Number(transaction.tax?.amount ?? 0);
   const totalAmount = Number(transaction.authAmount ?? 0);
 
+  // ShipStation expects currency objects, not plain numbers
+  const money = (n: number) => ({ currency: 'usd', amount: Number(n.toFixed(2)) });
+
   const res = await fetch('https://api.shipstation.com/v2/shipments', {
     method: 'POST',
     headers: { 'API-Key': apiKey, 'Content-Type': 'application/json' },
@@ -436,9 +439,9 @@ async function createShipStationShipment(details: any, orderNumber: string, oppo
           carrier_id: USPS_CARRIER_ID,
           service_code: USPS_GROUND_ADVANTAGE,
           insurance_provider: 'parcelguard',
-          amount_paid: Number(totalAmount.toFixed(2)),
-          shipping_paid: Number(shippingAmount.toFixed(2)),
-          tax_paid: Number(taxAmount.toFixed(2)),
+          amount_paid: money(totalAmount),
+          shipping_paid: money(shippingAmount),
+          tax_paid: money(taxAmount),
           ship_from: {
             name: SHIP_FROM.name,
             phone: SHIP_FROM.phone,
