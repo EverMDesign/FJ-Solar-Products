@@ -2,6 +2,23 @@
 
 All notable changes to this project, newest first. Dates are when the work happened, not a formal release schedule — this is a live site, not a versioned package.
 
+## 2026-10-31 (Revert to transId-derived order numbers)
+
+### Changed
+- **Reverted order numbering scheme** from GHL location custom-value counter back to Authorize.net `transId`-derived approach:
+  - Removed `getAndIncrementOrderNumber()` function entirely — eliminates dependency on GHL custom-value write API (which was failing with 401 IAM error)
+  - Order numbers now derived synchronously from `transaction.transId` (no async API calls or external storage)
+  - Customer-facing number format remains branded: `FJSP-` + last 6 digits of transId (e.g., `FJSP-234567`)
+  - Full transId stored in GHL contact timeline note for audit & lookup
+  - Trades sequential meaning for bulletproof reliability (Authorize.net guarantees ID uniqueness)
+- **Documentation**: Rewrote `docs/order-numbering.md` to explain new approach, trade-offs, collision risk, and future Vercel KV migration path
+- **Cleanup**: Removed helper scripts `scripts/check-custom-value.mjs` and `scripts/set-custom-value.mjs` (no longer needed)
+
+### Why
+GHL's `/locations/{id}/custom-values` write endpoint returned persistent 401 "IAM Service not supported" errors on this account, causing the counter increment to silently fail and every order to fall back to hardcoded default (103026). Reverting to transId eliminates the external dependency and guarantees each order gets a unique number directly from Authorize.net.
+
+---
+
 ## 2026-10-30 (Auto-Gen Purchase email template)
 
 ### Added

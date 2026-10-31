@@ -46,55 +46,11 @@ async function getTransactionDetails(
 const ORDERS_PIPELINE_ID = '1hY3ZSKUDcn6JGnbpjxk';
 const NEW_ORDER_STAGE_ID = '2084ca26-91fb-4dd4-b4a3-e1d5532631a7';
 
-async function getAndIncrementOrderNumber(): Promise<string> {
-  const PIT_TOKEN = import.meta.env.PIT_TOKEN;
-  const LOCATION_ID = import.meta.env.LOCATION_ID;
-  const API_BASE = import.meta.env.GHL_API_BASE || 'https://services.leadconnectorhq.com';
-
-  // Fetch current custom values
-  const res = await fetch(`${API_BASE}/locations/${LOCATION_ID}/custom-values`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${PIT_TOKEN}`,
-      Version: '2021-07-28',
-      Accept: 'application/json',
-    },
-  });
-
-  let nextNumber = 103026; // Default if not found
-  if (res.ok) {
-    const data = await res.json();
-    const customValues = data.customValues || {};
-    const currentValue = customValues.next_order_number;
-    if (currentValue && !isNaN(Number(currentValue))) {
-      nextNumber = Number(currentValue);
-    }
-  }
-
-  // Format as FJSP-XXXXXX
-  const orderNumber = `FJSP-${nextNumber}`;
-
-  // Increment and update for next order
-  const updateRes = await fetch(`${API_BASE}/locations/${LOCATION_ID}/custom-values`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${PIT_TOKEN}`,
-      Version: '2021-07-28',
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      customValues: {
-        next_order_number: String(nextNumber + 1),
-      },
-    }),
-  });
-
-  if (!updateRes.ok) {
-    console.error('Failed to update next_order_number in GHL:', updateRes.status);
-  }
-
-  return orderNumber;
+// Derive order number from Authorize.net's transId (e.g., "60171234567" → "FJSP-234567").
+// Uses last 6 digits of transId for a short, branded, customer-facing number.
+// Full transId is stored in the order note for authoritative reference/audit.
+function deriveOrderNumber(transId: string): string {
+  return `FJSP-${String(transId).slice(-6)}`;
 }
 
 // billTo/customer field names confirmed correct against a real transaction (2026-10-29).
@@ -258,6 +214,7 @@ async function addOrderNoteToContact(contactId: string, details: any, orderNumbe
   const email = transaction.customer?.email || billTo.email || '';
   const phone = billTo.phoneNumber || '';
   const lineItems = getLineItems(transaction);
+  const transId = transaction.transId || '(unknown)';
 
   // Use full untruncated names from item.productCode when available
   const itemLines = lineItems
@@ -284,6 +241,7 @@ async function addOrderNoteToContact(contactId: string, details: any, orderNumbe
 
   const body = [
     `Order #${orderNumber}`,
+    `Authorize.net Transaction ID: ${transId}`,
     '',
     'CONTACT INFO:',
     billToName,
@@ -528,7 +486,8 @@ export const POST: APIRoute = async ({ request }) => {
     const transactionId = event.payload?.id;
     if (transactionId) {
       const details = await getTransactionDetails(transactionId, apiLoginId, transactionKey, environment);
-      const orderNumber = await getAndIncrementOrderNumber();
+      const rawTransId = details?.transaction?.transId || transactionId;
+      const orderNumber = deriveOrderNumber(rawTransId);
       const contactId = await upsertGhlContact(details, orderNumber);
       if (contactId) {
         await addOrderNoteToContact(contactId, details, orderNumber);
