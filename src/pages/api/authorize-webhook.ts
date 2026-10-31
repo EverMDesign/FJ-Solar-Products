@@ -136,6 +136,8 @@ async function upsertGhlContact(details: any, orderNumber: string): Promise<stri
 
   // Determine product-based tags from line items. Match on itemId (slug) instead of name
   // because Authorize.net truncates names to 31 chars, cutting off words like "fan kit".
+  // For external fan kit: "victron-multiplus-ii-external-fan-kit" gets truncated to "victron-multiplus-ii-external-f"
+  // so match on the untruncated part "multiplus-ii-external" instead.
   const lineItems = getLineItems(transaction);
   const productTags: string[] = [];
   lineItems.forEach((item: any) => {
@@ -143,7 +145,7 @@ async function upsertGhlContact(details: any, orderNumber: string): Promise<stri
     if (itemId.includes('auto-generator-start')) {
       productTags.push('fj_ags_purchase');
     }
-    if (itemId.includes('victron-multiplus-ii-external-fan-kit')) {
+    if (itemId.includes('multiplus-ii-external')) {
       productTags.push('fj_ext-kit_purchase');
     }
   });
