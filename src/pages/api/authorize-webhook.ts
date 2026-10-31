@@ -150,6 +150,9 @@ async function upsertGhlContact(details: any, orderNumber: string): Promise<stri
   // Remove duplicates
   const uniqueProductTags = [...new Set(productTags)];
 
+  const allTags = ['Customer', 'FJ Solar Store', 'fjsp-new-order', ...uniqueProductTags];
+  console.log('Sending to GHL - itemIds:', lineItems.map((i: any) => i.itemId), 'productTags:', uniqueProductTags, 'allTags:', allTags);
+
   const body = {
     locationId: LOCATION_ID,
     firstName: billTo.firstName || undefined,
@@ -164,7 +167,7 @@ async function upsertGhlContact(details: any, orderNumber: string): Promise<stri
     // 'fjsp-new-order' is what the EverReach workflow watches for to fire the
     // new-order-alert email to Andrew (see new-order-alert.html) — don't rename
     // without updating that workflow's trigger too.
-    tags: ['Customer', 'FJ Solar Store', 'fjsp-new-order', ...uniqueProductTags],
+    tags: allTags,
     source: 'FJ Solar Store',
     customFields: [
       itemsHtml && { id: LAST_ORDER_ITEMS_FIELD_ID, fieldValue: itemsHtml },
