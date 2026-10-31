@@ -479,6 +479,7 @@
     "internationalShipping": {
       "service": "usps_first_class_international"
     },
+    "defaultVariantId": "wc92d8ztob8",
     "variantGroups": [
       {
         "name": "Voltage",
