@@ -46,6 +46,57 @@ async function getTransactionDetails(
 const ORDERS_PIPELINE_ID = '1hY3ZSKUDcn6JGnbpjxk';
 const NEW_ORDER_STAGE_ID = '2084ca26-91fb-4dd4-b4a3-e1d5532631a7';
 
+async function getAndIncrementOrderNumber(): Promise<string> {
+  const PIT_TOKEN = import.meta.env.PIT_TOKEN;
+  const LOCATION_ID = import.meta.env.LOCATION_ID;
+  const API_BASE = import.meta.env.GHL_API_BASE || 'https://services.leadconnectorhq.com';
+
+  // Fetch current custom values
+  const res = await fetch(`${API_BASE}/locations/${LOCATION_ID}/custom-values`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${PIT_TOKEN}`,
+      Version: '2021-07-28',
+      Accept: 'application/json',
+    },
+  });
+
+  let nextNumber = 103026; // Default if not found
+  if (res.ok) {
+    const data = await res.json();
+    const customValues = data.customValues || {};
+    const currentValue = customValues.next_order_number;
+    if (currentValue && !isNaN(Number(currentValue))) {
+      nextNumber = Number(currentValue);
+    }
+  }
+
+  // Format as FJSP-XXXXXX
+  const orderNumber = `FJSP-${nextNumber}`;
+
+  // Increment and update for next order
+  const updateRes = await fetch(`${API_BASE}/locations/${LOCATION_ID}/custom-values`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${PIT_TOKEN}`,
+      Version: '2021-07-28',
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      customValues: {
+        next_order_number: String(nextNumber + 1),
+      },
+    }),
+  });
+
+  if (!updateRes.ok) {
+    console.error('Failed to update next_order_number in GHL:', updateRes.status);
+  }
+
+  return orderNumber;
+}
+
 // billTo/customer field names confirmed correct against a real transaction (2026-10-29).
 // Custom fields created 2026-10-30, matching the blank slots found in the real
 // new-order-alert.html template (Google Drive) — it uses {{custom_values.X}} for these,
@@ -63,7 +114,7 @@ const ORDER_SHIPPING_FIELD_ID = 'CRkQnxjjn6RMIrzTKE1s';
 const ORDER_TAX_FIELD_ID = 'ZlQ6cAmVi7fBDC64H465';
 const ORDER_TOTAL_FIELD_ID = 'Hg860V4KvRtjprIM66vM';
 
-async function upsertGhlContact(details: any): Promise<string | null> {
+async function upsertGhlContact(details: any, orderNumber: string): Promise<string | null> {
   const PIT_TOKEN = import.meta.env.PIT_TOKEN;
   const LOCATION_ID = import.meta.env.LOCATION_ID;
   const API_BASE = import.meta.env.GHL_API_BASE || 'https://services.leadconnectorhq.com';
@@ -161,7 +212,7 @@ async function upsertGhlContact(details: any): Promise<string | null> {
     source: 'FJ Solar Store',
     customFields: [
       itemsHtml && { id: LAST_ORDER_ITEMS_FIELD_ID, fieldValue: itemsHtml },
-      transaction.transId && { id: ORDER_NUMBER_FIELD_ID, fieldValue: transaction.transId },
+      orderNumber && { id: ORDER_NUMBER_FIELD_ID, fieldValue: orderNumber },
       shippingAddressHtml && { id: SHIPPING_ADDRESS_FIELD_ID, fieldValue: shippingAddressHtml },
       { id: ORDER_SUBTOTAL_FIELD_ID, fieldValue: money(subtotalAmount) },
       { id: ORDER_SHIPPING_FIELD_ID, fieldValue: money(shippingAmount) },
@@ -197,7 +248,7 @@ async function upsertGhlContact(details: any): Promise<string | null> {
 // below) linked to the same upserted contact, so GHL's contact page already lists every
 // order a repeat customer has made; this note is what makes each one show *what* they bought,
 // at what cost, and all shipping/billing details.
-async function addOrderNoteToContact(contactId: string, details: any): Promise<void> {
+async function addOrderNoteToContact(contactId: string, details: any, orderNumber: string): Promise<void> {
   const PIT_TOKEN = import.meta.env.PIT_TOKEN;
   const API_BASE = import.meta.env.GHL_API_BASE || 'https://services.leadconnectorhq.com';
 
@@ -232,7 +283,7 @@ async function addOrderNoteToContact(contactId: string, details: any): Promise<v
     .join('\n');
 
   const body = [
-    `Order #${transaction.transId || 'unknown'}`,
+    `Order #${orderNumber}`,
     '',
     'CONTACT INFO:',
     billToName,
@@ -275,7 +326,7 @@ async function addOrderNoteToContact(contactId: string, details: any): Promise<v
 
 // authAmount is Authorize.net's documented field for the captured amount — confirmed
 // against the first real transaction (2026-10-29): $29.93, matched exactly.
-async function createNewOrderOpportunity(contactId: string, details: any): Promise<string | null> {
+async function createNewOrderOpportunity(contactId: string, details: any, orderNumber: string): Promise<string | null> {
   const PIT_TOKEN = import.meta.env.PIT_TOKEN;
   const LOCATION_ID = import.meta.env.LOCATION_ID;
   const API_BASE = import.meta.env.GHL_API_BASE || 'https://services.leadconnectorhq.com';
@@ -297,7 +348,7 @@ async function createNewOrderOpportunity(contactId: string, details: any): Promi
       locationId: LOCATION_ID,
       pipelineId: ORDERS_PIPELINE_ID,
       pipelineStageId: NEW_ORDER_STAGE_ID,
-      name: `${customerName} — ${transaction.transId || 'Order'}`,
+      name: `${customerName} — ${orderNumber}`,
       status: 'open',
       contactId,
       monetaryValue,
@@ -477,10 +528,11 @@ export const POST: APIRoute = async ({ request }) => {
     const transactionId = event.payload?.id;
     if (transactionId) {
       const details = await getTransactionDetails(transactionId, apiLoginId, transactionKey, environment);
-      const contactId = await upsertGhlContact(details);
+      const orderNumber = await getAndIncrementOrderNumber();
+      const contactId = await upsertGhlContact(details, orderNumber);
       if (contactId) {
-        await addOrderNoteToContact(contactId, details);
-        const opportunityId = await createNewOrderOpportunity(contactId, details);
+        await addOrderNoteToContact(contactId, details, orderNumber);
+        const opportunityId = await createNewOrderOpportunity(contactId, details, orderNumber);
         if (opportunityId) {
           await createShipStationShipment(details, opportunityId);
         }
