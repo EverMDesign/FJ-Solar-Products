@@ -27,11 +27,17 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ message: 'Event ignored' }), { status: 200 });
     }
 
-    // external_shipment_id is the GHL Opportunity ID we stored when creating the shipment
-    const opportunityId = payload.external_shipment_id;
-    if (!opportunityId) {
+    // external_shipment_id format: "FJSP-XXXXX|opportunityId" — order number | GHL opportunity ID
+    const externalId = payload.external_shipment_id;
+    if (!externalId) {
       console.warn('ShipStation webhook: no external_shipment_id found', payload);
       return new Response(JSON.stringify({ error: 'No opportunity ID' }), { status: 400 });
+    }
+
+    const [orderNumber, opportunityId] = externalId.split('|');
+    if (!opportunityId) {
+      console.warn('ShipStation webhook: malformed external_shipment_id', externalId);
+      return new Response(JSON.stringify({ error: 'Malformed opportunity ID' }), { status: 400 });
     }
 
     // Update the GHL Opportunity to "Completed" status
