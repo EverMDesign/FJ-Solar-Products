@@ -418,11 +418,10 @@ async function createShipStationShipment(details: any, orderNumber: string, oppo
 
   const customerName = `${shipTo.firstName || ''} ${shipTo.lastName || ''}`.trim() || 'FJ Solar Customer';
 
-  // Calculate cost summary from transaction
+  // Calculate cost amounts from transaction
   const shippingAmount = Number(transaction.shipping?.amount ?? 0);
   const taxAmount = Number(transaction.tax?.amount ?? 0);
   const totalAmount = Number(transaction.authAmount ?? 0);
-  const productCost = totalAmount - shippingAmount - taxAmount;
 
   const res = await fetch('https://api.shipstation.com/v2/shipments', {
     method: 'POST',
@@ -437,12 +436,9 @@ async function createShipStationShipment(details: any, orderNumber: string, oppo
           carrier_id: USPS_CARRIER_ID,
           service_code: USPS_GROUND_ADVANTAGE,
           insurance_provider: 'parcelguard',
-          cost_summary: {
-            product_cost: Number(productCost.toFixed(2)),
-            shipping_cost: Number(shippingAmount.toFixed(2)),
-            tax: Number(taxAmount.toFixed(2)),
-            total: Number(totalAmount.toFixed(2)),
-          },
+          amount_paid: Number(totalAmount.toFixed(2)),
+          shipping_paid: Number(shippingAmount.toFixed(2)),
+          tax_paid: Number(taxAmount.toFixed(2)),
           ship_from: {
             name: SHIP_FROM.name,
             phone: SHIP_FROM.phone,
