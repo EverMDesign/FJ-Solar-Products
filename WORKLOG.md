@@ -25,3 +25,69 @@ Mapped Andrew's WooCommerce order flow to the new site and closed the first gap:
 **Next Steps:** Create the GHL custom fields for per-order data (order total, line items, product docs/video links) and the review_link custom value; fix the templates' merge syntax to match; verify/fix product weights+dimensions for the 7 non-AGS products
 
 ---
+
+## 2026-10-31 — 13:30
+
+Session completed: Fixed product tagging for FJ Solar checkout
+
+## What was accomplished
+
+1. **Order Numbering Updates**
+   - Changed from first 5 digits to last 5 digits of Authorize.net transId
+   - Simplified ShipStation external_shipment_id to just order number (removed GHL opportunity ID)
+   - Updated all documentation
+
+2. **EverReach Notes Formatting**
+   - Changed section headers from ALL CAPS to Title Case
+   - Added visual separators (---) between sections for better readability
+   - Confirmed variants are already included in notes via productCode field
+
+3. **External Fan Kit Product**
+   - Set 12v as default variant selection on product page
+   - Added proper tagging with `fj_ext-kit_purchase`
+
+4. **Product Purchase Tagging** ✅ FIXED
+   - `fj_ags_purchase`: Auto Generator Start (onboard + portable)
+   - `fj_ext-kit_purchase`: Victron MultiPlus External Fan Kit
+   - Root cause: Authorize.net truncates itemId to 31 characters
+   - Solution: Match on `multiplus-ii-external` substring instead of full slug
+   - Verified working via Vercel logs
+
+## Key Learning
+Authorize.net caps itemId at 31 chars, truncating `victron-multiplus-ii-external-fan-kit` to `victron-multiplus-ii-external-f`. Product matching must account for this truncation.
+
+## Status
+✅ All changes deployed to production and tested working
+
+**Status:** ✅ Complete
+
+---
+
+## 2026-10-31 — 17:35
+
+Session completed: ShipStation cost summary integration
+
+## What was accomplished
+
+1. **ShipStation Cost Summary Auto-Population**
+   - Updated `createShipStationShipment()` to calculate and send cost_summary
+   - Extracts product cost, shipping, tax, and total from Authorize.net transaction
+   - All future orders will auto-populate ShipStation's Cost Summary UI
+   - Calculated as: productCost = total - shipping - tax
+
+2. **Backfill Script Created**
+   - Created `scripts/backfill-shipstation-costs.js` for updating existing shipments
+   - Usage: `node scripts/backfill-shipstation-costs.js --latest --product 69.99 --shipping 0.00 --tax 0.00`
+   - Also supports specific shipment IDs via `--shipment-id` flag
+   - Validates API key from environment, provides clear error messages
+
+## Files Modified
+- `src/pages/api/authorize-webhook.ts`: Added cost_summary calculation and payload
+- `scripts/backfill-shipstation-costs.js`: New script for updating existing orders
+
+## Status
+✅ Code complete, build passing, ready for testing with next order
+
+**Next Steps:** Place test order to verify cost_summary populates correctly in ShipStation UI, then use backfill script if needed for any existing orders
+
+---
