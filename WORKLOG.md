@@ -91,3 +91,47 @@ Session completed: ShipStation cost summary integration
 **Next Steps:** Place test order to verify cost_summary populates correctly in ShipStation UI, then use backfill script if needed for any existing orders
 
 ---
+
+## 2026-10-31 — 23:45
+
+Session completed: Fixed ShipStation cost summary field format
+
+## Problem
+ShipStation shipments were not being created because `amount_paid`, `shipping_paid`, and `tax_paid` were being sent as plain numbers instead of currency objects. API returned 400 error: "Could not cast or convert from System.Double to ShipEngine.Core.DTO.Currency.MoneyDTO."
+
+## Solution
+Updated all three cost fields to use proper currency object format:
+```json
+{
+  "amount_paid": { "currency": "usd", "amount": 69.99 },
+  "shipping_paid": { "currency": "usd", "amount": 0.00 },
+  "tax_paid": { "currency": "usd", "amount": 0.00 }
+}
+```
+
+## Changes Made
+1. **authorize-webhook.ts** (lines 421-444)
+   - Added `money()` helper function to format amounts as currency objects
+   - Updated all three cost fields to use helper
+   - Verified format against live ShipStation API (tested successfully with 200 status, no errors)
+
+2. **backfill-shipstation-costs.js**
+   - Updated to use same currency object format
+   - Updated console output to display currency objects correctly
+
+## Files Modified
+- `src/pages/api/authorize-webhook.ts`: Fixed cost field format
+- `scripts/backfill-shipstation-costs.js`: Updated for currency objects
+
+## Verification
+✅ API test confirmed all three fields accept `{currency, amount}` format
+✅ Test shipment created successfully (id: se-489055438)
+✅ Build passes
+✅ Deployed to production (commit: a2d8664)
+
+## Status
+✅ Code fix complete and verified against live API
+
+**Next Steps:** Place test order to verify shipments now create successfully in ShipStation with cost summary populated
+
+---
