@@ -46,11 +46,11 @@ async function getTransactionDetails(
 const ORDERS_PIPELINE_ID = '1hY3ZSKUDcn6JGnbpjxk';
 const NEW_ORDER_STAGE_ID = '2084ca26-91fb-4dd4-b4a3-e1d5532631a7';
 
-// Derive order number from Authorize.net's transId (e.g., "60171234567" → "FJSP-60171").
-// Uses first 5 digits of transId for a short, branded, customer-facing number.
+// Derive order number from Authorize.net's transId (e.g., "60171234567" → "FJSP-34567").
+// Uses last 5 digits of transId for a short, branded, customer-facing number.
 // Full transId is stored in the order note for authoritative reference/audit.
 function deriveOrderNumber(transId: string): string {
-  return `FJSP-${String(transId).slice(0, 5)}`;
+  return `FJSP-${String(transId).slice(-5)}`;
 }
 
 // billTo/customer field names confirmed correct against a real transaction (2026-10-29).
@@ -419,12 +419,9 @@ async function createShipStationShipment(details: any, orderNumber: string, oppo
     body: JSON.stringify({
       shipments: [
         {
-          external_shipment_id: `${orderNumber}|${opportunityId}`,
-          // Format: "FJSP-XXXXX|opportunityId" — webhook uses order number for ShipStation display,
-          // opportunityId to update GHL. Without this, the shipment exists via the API (confirmed working — GHL sync,
-          // correct weight/address) but never appears in ShipStation's Orders UI at all,
-          // which is what Andrew actually looks at day-to-day. Found after the first real
-          // order's shipment was invisible to him despite being created successfully.
+          external_shipment_id: orderNumber,
+          // Format: "FJSP-XXXXX" — order number only. The shipment exists via the API (confirmed working —
+          // correct weight/address) and appears in ShipStation's Orders UI with the order number linked.
           create_sales_order: true,
           carrier_id: USPS_CARRIER_ID,
           service_code: USPS_GROUND_ADVANTAGE,

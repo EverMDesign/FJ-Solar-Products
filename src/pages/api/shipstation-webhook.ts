@@ -27,45 +27,19 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ message: 'Event ignored' }), { status: 200 });
     }
 
-    // external_shipment_id format: "FJSP-XXXXX|opportunityId" — order number | GHL opportunity ID
-    const externalId = payload.external_shipment_id;
-    if (!externalId) {
+    // external_shipment_id format: "FJSP-XXXXX" — order number only
+    const orderNumber = payload.external_shipment_id;
+    if (!orderNumber) {
       console.warn('ShipStation webhook: no external_shipment_id found', payload);
-      return new Response(JSON.stringify({ error: 'No opportunity ID' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'No order number' }), { status: 400 });
     }
 
-    const [orderNumber, opportunityId] = externalId.split('|');
-    if (!opportunityId) {
-      console.warn('ShipStation webhook: malformed external_shipment_id', externalId);
-      return new Response(JSON.stringify({ error: 'Malformed opportunity ID' }), { status: 400 });
-    }
+    // TODO: To update GHL when shipment ships, we need to look up the opportunity by order number
+    // (could add GHL search/filter by custom field, or store mapping in a database).
+    // For now, shipment status is manually tracked in ShipStation and GHL.
 
-    // Update the GHL Opportunity to "Completed" status
-    const updateRes = await fetch(`${API_BASE}/opportunities/${opportunityId}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${PIT_TOKEN}`,
-        Version: '2021-07-28',
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        locationId: LOCATION_ID,
-        status: 'won', // "won" = Completed in GHL
-      }),
-    });
-
-    if (!updateRes.ok) {
-      const errorBody = await updateRes.text();
-      console.error('GHL opportunity update failed:', updateRes.status, errorBody);
-      return new Response(
-        JSON.stringify({ error: 'Could not update opportunity' }),
-        { status: 502 }
-      );
-    }
-
-    console.log(`Opportunity ${opportunityId} marked as shipped (won)`);
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    console.log(`Shipment received for order ${orderNumber}`);
+    return new Response(JSON.stringify({ success: true, orderNumber }), { status: 200 });
   } catch (err) {
     console.error('ShipStation webhook error:', err);
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });

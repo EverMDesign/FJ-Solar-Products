@@ -1,6 +1,6 @@
 # Order Numbering
 
-FJ Solar uses Authorize.net's transaction ID to derive order numbers in the format `FJSP-XXXXX` (e.g., `FJSP-60171`). Each order gets a unique customer-facing number derived from the **first 5 digits** of Authorize.net's internal transaction ID, ensuring consistency across Authorize.net, GHL (EverReach), and ShipStation.
+FJ Solar uses Authorize.net's transaction ID to derive order numbers in the format `FJSP-XXXXX` (e.g., `FJSP-34567`). Each order gets a unique customer-facing number derived from the **last 5 digits** of Authorize.net's internal transaction ID, ensuring consistency across Authorize.net, GHL (EverReach), and ShipStation.
 
 ## How It Works
 
@@ -17,8 +17,8 @@ When an Authorize.net payment succeeds:
 
 1. **Webhook receives payment** → `POST /api/authorize-webhook`
 2. **Extract transaction details** → Authorize.net API `getTransactionDetailsRequest`
-3. **Derive order number** → `FJSP-` + **first 5 digits** of `transaction.transId`
-   - Example: `transId=60171234567` → Order number: `FJSP-60171`
+3. **Derive order number** → `FJSP-` + **last 5 digits** of `transaction.transId`
+   - Example: `transId=60171234567` → Order number: `FJSP-34567`
 4. **Create order record** → Store order number in:
    - Contact custom field `ORDER_NUMBER_FIELD_ID`
    - Opportunity name (e.g., "Customer Name — FJSP-60171")
@@ -39,51 +39,29 @@ Authorize.net Payment
     ↓
     transId: 60171234567
     ↓
-    Derived Order #: FJSP-60171
+    Derived Order #: FJSP-34567 (last 5 digits)
     ↓
 [Authorize.net Webhook] → POST /api/authorize-webhook.ts
     ↓
     ├─ Create GHL Opportunity
-    │  ├─ Name: "Customer Name — FJSP-60171"
-    │  ├─ Custom field: FJSP-60171
-    │  └─ Timeline note: Full transId for audit
+    │  ├─ Name: "Customer Name — FJSP-34567"
+    │  ├─ Custom field: FJSP-34567
+    │  └─ Timeline note: Full transId for audit + line items with variants
     │
-    ├─ Create ShipStation Shipment
-    │  └─ external_shipment_id: "FJSP-60171|{opportunityId}"
-    │     (pipe-separated: order number | GHL opportunity ID)
-    │
-    └─ When shipment is dispatched
-       ↓
-       [ShipStation Webhook] → POST /api/shipstation-webhook.ts
-       ↓
-       ├─ Parse external_shipment_id
-       │  ├─ Extract order number: FJSP-60171
-       │  └─ Extract opportunityId for GHL update
-       │
-       └─ Update GHL Opportunity to "won" (shipped)
+    └─ Create ShipStation Shipment
+       └─ external_shipment_id: "FJSP-34567"
+          (order number only)
 ```
-
-### Why the Pipe-Separated external_shipment_id?
-
-ShipStation needs the order number for customer-facing displays, but the webhook also needs to update the correct GHL opportunity when the shipment ships. The format `"{orderNumber}|{opportunityId}"` solves both:
-
-- **ShipStation UI displays**: `FJSP-60171` (clean, branded order number)
-- **Webhook has both values**: Parses to extract `FJSP-60171` and the GHL `opportunityId` for status updates
-- **No external lookup needed**: Both pieces travel together, no second API call required
 
 ### ShipStation Integration
 
 When an order is created, the webhook:
 
-1. Derives the order number from `transId`
-2. Creates a GHL opportunity (returns `opportunityId`)
-3. Creates a ShipStation shipment with `external_shipment_id: "{orderNumber}|{opportunityId}"`
+1. Derives the order number from `transId` (last 5 digits)
+2. Creates a GHL opportunity with order number in name and custom field
+3. Creates a ShipStation shipment with `external_shipment_id: "{orderNumber}"`
 
-When ShipStation dispatches the shipment:
-
-1. Sends webhook to `/api/shipstation-webhook.ts`
-2. Webhook parses the pipe-separated `external_shipment_id`
-3. Extracts the `opportunityId` and updates the GHL opportunity status to "won" (shipped)
+The order number is used to link ShipStation orders to GHL opportunities. Shipment status tracking happens in ShipStation's UI (manual).
 
 ## Why transId Instead of a Counter?
 
@@ -102,31 +80,28 @@ This approach reverted from a GHL custom-value counter (deployed 2026-10-30) aft
 
 ## Collision Risk
 
-First 5 digits = ~100,000 possible customer-facing numbers. For FJ Solar's expected order volume (hundreds/year), collision odds are effectively zero. However, the full `transaction.transId` is always stored in the contact timeline note as the authoritative, unambiguous identifier for audits and lookups.
-
-**Note**: Using the first 5 digits maintains consistency with how Authorize.net's transaction IDs are structured (sequential, starting digits represent the payment gateway batch/time), making the order numbers more predictable and grouped chronologically.
+Last 5 digits = ~100,000 possible customer-facing numbers. For FJ Solar's expected order volume (hundreds/year), collision odds are effectively zero. However, the full `transaction.transId` is always stored in the contact timeline note as the authoritative, unambiguous identifier for audits and lookups.
 
 ## Testing
 
 ### Sandbox Testing
 
 1. Set `AUTHORIZE_NET_ENVIRONMENT=sandbox` in `.env.local`
-2. Process a test payment
+2. Process a test payment with variant options
 3. Check GHL and ShipStation:
-   - **GHL opportunity name**: `FJSP-XXXXX` (derived from first 5 digits of sandbox transId)
-   - **GHL timeline note**: Both the shortened order number and the full transId
-   - **ShipStation external_shipment_id**: `FJSP-XXXXX|{opportunityId}` (pipe-separated)
-4. When shipment is marked shipped in ShipStation:
-   - Check GHL opportunity status updates to "won"
+   - **GHL opportunity name**: `FJSP-XXXXX` (derived from last 5 digits of sandbox transId)
+   - **GHL timeline note**: 
+     - Order number and full transId
+     - **Line items with variants** (e.g., "Victron SmartShunt 500A - Current Monitor")
+   - **ShipStation external_shipment_id**: `FJSP-XXXXX` (order number only)
 
 ### Example Output
 
 For a sandbox transaction with `transId=60171234567`:
-- **Order number derived**: `FJSP-60171` (first 5 digits)
-- **GHL opportunity name**: "Test Customer — FJSP-60171"
-- **GHL timeline note**: "Order #FJSP-60171" + "Authorize.net Transaction ID: 60171234567"
-- **ShipStation external_shipment_id**: "FJSP-60171|{ghlOpportunityId}"
-  - Example: "FJSP-60171|opp_1a2b3c4d5e6f"
+- **Order number derived**: `FJSP-34567` (last 5 digits)
+- **GHL opportunity name**: "Test Customer — FJSP-34567"
+- **GHL timeline note**: "Order #FJSP-34567" + "Authorize.net Transaction ID: 60171234567" + line items with variants
+- **ShipStation external_shipment_id**: "FJSP-34567"
 
 ## Future: Atomic Counters via Vercel KV
 
