@@ -77,13 +77,13 @@ async function upsertGhlContact(details: any): Promise<string | null> {
   // field's HTML as-is into the email body, where a plain newline collapses to a space.
   // Verify this assumption with a real test email before relying on it (see CHANGELOG).
   // Look up full product names and variants from products.json using itemId (slug or slug:variantId).
-  // Use item.description (if available) for the full untruncated name, otherwise reconstruct from itemId.
+  // Use item.productCode (if available) for the full untruncated name, otherwise reconstruct from itemId.
   const itemsHtml = getLineItems(transaction)
     .map((item: any) => {
-      let displayName = item.description || item.name || item.itemId;
+      let displayName = item.productCode || item.name || item.itemId;
 
-      // If no description provided, reconstruct from itemId
-      if (!item.description) {
+      // If no productCode provided, reconstruct from itemId
+      if (!item.productCode) {
         const itemId = item.itemId || '';
 
         // itemId might be "slug" or "slug:variantId" if variant was selected
@@ -208,10 +208,10 @@ async function addOrderNoteToContact(contactId: string, details: any): Promise<v
   const phone = billTo.phoneNumber || '';
   const lineItems = getLineItems(transaction);
 
-  // Use full untruncated names from item.description when available
+  // Use full untruncated names from item.productCode when available
   const itemLines = lineItems
     .map((item: any) => {
-      const displayName = item.description || item.name || item.itemId;
+      const displayName = item.productCode || item.name || item.itemId;
       return `- ${displayName} x${item.quantity} @ $${Number(item.unitPrice || 0).toFixed(2)}`;
     })
     .join('\n');
