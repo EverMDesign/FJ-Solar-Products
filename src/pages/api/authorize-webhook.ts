@@ -141,8 +141,11 @@ async function upsertGhlContact(details: any, orderNumber: string): Promise<stri
   const productTags: string[] = [];
   lineItems.forEach((item: any) => {
     const itemId = (item.itemId || '').toLowerCase();
-    if (itemId.includes('auto-generator-start')) {
-      productTags.push('fj_ags_purchase');
+    if (itemId.includes('auto-generator-start-onboard')) {
+      productTags.push('fj_ags_onboard_purchase');
+    }
+    if (itemId.includes('auto-generator-start-portable')) {
+      productTags.push('fj_ags_portable_purchase');
     }
     if (itemId.includes('victron-multiplus-ii-external-fan-kit')) {
       productTags.push('fj_ext-kit_purchase');
