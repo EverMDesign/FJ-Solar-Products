@@ -97,7 +97,7 @@ function runFetchProducts(
         resolve({
           stdout,
           stderr,
-          error: `Script exited with code ${code}`,
+          error: `Script exited with code ${code} — stderr: ${stderr}`,
         });
       } else {
         resolve({ stdout, stderr });
