@@ -1,10 +1,5 @@
 import type { APIRoute } from 'astro';
 import { spawn } from 'child_process';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const prerender = false;
 
@@ -20,9 +15,10 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  // Run fetch-products script
-  const scriptPath = path.join(__dirname, '..', '..', '..', 'scripts', 'fetch-products.mjs');
-  const projectRoot = path.join(__dirname, '..', '..', '..', '..');
+  // Run fetch-products script — use simpler path that works on Vercel
+  // Project root is 4 levels up from this file: src/pages/api/admin/sync-ghl.ts -> ../../../..
+  const scriptPath = 'scripts/fetch-products.mjs';
+  const projectRoot = process.cwd();
 
   try {
     const result = await runFetchProducts(scriptPath, projectRoot);
@@ -76,10 +72,14 @@ function runFetchProducts(
     let stdout = '';
     let stderr = '';
 
-    const child = spawn('node', [scriptPath], {
+    // Use absolute path by joining with cwd
+    const absoluteScriptPath = `${cwd}/${scriptPath}`;
+
+    const child = spawn('node', [absoluteScriptPath], {
       cwd,
       stdio: ['pipe', 'pipe', 'pipe'],
       env: process.env,
+      shell: false,
     });
 
     child.stdout?.on('data', (data) => {
