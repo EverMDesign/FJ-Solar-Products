@@ -13,8 +13,6 @@ export const prerender = false;
 let transId: string | null = null;
 let last4: string | null = null;
 let totalAmount: number | null = null;
-let debugInfo: string = '';
-let debugRawResponse: string = '';
 
 function parseAuthnetResponse(raw: string): any {
   try {
@@ -50,38 +48,17 @@ if (Astro.request.method === 'POST') {
     const formData = await Astro.request.formData();
     const raw = formData.get('response');
     if (typeof raw === 'string') {
-      debugRawResponse = raw;
       responseData = parseAuthnetResponse(raw);
       if (responseData) {
-        console.log('[thank-you.astro] Authorize.net response parsed:', JSON.stringify(responseData, null, 2));
         transId = responseData.transId ?? responseData.transactionResponse?.transId ?? null;
         const account = responseData.accountNumber ?? responseData.transactionResponse?.accountNumber ?? null;
         if (typeof account === 'string') last4 = account.slice(-4);
-        // Extract transaction amount for Meta Pixel tracking
         totalAmount = responseData.totalAmount ?? responseData.transactionResponse?.totalAmount ?? null;
-        debugInfo = JSON.stringify({
-          method: 'POST',
-          transId,
-          totalAmount,
-          last4,
-          responseKeys: Object.keys(responseData),
-          // Log the full response to help debug field names
-          fullResponse: responseData
-        }, null, 2);
-        console.log('[thank-you.astro] Extracted:', { transId, totalAmount, last4 });
-      } else {
-        debugInfo = JSON.stringify({ method: 'POST', error: 'Could not parse response field' }, null, 2);
       }
     }
   } catch (e) {
-    console.error('[thank-you.astro] Error parsing POST response:', e);
-    debugInfo = `POST Error: ${e instanceof Error ? e.message : String(e)}`;
+    // Unexpected response shape — show the generic message instead of erroring out.
   }
-} else {
-  // GET request — postMessage worked and checkout.astro did a plain GET redirect
-  // But we don't have the response data because it wasn't passed along
-  // This is the issue: the response needs to be stored in sessionStorage on the client side
-  debugInfo = JSON.stringify({ method: 'GET', message: 'postMessage succeeded but response not passed to server' }, null, 2);
 }
 ---
 
@@ -93,18 +70,6 @@ if (Astro.request.method === 'POST') {
       will be sent to your email shortly.
     </p>
 
-    {debugInfo && (
-      <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded text-left text-xs">
-        <p class="font-semibold text-yellow-900 mb-2">Debug Info (remove before production):</p>
-        <pre class="whitespace-pre-wrap break-words text-yellow-800 font-mono text-[10px]">{debugInfo}</pre>
-        {debugRawResponse && (
-          <details class="mt-2">
-            <summary class="cursor-pointer text-yellow-900 font-semibold">Raw POST Response</summary>
-            <pre class="mt-2 whitespace-pre-wrap break-words text-yellow-800 font-mono text-[10px]">{debugRawResponse}</pre>
-          </details>
-        )}
-      </div>
-    )}
     {
       transId && (
         <p class="text-sm text-fj-navy/50 mt-6">
