@@ -54,6 +54,18 @@ export function addToCart(item: Omit<CartItem, 'quantity'>, quantity = 1) {
     items.push({ ...item, quantity });
   }
   writeRaw(items);
+
+  // Track with Meta Pixel
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'AddToCart', {
+      value: item.price * quantity,
+      currency: 'USD',
+      content_name: item.name,
+      content_ids: [item.slug],
+      content_type: 'product',
+      quantity: quantity,
+    });
+  }
 }
 
 export function removeFromCart(slug: string, variantOptionId?: string) {

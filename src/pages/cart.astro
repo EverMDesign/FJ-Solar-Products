@@ -93,6 +93,7 @@ import Layout from '../layouts/Layout.astro';
 
   <script>
     import { getCart, removeFromCart, setQuantity, type CartItem } from '../lib/cart';
+    import { calculateTaxCents } from '../lib/tax';
 
     const itemsEl = document.getElementById('cart-items')!;
     const emptyEl = document.getElementById('empty-cart-message')!;
@@ -209,6 +210,18 @@ import Layout from '../layouts/Layout.astro';
       shippingErrorEl.classList.add('hidden');
       getRateBtn.disabled = true;
 
+      // Track InitiateCheckout with Meta Pixel
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        const cart = getCart();
+        const subtotalCents = cart.reduce((sum, i) => sum + dollarsToCents(i.price ?? 0) * i.quantity, 0);
+        (window as any).fbq('track', 'InitiateCheckout', {
+          value: subtotalCents / 100,
+          currency: 'USD',
+          content_ids: cart.map((i) => i.slug),
+          num_items: cart.length,
+        });
+      }
+
       let messageIndex = 0;
       getRateBtn.textContent = RATE_LOADING_MESSAGES[0];
       const loadingInterval = setInterval(() => {
@@ -271,6 +284,23 @@ import Layout from '../layouts/Layout.astro';
 
     checkoutBtn.addEventListener('click', () => {
       if (shippingCents === null || !shippingAddress) return;
+
+      // Track Purchase with Meta Pixel
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        const cart = getCart();
+        const subtotalCents = cart.reduce((sum, i) => sum + dollarsToCents(i.price ?? 0) * i.quantity, 0);
+        const taxCents = calculateTaxCents(subtotalCents, shippingAddress.state) || 0;
+        const totalCents = subtotalCents + shippingCents + taxCents;
+        (window as any).fbq('track', 'Purchase', {
+          value: totalCents / 100,
+          currency: 'USD',
+          content_ids: cart.map((i) => i.slug),
+          content_name: cart.map((i) => i.name).join(', '),
+          content_type: 'product',
+          num_items: cart.length,
+        });
+      }
+
       // checkout.astro needs this after a full page navigation, which can't carry
       // JS variables — getCart() alone isn't enough since it doesn't have the rate.
       sessionStorage.setItem('fj-checkout-session', JSON.stringify({ shippingCents, address: shippingAddress }));
