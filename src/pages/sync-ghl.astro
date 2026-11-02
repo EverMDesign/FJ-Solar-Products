@@ -142,9 +142,15 @@ if (!LOCATION_ID || providedId !== LOCATION_ID) {
           // Display output logs
           if (data.output) {
             clearLogs();
-            data.output.split('\n').forEach((line: string) => {
-              if (line.trim()) addLog(line);
+            const lines = data.output.split('\n');
+            lines.forEach((line: string) => {
+              if (line.trim() || line === '') {
+                addLog(line || '&nbsp;');
+              }
             });
+          } else {
+            clearLogs();
+            addLog('✓ Sync completed successfully');
           }
 
           // Show summary
