@@ -87,8 +87,14 @@ import Layout from '../layouts/Layout.astro';
       } else if (action === 'cancel') {
         window.location.href = '/cart/?canceled=1';
       } else if (action === 'transactResponse') {
+        // Extract the response field from the postMessage event
+        const response = params.get('response');
         sessionStorage.removeItem('fj-checkout-session');
         clearCart();
+        // Pass the response data to thank-you page via sessionStorage so it survives the redirect
+        if (response) {
+          sessionStorage.setItem('fj-authorize-response', response);
+        }
         window.location.href = '/thank-you/';
       }
     });
