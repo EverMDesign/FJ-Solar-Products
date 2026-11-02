@@ -135,3 +135,114 @@ Updated all three cost fields to use proper currency object format:
 **Next Steps:** Place test order to verify shipments now create successfully in ShipStation with cost summary populated
 
 ---
+
+## 2026-10-31 — 17:50
+
+FJ Solar Checkout — Complete session summary with workflows, technical architecture, and future reference docs
+
+## ✅ Successfully Completed Items
+
+1. **Order Numbering System Finalized**
+   - Transitioned from GHL custom-value counter (broken) to Authorize.net transId derivation
+   - Format: FJSP-XXXXX (last 5 digits of transId) — e.g., transId 60171234567 → FJSP-34567
+   - No external storage dependency, guarantees uniqueness via Authorize.net
+   - Full transId preserved in GHL contact timeline for audit trail
+
+2. **ShipStation Order Linking Simplified**
+   - Removed GHL opportunity ID from ShipStation external_shipment_id
+   - Now stores just order number: "FJSP-XXXXX"
+   - Reduces coupling between systems; each system owns its own IDs
+   - ShipStation webhook simplified (removed GHL status update logic)
+
+3. **EverReach Order Notes Reformatted**
+   - Changed section headers from ALL CAPS to Title Case for readability
+   - Added --- dividers between sections (Contact Info, Items Ordered, Billing Address, Shipping Address, Order Summary)
+   - Variants confirmed already included via productCode field (e.g., "Victron SmartShunt 500A - Current Monitor")
+   - Notes now scannable and professional in appearance
+
+4. **External Fan Kit Product Configuration**
+   - Set 12v as default variant (optionId: wc92d8ztob8)
+   - Implemented via PRODUCT_DEFAULTS in [slug].astro
+   - Price and shipping info auto-populate on page load with default selected
+
+5. **Product Purchase Tagging System ✅ DEBUGGED & FIXED**
+   - `fj_ags_purchase`: Tags all Auto Generator Start orders (both onboard + portable, any variant)
+   - `fj_ext-kit_purchase`: Tags Victron MultiPlus external fan kit orders (any variant)
+   - Root cause of failure: Authorize.net truncates itemId to 31 characters
+     * Full: "victron-multiplus-ii-external-fan-kit" (33 chars)
+     * Truncated: "victron-multiplus-ii-external-f" (31 chars)
+   - Solution: Match on substring "multiplus-ii-external" which survives truncation
+   - Verified working via Vercel runtime logs
+
+## 📋 Workflows & Architecture Documented
+
+### Order Creation Flow (Authorize.net → GHL → ShipStation)
+- Documented in `/docs/order-numbering.md` with complete workflow diagram
+- Payment captured → Authorize.net webhook → Extract transId → Derive FJSP order number
+- Create GHL contact + opportunity (name includes order number) + ShipStation shipment
+- All three systems reference same order number for unified tracking
+
+### Product-Based Tagging Logic (Authorize.net itemId Truncation)
+- Authorize.net API caps lineItem.itemId at 31 characters per its schema
+- Product slugs that exceed 31 chars get truncated mid-word
+- Tag matching must use substring that won't get cut off
+- Pattern: Match on middle portion of slug (e.g., "multiplus-ii-external") not the full slug
+
+### ShipStation Integration Points
+- Shipment creation endpoint: POST /api/authorize-webhook → calls ShipStation API v2
+- Webhook receiver: POST /api/shipstation-webhook for shipment dispatch events
+- Currently logs shipment receipt; GHL status updates removed (can be re-added with order number lookup)
+- Ship-from location hardcoded; ship-to from customer address form
+- Carrier: USPS Ground Advantage; Insurance: ParcelGuard
+
+### EverReach Contact Field Mapping
+- ORDER_NUMBER_FIELD_ID: Stores FJSP-XXXXX
+- ORDER_SUBTOTAL_FIELD_ID: Stores subtotal with currency formatting
+- LAST_ORDER_ITEMS_FIELD_ID: Stores HTML-joined line items with variants + prices
+- SHIPPING_ADDRESS_FIELD_ID: Stores formatted customer shipping address
+- Tags: Array sent to GHL includes standard tags (Customer, FJ Solar Store, fjsp-new-order) + product tags
+
+## 🔧 Technical Debt & Future Considerations
+
+1. **GHL Opportunity Status Updates from ShipStation**
+   - Currently deferred: No longer updating GHL when ShipStation dispatches shipment
+   - Could be re-implemented by searching GHL opportunities by order number + customer email
+   - Trade-off: Adds API call complexity vs manual ShipStation → GHL sync (current approach)
+   - See REVISIT.md section: "ShipStation ↔ GHL Opportunity sync"
+
+2. **Sequential Order Numbers (If Needed Later)**
+   - Current transId-derived approach not sequential (looks random)
+   - Migration path exists: Vercel KV (Redis) for atomic counter increments
+   - Design documented but not implemented; see plan file notes for details
+
+3. **Authorize.net Sandbox Testing Gaps**
+   - Webhook handler tested in production only; no sandbox transaction ever captured
+   - billTo/customer field names from documentation; should verify against real sandbox transId
+   - See CLAUDE.md critical gotchas section for details
+
+## 🎯 Key Learning for Future Sessions
+
+**Authorize.net itemId Truncation is Load-Bearing**
+- Any new product tagging must account for 31-char limit
+- Use shorter, middle-portion substrings in tag-matching logic
+- Document the matching rule in code comments
+- Test with actual Authorize.net webhook to verify truncation
+
+**Order Number Consistency Across Three Systems**
+- Authorize.net generates transId (unique, guaranteed)
+- FJ Solar derives FJSP-XXXXX (branded, 5-digit)
+- GHL displays in opportunity name + custom field
+- ShipStation stores in external_shipment_id
+- All three see same order number → simplifies customer communication and support
+
+## 📚 Files to Reference in Future Sessions
+
+- `src/pages/api/authorize-webhook.ts` — Central hub for all order creation logic
+- `src/pages/api/shipstation-webhook.ts` — Shipment event receiver (simple, logging-only)
+- `docs/order-numbering.md` — Complete architecture + trade-offs documented
+- `docs/authorize-net-integration.md` — Authorize.net-specific implementation details
+- `CLAUDE.md` critical gotchas — Know the sandbox testing gap + field name caveats
+
+**Status:** ✅ Complete
+
+---

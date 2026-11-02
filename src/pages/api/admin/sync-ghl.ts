@@ -1,7 +1,10 @@
 import type { APIRoute } from 'astro';
-import { spawn } from 'child_process';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 
 export const prerender = false;
+
+const execFileAsync = promisify(execFile);
 
 export const POST: APIRoute = async ({ request }) => {
   const LOCATION_ID = import.meta.env.LOCATION_ID;
@@ -15,27 +18,17 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  // Run fetch-products script — use simpler path that works on Vercel
-  // Project root is 4 levels up from this file: src/pages/api/admin/sync-ghl.ts -> ../../../..
-  const scriptPath = 'scripts/fetch-products.mjs';
-  const projectRoot = process.cwd();
-
   try {
-    const result = await runFetchProducts(scriptPath, projectRoot);
+    // Run fetch-products using npm script (more reliable than direct node spawn)
+    const { stdout, stderr } = await execFileAsync('npm', ['run', 'fetch-products'], {
+      cwd: process.cwd(),
+      env: process.env,
+      maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+    });
 
-    if (result.error) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: result.error,
-          output: result.stdout + result.stderr,
-        }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    const output = stdout + stderr;
 
     // Parse output for summary
-    const output = result.stdout + (result.stderr || '');
     const productsMatch = output.match(/✓ Saved (\d+) products/);
     const productCount = productsMatch ? parseInt(productsMatch[1], 10) : 0;
 
@@ -53,63 +46,14 @@ export const POST: APIRoute = async ({ request }) => {
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err) {
-    console.error('Sync error:', err);
+    const errMsg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Sync error:', errMsg);
     return new Response(
       JSON.stringify({
         success: false,
-        error: err instanceof Error ? err.message : 'Unknown error',
+        error: errMsg,
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 };
-
-function runFetchProducts(
-  scriptPath: string,
-  cwd: string
-): Promise<{ stdout: string; stderr: string; error?: string }> {
-  return new Promise((resolve) => {
-    let stdout = '';
-    let stderr = '';
-
-    // Use absolute path by joining with cwd
-    const absoluteScriptPath = `${cwd}/${scriptPath}`;
-
-    const child = spawn('node', [absoluteScriptPath], {
-      cwd,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: process.env,
-      shell: false,
-    });
-
-    child.stdout?.on('data', (data) => {
-      const text = data.toString();
-      stdout += text;
-    });
-
-    child.stderr?.on('data', (data) => {
-      const text = data.toString();
-      stderr += text;
-    });
-
-    child.on('close', (code) => {
-      if (code !== 0) {
-        resolve({
-          stdout,
-          stderr,
-          error: `Script exited with code ${code} — stderr: ${stderr}`,
-        });
-      } else {
-        resolve({ stdout, stderr });
-      }
-    });
-
-    child.on('error', (err) => {
-      resolve({
-        stdout,
-        stderr,
-        error: err.message,
-      });
-    });
-  });
-}
