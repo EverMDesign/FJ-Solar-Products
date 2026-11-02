@@ -83,8 +83,13 @@ async function fetchAndSyncProducts(): Promise<string> {
   const activeSummaries = summaries.filter((p: any) => p.status === 'active' && p.availableInStore !== false);
 
   // Load existing products to preserve checkoutUrl and brand overrides
-  const dataDir = new URL('.', import.meta.url).pathname;
-  const productsPath = path.join(dataDir.replace(/\/$/, ''), '../../../src/data/products.json');
+  // In Vercel, import.meta.url is something like file:///var/task/vercel/output/server/chunks/...
+  // We need to go back to /var/task root and then to src/data
+  const currentFile = new URL(import.meta.url).pathname;
+  const currentDir = path.dirname(currentFile);
+  // Go up from /var/task/vercel/output/server/chunks/... to /var/task
+  const varTaskRoot = currentDir.split('/vercel/output/')[0];
+  const productsPath = path.join(varTaskRoot, 'src/data/products.json');
   let existingById = new Map<string, any>();
 
   if (fs.existsSync(productsPath)) {
