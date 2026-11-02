@@ -132,6 +132,7 @@ if (!LOCATION_ID || providedId !== LOCATION_ID) {
         const startTime = Date.now();
 
         try {
+          addLog('Calling sync API...');
           const res = await fetch('/api/admin/sync-ghl', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -139,18 +140,23 @@ if (!LOCATION_ID || providedId !== LOCATION_ID) {
           });
 
           const data = await res.json();
+          addLog(`API Response: ${res.ok ? 'Success' : 'Failed'}`);
 
           if (!res.ok) {
             throw new Error(data.error || 'Sync failed');
           }
 
           // Display output logs — line by line
-          clearLogs();
           if (data.output) {
             const lines = data.output.split('\n');
+            logsContainer.innerHTML = ''; // Clear old logs
             lines.forEach((line: string) => {
-              addLog(line);
+              const p = document.createElement('p');
+              p.textContent = line || ' '; // Preserve empty lines
+              p.className = line.includes('✓') || line.includes('⚠') ? 'text-fj-green' : 'text-fj-sand';
+              logsContainer.appendChild(p);
             });
+            logsContainer.scrollTop = logsContainer.scrollHeight;
           }
 
           // Show summary
