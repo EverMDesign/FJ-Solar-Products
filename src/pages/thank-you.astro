@@ -121,41 +121,58 @@ if (Astro.request.method === 'POST') {
     </a>
   </section>
 
-  <script define:vars={{ transId, totalAmount }}>
+  <script>
     import { clearCart } from '../lib/cart';
     clearCart();
+  </script>
 
-    // On the client side, check if checkout.astro stored the response in sessionStorage
-    // (from the postMessage path). If not, we rely on the server-side transId extraction
-    // from the POST fallback path.
+  <script define:vars={{ transId, totalAmount }}>
+    // On the client side, we have multiple sources for transaction data:
+    // 1. Server-side extraction from POST response (if POST fallback worked)
+    // 2. Authorize.net response stored in sessionStorage (from postMessage + checkout.astro)
+    // 3. Order total stored in sessionStorage by checkout.astro (always available after successful payment form load)
+
     let finalTransId = transId;
     let finalAmount = totalAmount;
 
-    if (!finalTransId && typeof window !== 'undefined' && window.sessionStorage) {
+    // Try to recover transaction data from sessionStorage
+    if (typeof window !== 'undefined' && window.sessionStorage) {
       try {
+        // First priority: Authorize.net response (has transId)
         const authResponse = sessionStorage.getItem('fj-authorize-response');
         if (authResponse) {
           const data = JSON.parse(authResponse);
           finalTransId = data.transId ?? data.transactionResponse?.transId ?? null;
           finalAmount = data.totalAmount ?? data.transactionResponse?.totalAmount ?? null;
-          console.log('[thank-you] Recovered from sessionStorage:', { finalTransId, finalAmount });
+          console.log('[thank-you] Recovered transaction from sessionStorage:', { finalTransId, finalAmount });
           sessionStorage.removeItem('fj-authorize-response');
+        }
+
+        // Fallback: Order total from checkout.astro (always available, used for pixel if no transId)
+        if (!finalAmount) {
+          const orderTotalRaw = sessionStorage.getItem('fj-order-total');
+          if (orderTotalRaw) {
+            const orderTotal = JSON.parse(orderTotalRaw);
+            finalAmount = orderTotal.amount;
+            console.log('[thank-you] Using order total from checkout:', finalAmount);
+          }
         }
       } catch (e) {
         console.error('[thank-you] Error recovering from sessionStorage:', e);
       }
     }
 
-    // Track purchase with Meta Pixel (only when transaction ID is present)
-    if (finalTransId && typeof window !== 'undefined' && (window as any).fbq) {
+    // Track purchase with Meta Pixel
+    // Fire the event even without transId — the important thing is that a purchase happened
+    if (typeof window !== 'undefined' && window.fbq) {
       console.log('[thank-you] Firing Purchase event:', { value: finalAmount, transId: finalTransId });
-      (window as any).fbq('track', 'Purchase', {
+      window.fbq('track', 'Purchase', {
         value: finalAmount || 0,
         currency: 'USD',
         content_type: 'product',
       });
     } else {
-      console.log('[thank-you] Purchase event NOT fired:', { finalTransId, hasFbq: typeof (window as any).fbq !== 'undefined' });
+      console.log('[thank-you] Purchase event NOT fired - fbq unavailable');
     }
   </script>
 </Layout>

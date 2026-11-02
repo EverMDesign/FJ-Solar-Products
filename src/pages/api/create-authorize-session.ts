@@ -201,7 +201,14 @@ export const POST: APIRoute = async ({ request, url }) => {
 
   // The hosted page needs a POST with this token as a form field, not a GET redirect —
   // see the checkout button handler in src/pages/cart.astro.
-  return new Response(JSON.stringify({ token: data.token, paymentUrl }), {
+  // Also return order amounts for Meta Pixel tracking on thank-you page
+  return new Response(JSON.stringify({
+    token: data.token,
+    paymentUrl,
+    totalAmount: parseFloat(totalAmount),
+    subtotal,
+    taxCents,
+  }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });

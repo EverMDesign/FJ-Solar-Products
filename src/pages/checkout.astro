@@ -52,6 +52,17 @@ import Layout from '../layouts/Layout.astro';
             throw new Error(data.error || 'Could not start checkout.');
           }
 
+          // Store order total for Meta Pixel Purchase event on thank-you page
+          // (we won't have transaction ID from postMessage, but we have the amount)
+          const orderTotal = {
+            amount: data.totalAmount || 0, // in dollars, from API
+            subtotal: data.subtotal || 0,
+            shipping: shippingCents / 100,
+            tax: data.taxCents ? data.taxCents / 100 : 0,
+          };
+          sessionStorage.setItem('fj-order-total', JSON.stringify(orderTotal));
+          console.log('[checkout] Stored order total:', orderTotal);
+
           const form = document.createElement('form');
           form.method = 'POST';
           form.action = data.paymentUrl;
@@ -89,11 +100,16 @@ import Layout from '../layouts/Layout.astro';
       } else if (action === 'transactResponse') {
         // Extract the response field from the postMessage event
         const response = params.get('response');
+        console.log('[checkout] transactResponse received. Params:', event.data);
+        console.log('[checkout] response field:', response);
         sessionStorage.removeItem('fj-checkout-session');
         clearCart();
         // Pass the response data to thank-you page via sessionStorage so it survives the redirect
         if (response) {
+          console.log('[checkout] Storing response in sessionStorage');
           sessionStorage.setItem('fj-authorize-response', response);
+        } else {
+          console.log('[checkout] No response field found in postMessage - will rely on POST fallback');
         }
         window.location.href = '/thank-you/';
       }
