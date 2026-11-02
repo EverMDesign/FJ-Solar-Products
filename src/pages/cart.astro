@@ -34,16 +34,19 @@ import Layout from '../layouts/Layout.astro';
             <span id="cart-total" class="font-bold">$0.00</span>
           </div>
 
+          <div id="country-selector" class="mt-6">
+            <select name="country" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="country-select">
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+            </select>
+          </div>
+
           <form id="shipping-form" class="mt-6 space-y-3">
             <p class="text-sm font-semibold text-fj-navy">Your name</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input name="firstName" required placeholder="First name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
               <input name="lastName" required placeholder="Last name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
             </div>
-            <select name="country" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="country-select">
-              <option value="US">United States</option>
-              <option value="CA">Canada</option>
-            </select>
             <p class="text-sm font-semibold text-fj-navy">Shipping address</p>
             <input name="street" required placeholder="Street address" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -62,6 +65,17 @@ import Layout from '../layouts/Layout.astro';
             </button>
             <p id="shipping-error" class="hidden text-sm text-red-600"></p>
           </form>
+
+          <div id="canada-info-box" class="hidden mt-6 border-l-4 border-fj-gold bg-fj-cream p-4 rounded">
+            <p class="font-semibold text-fj-navy mb-2">We ship to Canada!</p>
+            <p class="text-sm text-fj-navy mb-3">
+              To arrange a custom quote for Canadian orders, please contact our sales team:
+            </p>
+            <div class="space-y-1 text-sm font-semibold text-fj-gold">
+              <p>📧 <a href="mailto:sales@fjsolarproducts.com" class="hover:underline">sales@fjsolarproducts.com</a></p>
+              <p>📞 <a href="tel:+14078218722" class="hover:underline">+1 (407) 821-8722</a></p>
+            </div>
+          </div>
 
           <button
             type="button"
@@ -95,6 +109,7 @@ import Layout from '../layouts/Layout.astro';
     const countrySelect = document.getElementById('country-select') as HTMLSelectElement;
     const stateInput = document.getElementById('state-input') as HTMLInputElement;
     const zipInput = document.getElementById('zip-input') as HTMLInputElement;
+    const canadaInfoBox = document.getElementById('canada-info-box')!;
 
     // Product prices in cart data are plain dollars (e.g. 329 = $329.00); shippingCents from
     // the quote API is real cents. Everything gets converted to cents here before formatting
@@ -111,6 +126,15 @@ import Layout from '../layouts/Layout.astro';
       stateInput.placeholder = isCanada ? 'Province' : 'State';
       stateInput.maxLength = isCanada ? 2 : 2;
       zipInput.placeholder = isCanada ? 'Postal Code' : 'ZIP code';
+
+      // Toggle form visibility and info box based on country
+      if (isCanada) {
+        shippingForm.classList.add('hidden');
+        canadaInfoBox.classList.remove('hidden');
+      } else {
+        shippingForm.classList.remove('hidden');
+        canadaInfoBox.classList.add('hidden');
+      }
 
       // Reset shipping calculation when country changes
       shippingCents = null;
