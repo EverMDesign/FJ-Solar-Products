@@ -22,7 +22,7 @@ jobs:
 
       - name: Create .env from secrets
         run: |
-          cat > .env << 'EOF'
+          cat > .env << EOF
           PIT_TOKEN=${{ secrets.GHL_PIT_TOKEN }}
           LOCATION_ID=${{ secrets.GHL_LOCATION_ID }}
           GHL_API_BASE=${{ secrets.GHL_API_BASE }}
