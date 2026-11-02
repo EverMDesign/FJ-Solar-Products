@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import products from '../../data/products.json';
 import { calculateTaxCents } from '../../lib/tax';
-import { SHIP_FROM, USPS_CARRIER_ID, USPS_GROUND_ADVANTAGE, DIMENSION_UNITS, normalizeUsState } from '../../lib/shipstation';
+import { SHIP_FROM, USPS_CARRIER_ID, USPS_GROUND_ADVANTAGE, USPS_FIRST_CLASS_INTERNATIONAL, DIMENSION_UNITS, normalizeUsState } from '../../lib/shipstation';
 
 export const prerender = false;
 
@@ -100,6 +100,10 @@ export const POST: APIRoute = async ({ request }) => {
     service = 'Ground Advantage (Flat Rate)';
   } else {
     // Use ShipStation API for FJ Solar products
+    // For Canada, use First Class International; for US, use Ground Advantage
+    const isCanada = address.country === 'CA';
+    const serviceCode = isCanada ? USPS_FIRST_CLASS_INTERNATIONAL : USPS_GROUND_ADVANTAGE;
+
     const shipstationRes = await fetch('https://api.shipstation.com/v2/rates', {
       method: 'POST',
       headers: {
@@ -109,7 +113,7 @@ export const POST: APIRoute = async ({ request }) => {
       body: JSON.stringify({
         rate_options: {
           carrier_ids: [USPS_CARRIER_ID],
-          service_codes: [USPS_GROUND_ADVANTAGE],
+          service_codes: [serviceCode],
         },
         shipment: {
           insurance_provider: 'parcelguard',

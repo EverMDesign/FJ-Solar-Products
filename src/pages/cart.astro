@@ -40,15 +40,18 @@ import Layout from '../layouts/Layout.astro';
               <input name="firstName" required placeholder="First name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
               <input name="lastName" required placeholder="Last name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
             </div>
+            <select name="country" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="country-select">
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+            </select>
             <p class="text-sm font-semibold text-fj-navy">Shipping address</p>
             <input name="street" required placeholder="Street address" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input name="city" required placeholder="City" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
-              <input name="state" required placeholder="State" maxlength="2" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+              <input name="state" required placeholder="State" maxlength="2" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="state-input" />
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input name="zip" required placeholder="ZIP code" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
-              <input name="country" value="US" readonly class="w-full border border-fj-sand rounded px-3 py-2 text-sm bg-fj-cream" />
+              <input name="zip" required placeholder="ZIP code" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="zip-input" />
             </div>
             <button
               type="submit"
@@ -89,6 +92,9 @@ import Layout from '../layouts/Layout.astro';
     const getRateBtn = document.getElementById('get-rate-btn') as HTMLButtonElement;
     const shippingForm = document.getElementById('shipping-form') as HTMLFormElement;
     const shippingErrorEl = document.getElementById('shipping-error')!;
+    const countrySelect = document.getElementById('country-select') as HTMLSelectElement;
+    const stateInput = document.getElementById('state-input') as HTMLInputElement;
+    const zipInput = document.getElementById('zip-input') as HTMLInputElement;
 
     // Product prices in cart data are plain dollars (e.g. 329 = $329.00); shippingCents from
     // the quote API is real cents. Everything gets converted to cents here before formatting
@@ -98,6 +104,22 @@ import Layout from '../layouts/Layout.astro';
 
     let shippingCents: number | null = null;
     let shippingAddress: Record<string, string> | null = null;
+
+    // Handle country selection changes
+    countrySelect.addEventListener('change', () => {
+      const isCanada = countrySelect.value === 'CA';
+      stateInput.placeholder = isCanada ? 'Province' : 'State';
+      stateInput.maxLength = isCanada ? 2 : 2;
+      zipInput.placeholder = isCanada ? 'Postal Code' : 'ZIP code';
+
+      // Reset shipping calculation when country changes
+      shippingCents = null;
+      shippingEl.textContent = 'Not yet calculated';
+      shippingEl.classList.add('text-fj-navy/50');
+      taxRowEl.classList.add('hidden');
+      checkoutBtn.disabled = true;
+      totalEl.textContent = money(dollarsToCents(getCart().reduce((sum, i) => sum + (i.price ?? 0) * i.quantity, 0)));
+    });
 
     function render() {
       const cart = getCart();
