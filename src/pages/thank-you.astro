@@ -12,6 +12,7 @@ export const prerender = false;
 // this page should never fail to render for a customer who already paid.
 let transId: string | null = null;
 let last4: string | null = null;
+let totalAmount: number | null = null;
 
 if (Astro.request.method === 'POST') {
   try {
@@ -22,6 +23,8 @@ if (Astro.request.method === 'POST') {
       transId = data.transId ?? data.transactionResponse?.transId ?? null;
       const account = data.accountNumber ?? data.transactionResponse?.accountNumber ?? null;
       if (typeof account === 'string') last4 = account.slice(-4);
+      // Extract transaction amount for Meta Pixel tracking
+      totalAmount = data.totalAmount ?? data.transactionResponse?.totalAmount ?? null;
     }
   } catch {
     // Unexpected response shape — show the generic message instead of erroring out.
@@ -52,8 +55,17 @@ if (Astro.request.method === 'POST') {
     </a>
   </section>
 
-  <script>
+  <script define:vars={{ transId, totalAmount }}>
     import { clearCart } from '../lib/cart';
     clearCart();
+
+    // Track purchase with Meta Pixel (only on successful POST from Authorize.net)
+    if (transId && typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Purchase', {
+        value: totalAmount || 0,
+        currency: 'USD',
+        content_type: 'product',
+      });
+    }
   </script>
 </Layout>

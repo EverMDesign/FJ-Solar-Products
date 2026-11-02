@@ -284,23 +284,6 @@ import Layout from '../layouts/Layout.astro';
 
     checkoutBtn.addEventListener('click', () => {
       if (shippingCents === null || !shippingAddress) return;
-
-      // Track Purchase with Meta Pixel
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        const cart = getCart();
-        const subtotalCents = cart.reduce((sum, i) => sum + dollarsToCents(i.price ?? 0) * i.quantity, 0);
-        const taxCents = calculateTaxCents(subtotalCents, shippingAddress.state) || 0;
-        const totalCents = subtotalCents + shippingCents + taxCents;
-        (window as any).fbq('track', 'Purchase', {
-          value: totalCents / 100,
-          currency: 'USD',
-          content_ids: cart.map((i) => i.slug),
-          content_name: cart.map((i) => i.name).join(', '),
-          content_type: 'product',
-          num_items: cart.length,
-        });
-      }
-
       // checkout.astro needs this after a full page navigation, which can't carry
       // JS variables — getCart() alone isn't enough since it doesn't have the rate.
       sessionStorage.setItem('fj-checkout-session', JSON.stringify({ shippingCents, address: shippingAddress }));
