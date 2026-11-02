@@ -1,0 +1,54 @@
+name: Sync Products Daily
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 2 AM UTC daily (10 PM EST)
+  workflow_dispatch:      # Allow manual trigger from GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - run: npm install
+
+      - name: Fetch products from GHL
+        env:
+          PIT_TOKEN: ${{ secrets.GHL_PIT_TOKEN }}
+          LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
+          GHL_API_BASE: ${{ secrets.GHL_API_BASE || 'https://services.leadconnectorhq.com' }}
+        run: npm run fetch-products
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet src/data/products.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add src/data/products.json
+          git commit -m "sync: daily product update from GHL"
+          git push
+
+      - name: Trigger Vercel redeploy
+        if: steps.changes.outputs.changed == 'true'
+        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
+
+      - name: No changes
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "✓ Products already up to date"
