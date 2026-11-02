@@ -62,6 +62,82 @@ ShipStation shipments created per sale. See `docs/checkout.md` for the full mech
       dev) — correct Order Summary amounts, correct billing pre-fill, fj-gold Pay button, our
       header/logo visible, URL stayed on our own domain throughout
 
+## Clerk Integration + Account System (2026-11-02) — Strategic Priority
+
+**Design:** See `docs/clerk-integration.md` for full UX flow, database schema, dashboard pages, and 7-phase roadmap.
+
+**Why this matters:** Replaces anonymous checkout with optional login system. Unlocks persistent cart, order history, abandoned cart recovery (tied to account), first-time discount incentive (WELCOME10), and repeat customer engagement.
+
+**Key UX:**
+- "Add to Cart" popup (if not logged in): "Sign up for 10% off + save cart + see past orders"
+- Account dashboard: /dashboard (orders, abandoned carts, saved addresses, account settings)
+- Cart persists across devices when logged in
+- "Reorder" button on past orders (1-click repeat checkout)
+
+**First-Time Incentive:**
+- WELCOME10 coupon: 10% off, one-time use per account, automatic on signup
+
+**Abandoned Cart Recovery (Now Account-Tied):**
+- Automatic detection: cart exists + no order after 30+ min
+- Send email from account dashboard (not anonymous email)
+- Can personalize: "Complete your order + use WELCOME10"
+- User can view all abandoned carts in dashboard
+
+**Database:**
+- user_profiles: extended Clerk user data
+- carts: persistent, userId-specific
+- orders: purchase history linked to userId
+- saved_addresses: checkout acceleration
+
+**Success Metrics (Phase 1 → Phase 6):**
+- Signup rate: 0% → 15%
+- Cart persistence across devices: 70% → 85%
+- Repeat order rate: 0% → 35%
+- WELCOME10 redemption: 60% → 75%
+- Abandoned cart recovery (logged-in): 25% → 40%
+- Customer lifetime value: +50% → +100%
+
+### Phase 1: Clerk Setup + Auth
+- [ ] Install @clerk/astro
+- [ ] Create sign-up/sign-in pages
+- [ ] Protect /dashboard routes
+- [ ] Create user_profiles table
+
+### Phase 2: Cart Persistence
+- [ ] Create carts table (database)
+- [ ] Modify cart API endpoints (check if logged in)
+- [ ] Sync logic: localStorage ↔ database on login/logout
+
+### Phase 3: Dashboard UI
+- [ ] /dashboard layout (sidebar + main content)
+- [ ] /dashboard/orders (past orders, reorder button)
+- [ ] /dashboard/abandoned-carts (saved carts, resume option)
+- [ ] /dashboard/addresses (saved addresses, edit/delete)
+- [ ] /dashboard/settings (profile, email preferences)
+
+### Phase 4: Orders + History
+- [ ] Create orders table
+- [ ] Link orders to userId on Authorize.net webhook
+- [ ] Sync order status from ShipStation
+- [ ] Display in /dashboard/orders
+
+### Phase 5: First-Time Discount
+- [ ] Create WELCOME10 coupon
+- [ ] Set hasFirstTimeDiscount = true on signup
+- [ ] Show in signup banner
+- [ ] Validate one-time use per account
+
+### Phase 6: Abandoned Cart Recovery
+- [ ] Replace email-only recovery with account-tied recovery
+- [ ] Auto-detect abandoned carts (userId + inactive)
+- [ ] Send personalized emails from /dashboard/abandoned-carts link
+- [ ] Track recovery metrics per user
+
+### Phase 7: Repeat Orders + Wishlist (Future)
+- [ ] "Reorder" button implementation (pre-fill items)
+- [ ] Wishlist feature (save items, email on restock)
+- [ ] Bulk discount for repeat customers
+
 ## Needed before real orders can go through
 
 - [x] ~~Stripe~~ — removed 2026-09-30. Checkout now runs on Authorize.net's Accept Hosted
