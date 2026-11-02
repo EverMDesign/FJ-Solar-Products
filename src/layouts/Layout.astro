@@ -41,7 +41,15 @@ const {
         t.async = !0;
         t.src = v;
         s = b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t, s);
+        try {
+          if (s && s.parentNode) {
+            s.parentNode.insertBefore(t, s);
+          } else {
+            b.head.appendChild(t);
+          }
+        } catch (err) {
+          console.error('[Meta Pixel] Error injecting tracking script:', err);
+        }
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '2432707093923661');
       fbq('track', 'PageView');
