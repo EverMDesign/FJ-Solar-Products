@@ -31,6 +31,9 @@ jobs:
           if ! grep -q "GHL_API_BASE=" .env || [ -z "$(grep 'GHL_API_BASE=' .env | cut -d= -f2)" ]; then
             echo "GHL_API_BASE=https://services.leadconnectorhq.com" >> .env
           fi
+          echo "✓ .env created"
+          echo "PIT_TOKEN length: $(grep PIT_TOKEN .env | cut -d= -f2 | wc -c)"
+          echo "LOCATION_ID: $(grep LOCATION_ID .env | cut -d= -f2)"
 
       - name: Fetch products from GHL
         run: npm run fetch-products
