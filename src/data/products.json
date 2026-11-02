@@ -386,74 +386,6 @@
     ]
   },
   {
-    "id": "6ab165ff2bfb4e37de1ae17e",
-    "slug": "ve-direct-cable",
-    "name": "VE.Direct Cable",
-    "brand": "Victron",
-    "description": "The VE.Direct cable is used to connect one Victron component to the Cerbo GX using the VE.Direct port on the device. Cable length: 1.8 meters.",
-    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/118087f3-0c06-42eb-b03e-bd72215ae5fd.webp",
-    "images": [
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/118087f3-0c06-42eb-b03e-bd72215ae5fd.webp"
-    ],
-    "price": 18.99,
-    "priceLabel": "Default",
-    "currency": "USD",
-    "hasMultiplePrices": false,
-    "sku": "VIC-ASS030530218",
-    "weightOz": 16
-  },
-  {
-    "id": "6ab16607ee6899ed626389cb",
-    "slug": "victron-bmv-712",
-    "name": "Victron BMV-712",
-    "brand": "Victron",
-    "description": "Smart Battery Monitor with built-in Bluetooth. The BMV-712 connects to the VictronConnect smartphone app for customization, data monitoring, historical review, and software updates.\n\nKey Features:\n• Bluetooth built-in\n• Easy to install — all electrical connections via quick connect PCB on the current shunt\n• Midpoint voltage monitoring for series-connected batteries\n• Minimal current draw (0.7Ah/month @ 12V; 0.6Ah/month @ 24V)\n• Bi-stable alarm relay\n• Battery voltage, current, power, amp-hours, and state of charge tracking\n• 500 Amp quick connect shunt and connection kit\n• VE.Direct communication port\n• Input voltage range: 6.5–70V\n\nIncluded: RJ12 cable (10m), battery cable with fuse (2m), front bezels, securing ring, mounting screws.",
-    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp",
-    "images": [
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp"
-    ],
-    "price": 158.95,
-    "priceLabel": "Default",
-    "currency": "USD",
-    "hasMultiplePrices": false,
-    "sku": "VIC-BAM030712000",
-    "weightOz": 16
-  },
-  {
-    "id": "6ab16601a66feb9159747e73",
-    "slug": "victron-cerbo-gx-mk2",
-    "name": "Victron Cerbo GX MK2",
-    "brand": "Victron",
-    "description": "The Cerbo GX MK2 functions as a communication center enabling system control from anywhere. Users can access it via Victron Remote Management (VRM) portal, GX Touch display, Multi-Functional Display (MFD), or VictronConnect app with Bluetooth capability.\n\nKey Features:\n• 3 VE.Direct ports, 3 USB ports, 4 digital inputs, and 2 relays\n• Battery state of charge monitoring, power consumption tracking, and power harvesting oversight\n• Generator auto start/stop functionality\n• Remote configuration via internet or local network\n• Waterproof touchscreen display options (GX Touch 50 and 70, sold separately)\n• Simple DIN-Rail mounting compatibility\n• Single-cable connection to optional displays",
-    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fcd82811-3245-482b-88ed-ad9fd4fb79be.webp",
-    "images": [
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fcd82811-3245-482b-88ed-ad9fd4fb79be.webp"
-    ],
-    "price": 272.85,
-    "priceLabel": "Default",
-    "currency": "USD",
-    "hasMultiplePrices": false,
-    "sku": "VIC-BPP900450110",
-    "weightOz": 16
-  },
-  {
-    "id": "6ab16605ee6899ed6263898e",
-    "slug": "victron-gx-touch",
-    "name": "Victron GX Touch",
-    "brand": "Victron",
-    "description": "The GX Touch is the display accessory for the Cerbo GX. The touch screen display gives an instant overview of your system and allows you to adjust settings in the blink of an eye.\n\nKey Features:\n• Waterproof design\n• Bolted dashboard mounting (eliminates complex cut-outs)\n• Slim waterproof design\n• Single-cable connectivity to Cerbo GX\n• Bluetooth capability for VictronConnect app access and VRM portal connectivity",
-    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7393c123-6cd3-4a47-a52a-050e6d346d29.webp",
-    "images": [
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7393c123-6cd3-4a47-a52a-050e6d346d29.webp"
-    ],
-    "price": 220.15,
-    "priceLabel": "Touch 50",
-    "currency": "USD",
-    "hasMultiplePrices": false,
-    "sku": "VIC-BPP900455050",
-    "weightOz": 16
-  },
-  {
     "id": "6ab165f5c21f7bc9a548c123",
     "slug": "victron-multiplus-ii-external-fan-kit",
     "name": "Victron MultiPlus-II External Fan Kit",
@@ -520,6 +452,74 @@
         }
       }
     ]
+  },
+  {
+    "id": "6ab165ff2bfb4e37de1ae17e",
+    "slug": "ve-direct-cable",
+    "name": "VE. - Direct Cable",
+    "brand": "Victron",
+    "description": "The VE.Direct cable is used to connect one Victron component to the Cerbo GX using the VE.Direct port on the device. Cable length: 1.8 meters.",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/118087f3-0c06-42eb-b03e-bd72215ae5fd.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/118087f3-0c06-42eb-b03e-bd72215ae5fd.webp"
+    ],
+    "price": 18.99,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "sku": "VIC-ASS030530218",
+    "weightOz": 16
+  },
+  {
+    "id": "6ab16607ee6899ed626389cb",
+    "slug": "victron-bmv-712",
+    "name": "Victron BMV-712",
+    "brand": "Victron",
+    "description": "Smart Battery Monitor with built-in Bluetooth. The BMV-712 connects to the VictronConnect smartphone app for customization, data monitoring, historical review, and software updates.\n\nKey Features:\n• Bluetooth built-in\n• Easy to install — all electrical connections via quick connect PCB on the current shunt\n• Midpoint voltage monitoring for series-connected batteries\n• Minimal current draw (0.7Ah/month @ 12V; 0.6Ah/month @ 24V)\n• Bi-stable alarm relay\n• Battery voltage, current, power, amp-hours, and state of charge tracking\n• 500 Amp quick connect shunt and connection kit\n• VE.Direct communication port\n• Input voltage range: 6.5–70V\n\nIncluded: RJ12 cable (10m), battery cable with fuse (2m), front bezels, securing ring, mounting screws.",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/339edb16-28a6-4339-96f2-8a7b55aa8323.webp"
+    ],
+    "price": 158.95,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "sku": "VIC-BAM030712000",
+    "weightOz": 16
+  },
+  {
+    "id": "6ab16601a66feb9159747e73",
+    "slug": "victron-cerbo-gx-mk2",
+    "name": "Victron Cerbo GX MK2",
+    "brand": "Victron",
+    "description": "The Cerbo GX MK2 functions as a communication center enabling system control from anywhere. Users can access it via Victron Remote Management (VRM) portal, GX Touch display, Multi-Functional Display (MFD), or VictronConnect app with Bluetooth capability.\n\nKey Features:\n• 3 VE.Direct ports, 3 USB ports, 4 digital inputs, and 2 relays\n• Battery state of charge monitoring, power consumption tracking, and power harvesting oversight\n• Generator auto start/stop functionality\n• Remote configuration via internet or local network\n• Waterproof touchscreen display options (GX Touch 50 and 70, sold separately)\n• Simple DIN-Rail mounting compatibility\n• Single-cable connection to optional displays",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fcd82811-3245-482b-88ed-ad9fd4fb79be.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fcd82811-3245-482b-88ed-ad9fd4fb79be.webp"
+    ],
+    "price": 272.85,
+    "priceLabel": "Default",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "sku": "VIC-BPP900450110",
+    "weightOz": 16
+  },
+  {
+    "id": "6ab16605ee6899ed6263898e",
+    "slug": "victron-gx-touch",
+    "name": "Victron GX Touch",
+    "brand": "Victron",
+    "description": "The GX Touch is the display accessory for the Cerbo GX. The touch screen display gives an instant overview of your system and allows you to adjust settings in the blink of an eye.\n\nKey Features:\n• Waterproof design\n• Bolted dashboard mounting (eliminates complex cut-outs)\n• Slim waterproof design\n• Single-cable connectivity to Cerbo GX\n• Bluetooth capability for VictronConnect app access and VRM portal connectivity",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7393c123-6cd3-4a47-a52a-050e6d346d29.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/7393c123-6cd3-4a47-a52a-050e6d346d29.webp"
+    ],
+    "price": 220.15,
+    "priceLabel": "Touch 50",
+    "currency": "USD",
+    "hasMultiplePrices": false,
+    "sku": "VIC-BPP900455050",
+    "weightOz": 16
   },
   {
     "id": "6ab166031277448b610380ea",
