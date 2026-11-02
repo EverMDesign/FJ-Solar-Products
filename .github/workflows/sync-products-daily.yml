@@ -22,11 +22,15 @@ jobs:
 
       - name: Create .env from secrets
         run: |
-          cat > .env << EOF
+          cat > .env << 'EOF'
           PIT_TOKEN=${{ secrets.GHL_PIT_TOKEN }}
           LOCATION_ID=${{ secrets.GHL_LOCATION_ID }}
-          GHL_API_BASE=${{ secrets.GHL_API_BASE || 'https://services.leadconnectorhq.com' }}
+          GHL_API_BASE=${{ secrets.GHL_API_BASE }}
           EOF
+          # Set defaults if needed
+          if ! grep -q "GHL_API_BASE=" .env || [ -z "$(grep 'GHL_API_BASE=' .env | cut -d= -f2)" ]; then
+            echo "GHL_API_BASE=https://services.leadconnectorhq.com" >> .env
+          fi
 
       - name: Fetch products from GHL
         run: npm run fetch-products
