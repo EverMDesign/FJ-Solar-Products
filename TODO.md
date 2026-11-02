@@ -222,6 +222,38 @@ per-dealer locking, or tiered bulk pricing ($250 for 10 units). Building a custo
 - [ ] Build a GHL workflow that triggers off the "Customer" / "FJ Solar Store" tag we already
       send (thank-you text, notify team, etc.) — this one is done on the GHL side, no code needed
 
+## Auto-Sync GHL Products (2026-11-02)
+
+**Design:** See `docs/auto-sync-ghl.md` for complete setup guide.
+
+**Goal:** Automatically pull product updates (new products, SKU changes, shipping info) from GHL on a schedule without manual runs.
+
+**Solution:** GitHub Actions workflow + Vercel Deploy Hook
+- Runs `npm run fetch-products` every 15 minutes (configurable)
+- Detects changes in products.json
+- Auto-commits + pushes to main
+- Triggers Vercel redeploy
+- Products updated while you sleep
+
+**Setup Steps:**
+- [ ] Push FJ Solar repo to GitHub (if not already there)
+- [ ] Create `.github/workflows/sync-ghl-products.yml`
+- [ ] Add GitHub secrets: GHL_PIT_TOKEN, GHL_LOCATION_ID, VERCEL_DEPLOY_HOOK_URL
+- [ ] Create Vercel Deploy Hook (Settings → Deploy Hooks)
+- [ ] Test: Manual trigger in GitHub Actions tab
+- [ ] Monitor first week (check Actions log, Vercel redeploys)
+
+**Benefits:**
+- Zero manual syncs needed
+- New products appear automatically
+- SKU/shipping updates reflected in real-time
+- Can still manually sync anytime
+- Logs in GitHub Actions for monitoring
+
+**Cost:** Free (GitHub Actions free tier, Vercel redeploys included)
+
+---
+
 ## Housekeeping
 
 - [ ] Fix footer copyright text — currently "© 2026 Faithful Journey Solar Products. All
