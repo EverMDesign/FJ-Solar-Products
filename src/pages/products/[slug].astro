@@ -222,23 +222,27 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
     // Trigger price update on load to apply default selections
     updatePriceFromSelections();
 
-    btn?.addEventListener('click', () => {
-      const dimensions = btn.dataset.dimensions ? JSON.parse(btn.dataset.dimensions) : null;
-      const item = {
-        slug: btn.dataset.slug || '',
-        name: btn.dataset.name || '',
-        image: btn.dataset.image || '',
-        price: Number(btn.dataset.price) || 0,
-        variantOptionId: btn.dataset.variantOptionId || undefined,
-        variantName: btn.dataset.variantName || undefined,
-        weightOz: btn.dataset.weightOz ? Number(btn.dataset.weightOz) : undefined,
-        dimensions,
-      };
-      addToCart(item);
-      const original = btn.textContent;
-      btn.textContent = 'Added!';
-      document.getElementById('go-to-cart-link')?.classList.remove('hidden');
-      setTimeout(() => (btn.textContent = original), 1200);
-    });
+    // Prevent duplicate event listeners
+    if (btn && !btn.dataset.listenerAttached) {
+      btn.dataset.listenerAttached = 'true';
+      btn.addEventListener('click', () => {
+        const dimensions = btn.dataset.dimensions ? JSON.parse(btn.dataset.dimensions) : null;
+        const item = {
+          slug: btn.dataset.slug || '',
+          name: btn.dataset.name || '',
+          image: btn.dataset.image || '',
+          price: Number(btn.dataset.price) || 0,
+          variantOptionId: btn.dataset.variantOptionId || undefined,
+          variantName: btn.dataset.variantName || undefined,
+          weightOz: btn.dataset.weightOz ? Number(btn.dataset.weightOz) : undefined,
+          dimensions,
+        };
+        addToCart(item);
+        const original = btn.textContent;
+        btn.textContent = 'Added!';
+        document.getElementById('go-to-cart-link')?.classList.remove('hidden');
+        setTimeout(() => (btn.textContent = original), 1200);
+      });
+    }
   </script>
 </Layout>

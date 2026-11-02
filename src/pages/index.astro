@@ -149,17 +149,21 @@ const productsWithMeta = products
     import { addToCart } from '../lib/cart';
 
     document.querySelectorAll<HTMLButtonElement>('.add-to-cart-btn, .add-to-cart-icon').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        addToCart({
-          slug: btn.dataset.slug || '',
-          name: btn.dataset.name || '',
-          image: btn.dataset.image || '',
-          price: Number(btn.dataset.price) || 0,
+      // Prevent duplicate event listeners
+      if (!btn.dataset.listenerAttached) {
+        btn.dataset.listenerAttached = 'true';
+        btn.addEventListener('click', () => {
+          addToCart({
+            slug: btn.dataset.slug || '',
+            name: btn.dataset.name || '',
+            image: btn.dataset.image || '',
+            price: Number(btn.dataset.price) || 0,
+          });
+          const original = btn.textContent;
+          btn.textContent = btn.classList.contains('add-to-cart-icon') ? '✓' : 'Added!';
+          setTimeout(() => (btn.textContent = original), 1200);
         });
-        const original = btn.textContent;
-        btn.textContent = btn.classList.contains('add-to-cart-icon') ? '✓' : 'Added!';
-        setTimeout(() => (btn.textContent = original), 1200);
-      });
+      }
     });
 
     const ACTIVE_CLASSES = ['bg-fj-navy', 'text-fj-cream'];
