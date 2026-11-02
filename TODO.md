@@ -228,6 +228,56 @@ per-dealer locking, or tiered bulk pricing ($250 for 10 units). Building a custo
       Accept.js or a similar embeddable option supports an on-site lightbox/modal for card
       entry instead of the redirect, and what that would take to swap in.
 
+## Abandoned Cart Recovery (2026-11-02)
+
+**Design:** See `docs/abandoned-cart.md` for full strategy, email sequences, analytics, and 6-phase roadmap.
+
+**No Facebook Pixel** — Instead: email capture → automated recovery sequence → analytics.
+
+**Key Approaches:**
+- Optional email field in cart drawer + urgency-triggered prompt
+- 3-email recovery sequence (3h, 24h, 72h with incentive)
+- Device fingerprinting for anonymous returning visitors
+- GHL integration to sync abandonment data + send emails
+- Analytics dashboard: funnel, by-product, by-cohort metrics
+- A/B testing framework (timing, subject, incentive)
+- Future: SMS + push notifications
+
+**Recovery Email Sequence:**
+1. 3 hours: "You left items in your cart" + recovery link
+2. 24 hours: "Here's what's waiting" + questions option
+3. 72 hours: "$50 off last chance" + coupon code (COMEBACK50)
+
+**Success Metrics:**
+- Email capture: 20% → 45% (Phase 1) → 60% (Phase 2)
+- Recovery conversion: 0% → 15% (Phase 1) → 25% (Phase 2)
+- Recovered revenue: $0 → $2,000/month → $5,000+/month
+
+### Phase 1: Email Capture + Recovery (MVP)
+- [ ] Add optional email field to cart drawer
+- [ ] Create abandoned carts database table
+- [ ] Build `/api/cart/abandon` endpoint
+- [ ] Create 3-email recovery templates
+- [ ] Set up Vercel Cron (3h, 24h, 72h sends)
+- [ ] Build `/recover-cart/[id]` page
+- [ ] Test end-to-end: abandon → email → recovery
+
+### Phase 2: Urgency Prompt + Analytics
+- [ ] Add idle timeout (3+ min) trigger in cart drawer
+- [ ] Show "Still shopping?" prompt with email capture
+- [ ] Build `/admin/abandoned-carts` analytics dashboard
+- [ ] Funnel chart + by-product analysis
+
+### Phase 3: GHL Integration
+- [ ] Webhook: Send cart data to GHL on abandon
+- [ ] Create GHL workflow for email sequence (optional, parallel to FJ emails)
+- [ ] Track conversions back in GHL
+
+### Phase 4+: SMS, Push, Multi-Channel
+- [ ] SMS recovery for high-value carts
+- [ ] Browser push notifications
+- [ ] A/B testing framework
+
 ## Later / not started
 
 - [ ] Create the actual shipment + label in ShipStation after a sale (fulfillment) — right now
