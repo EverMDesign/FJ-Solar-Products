@@ -95,7 +95,12 @@ if (!LOCATION_ID || providedId !== LOCATION_ID) {
       }
 
       function clearLogs() {
+        logsContainer.textContent = '';
         logsContainer.innerHTML = '';
+      }
+
+      function updateProductCount(count: number) {
+        productCount.textContent = count > 0 ? count.toString() : '—';
       }
 
       function getLastSyncTime(): string {
@@ -139,18 +144,13 @@ if (!LOCATION_ID || providedId !== LOCATION_ID) {
             throw new Error(data.error || 'Sync failed');
           }
 
-          // Display output logs
+          // Display output logs — line by line
+          clearLogs();
           if (data.output) {
-            clearLogs();
             const lines = data.output.split('\n');
             lines.forEach((line: string) => {
-              if (line.trim() || line === '') {
-                addLog(line || '&nbsp;');
-              }
+              addLog(line);
             });
-          } else {
-            clearLogs();
-            addLog('✓ Sync completed successfully');
           }
 
           // Show summary
@@ -171,14 +171,16 @@ if (!LOCATION_ID || providedId !== LOCATION_ID) {
           statusMessage.textContent = '✓ Sync complete!';
           statusMessage.className = 'text-sm text-center text-fj-green font-semibold';
 
-          // Update last sync time
+          // Update last sync time and product count
           localStorage.setItem('lastSyncTime', new Date().toISOString());
           updateLastSyncTime();
-          productCount.textContent = data.productCount.toString();
+          updateProductCount(data.productCount);
         } catch (err) {
-          statusMessage.textContent = err instanceof Error ? err.message : 'Something went wrong';
+          clearLogs();
+          const errorMsg = err instanceof Error ? err.message : 'Something went wrong';
+          addLog(`Error: ${errorMsg}`);
+          statusMessage.textContent = errorMsg;
           statusMessage.className = 'text-sm text-center text-red-600 font-semibold';
-          addLog(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
         } finally {
           syncBtn.disabled = false;
           syncIcon.textContent = '🔄';
