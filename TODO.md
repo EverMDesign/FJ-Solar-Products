@@ -91,22 +91,51 @@ ShipStation shipments created per sale. See `docs/checkout.md` for the full mech
       production (2026-10-29) — see "Deployed to production" at the top of this file
 - [ ] Fix the placeholder product weights in `src/data/products.json` (all 8 are set to
       16oz right now) — real shipping rates depend on this
-- [ ] Double check "VE.Direct Cable" is filed under the right brand filter (currently "FJ Solar",
-      might belong under "Victron")
+- [x] Double check "VE.Direct Cable" is filed under the right brand filter (2026-11-02) — 
+      changed from FJ Solar to Victron brand, moved to index 3 with other Victron products
 
-## Coupons (planned 2026-09-30)
+## Coupons — Custom System (2026-11-02)
 
-- [ ] Add a "Promo code" input to `/cart/` (checkout is Authorize.net's hosted page now,
-      not Stripe's — see `docs/checkout.md`)
-- [ ] New endpoint `/api/validate-coupon` — calls GHL's `GET /payments/coupon?code=...`
-      (`altId`=location ID, `altType`=location), checks `status === 'active'` (not
-      expired/scheduled), returns the discount (`discountType`: percentage or flat amount,
-      `discountValue`)
-- [ ] Fold that discount into `create-authorize-session.ts`'s `amount`/`lineItems` before
-      calling `getHostedPaymentPageRequest`, so the price is correct before the hosted page loads
-- [ ] Known limitation: GHL's coupon API has no "redeem / mark as used" endpoint, only
-      fetch-and-read — so `limitPerCustomer` on a coupon can't be strictly enforced through
-      the API alone. Keep that in mind before relying on it for a strict one-per-customer deal.
+**Design:** See `docs/coupons.md` for full schema, examples, and testing checklist.
+
+**Why custom:** EverReach coupon API can't enforce free-shipping-only, minimum cart quantity,
+per-dealer locking, or tiered bulk pricing ($250 for 10 units). Building a custom admin UI
+(`/admin/coupons`) + validation endpoint (`/api/validate-coupon`) gives full control.
+
+**Database:** Vercel KV (simplest, no setup) or Postgres (if scaling beyond ~50 coupons).
+
+**Coupon Rules:**
+- Dealer bulk: 5 units @ 10% off; 10 units @ fixed price
+- Free shipping: yes/no toggle
+- Min/max quantity enforcement
+- Product-specific (e.g., "Fan Kit: 10% off 2 units")
+- Per-dealer locking (one dealer = one code)
+- Usage limit + expiration dates
+- Active/inactive toggle
+
+### Phase 1: Database + Validation
+- [ ] Set up Vercel KV store (or Postgres table)
+- [ ] Create `/api/validate-coupon` endpoint — takes `code` + `cartItems` + `customerId`
+- [ ] Return `{ valid, discountType, discountValue, freeShipping, error }`
+- [ ] Test locally
+
+### Phase 2: Admin UI (`/admin/coupons`)
+- [ ] Create/Edit/Delete coupon forms
+- [ ] Dashboard table (code, discount, expiry, status, usage, actions)
+- [ ] Protect route (Clerk auth or IP-based)
+- [ ] Test CRUD operations
+
+### Phase 3: Checkout Integration
+- [ ] Add promo code input to `/cart/`
+- [ ] Call `/api/validate-coupon` when user applies code
+- [ ] Show discount breakdown in cart
+- [ ] Integrate with `create-authorize-session.ts` to bake discount into line items
+- [ ] Increment usage count after Authorize.net webhook fires
+
+### Phase 4: Analytics (Optional)
+- [ ] Track coupon usage per code (usageCount)
+- [ ] Dashboard: total discount given per coupon
+- [ ] Identify popular/unused coupons
 
 ## Make the GHL connection deeper
 
