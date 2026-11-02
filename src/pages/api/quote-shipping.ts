@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import products from '../../data/products.json';
 import { calculateTaxCents } from '../../lib/tax';
-import { SHIP_FROM, USPS_CARRIER_ID, USPS_GROUND_ADVANTAGE, USPS_FIRST_CLASS_INTERNATIONAL, DIMENSION_UNITS, normalizeUsState } from '../../lib/shipstation';
+import { SHIP_FROM, USPS_CARRIER_ID, USPS_GROUND_ADVANTAGE, USPS_PRIORITY_MAIL_INTERNATIONAL, DIMENSION_UNITS, normalizeUsState } from '../../lib/shipstation';
 
 export const prerender = false;
 
@@ -100,9 +100,47 @@ export const POST: APIRoute = async ({ request }) => {
     service = 'Ground Advantage (Flat Rate)';
   } else {
     // Use ShipStation API for FJ Solar products
-    // For Canada, use First Class International; for US, use Ground Advantage
+    // For Canada, use Priority Mail International; for US, use Ground Advantage
     const isCanada = address.country === 'CA';
-    const serviceCode = isCanada ? USPS_FIRST_CLASS_INTERNATIONAL : USPS_GROUND_ADVANTAGE;
+    const serviceCode = isCanada ? USPS_PRIORITY_MAIL_INTERNATIONAL : USPS_GROUND_ADVANTAGE;
+
+    // Build customs items for international shipments (required by ShipStation for Canada/intl)
+    const customsItems = isCanada
+      ? items
+          .map((item) => {
+            const product = products.find((p) => p.slug === item.slug);
+            if (!product?.hsCode) {
+              // Products without HS codes cannot be shipped internationally
+              return null;
+            }
+            return {
+              description: product.name,
+              quantity: item.quantity,
+              value: {
+                currency: 'usd',
+                amount: item.price ?? product?.price ?? 0,
+              },
+              harmonized_tariff_code: product.hsCode,
+              origin_country: 'US',
+            };
+          })
+          .filter(Boolean)
+      : undefined;
+
+    // If Canada order has items without HS codes, reject it
+    if (isCanada && customsItems?.length !== items.length) {
+      const missingHsCodes = items.filter((item) => {
+        const product = products.find((p) => p.slug === item.slug);
+        return !product?.hsCode;
+      });
+      console.error('Canada order has products without HS codes:', missingHsCodes.map((i) => i.slug));
+      return new Response(
+        JSON.stringify({
+          error: `Canada shipping not available for: ${missingHsCodes.map((i) => products.find((p) => p.slug === i.slug)?.name).join(', ')}. Please contact us.`,
+        }),
+        { status: 400 }
+      );
+    }
 
     const shipstationRes = await fetch('https://api.shipstation.com/v2/rates', {
       method: 'POST',
@@ -135,6 +173,7 @@ export const POST: APIRoute = async ({ request }) => {
             country_code: address.country || 'US',
           },
           packages,
+          ...(customsItems && { customs: { contents: customsItems } }),
         },
       }),
     });

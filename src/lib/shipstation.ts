@@ -10,11 +10,12 @@ export const SHIP_FROM = {
   countryCode: import.meta.env.SHIP_FROM_COUNTRY || 'US',
 };
 
-// Andrew's standard shipping (confirmed 2026-10-01): USPS Ground Advantage only, no carrier
-// choice shown to the customer. Expedited (FedEx/UPS) is a planned later addition, not built yet.
+// Andrew's standard shipping (confirmed 2026-10-01): USPS Ground Advantage for US,
+// USPS Priority Mail International for Canada. No carrier choice shown to customer.
+// Expedited (FedEx/UPS) is a planned later addition, not built yet.
 export const USPS_CARRIER_ID = 'se-4619801';
 export const USPS_GROUND_ADVANTAGE = 'usps_ground_advantage';
-export const USPS_FIRST_CLASS_INTERNATIONAL = 'usps_first_class_international';
+export const USPS_PRIORITY_MAIL_INTERNATIONAL = 'usps_priority_mail_international';
 
 // GHL stores dimension units abbreviated ("in", "cm") — ShipStation's API rejects
 // anything but the full word ("inch", "centimeter").
