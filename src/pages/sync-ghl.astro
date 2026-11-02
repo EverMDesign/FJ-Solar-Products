@@ -1,0 +1,197 @@
+---
+export const prerender = false;
+import '../styles/global.css';
+
+const LOCATION_ID = import.meta.env.LOCATION_ID;
+const providedId = Astro.url.searchParams.get('locationId');
+
+// Only a visit carrying the real GHL location ID gets in. Anyone else gets a 404.
+if (!LOCATION_ID || providedId !== LOCATION_ID) {
+  return new Response('Not found', { status: 404 });
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Sync Products from GHL</title>
+  </head>
+  <body class="bg-fj-cream min-h-screen py-10 px-4">
+    <img src="/images/FJSP-Logo-Full-Color.png" alt="Faithful Journey Solar" class="h-10 mx-auto mb-6 block" />
+
+    <div class="max-w-[640px] mx-auto bg-white border border-fj-sand rounded p-8">
+      <h1 class="font-heading font-extrabold uppercase text-xl text-fj-navy mb-1">Sync Products from GHL</h1>
+      <p class="text-sm text-fj-navy/60 mb-6">Pull the latest products, prices, and shipping details from GoHighLevel.</p>
+
+      <div class="space-y-6">
+        <!-- Status Section -->
+        <div class="bg-fj-cream rounded p-4 space-y-2">
+          <p class="text-sm font-semibold text-fj-navy">
+            Last Sync: <span id="last-sync-time" class="text-fj-navy/60">Never</span>
+          </p>
+          <p class="text-sm font-semibold text-fj-navy">
+            Products: <span id="product-count" class="text-fj-navy/60">—</span>
+          </p>
+        </div>
+
+        <!-- Sync Button -->
+        <button
+          id="sync-btn"
+          class="w-full bg-fj-gold hover:bg-transparent border-2 border-fj-gold text-fj-navy hover:text-fj-gold font-heading font-bold uppercase tracking-wide text-sm px-7 py-3.5 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <span id="sync-icon">🔄</span>
+          <span id="sync-text">Sync Now</span>
+        </button>
+
+        <!-- Status Message -->
+        <p id="status-message" class="text-sm text-center"></p>
+
+        <!-- Logs Section -->
+        <div>
+          <label class="block font-semibold text-fj-navy mb-2 text-sm">Sync Logs</label>
+          <div
+            id="logs-container"
+            class="bg-fj-navy rounded p-4 h-[300px] overflow-y-auto font-mono text-xs text-fj-cream space-y-1"
+          >
+            <p class="text-fj-sand">Ready to sync.</p>
+          </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div id="summary-section" class="hidden bg-fj-cream rounded p-4 space-y-2">
+          <p class="text-sm font-semibold text-fj-navy">
+            ✓ Products Synced: <span id="summary-count" class="font-bold text-fj-green">0</span>
+          </p>
+          <p id="summary-warnings" class="text-sm font-semibold text-fj-navy hidden">
+            ⚠ Placeholder Weights: <span id="summary-placeholders" class="font-bold text-amber-600">0</span>
+          </p>
+          <p class="text-sm font-semibold text-fj-navy">
+            Duration: <span id="summary-duration" class="font-bold">0s</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const LOCATION_ID = new URLSearchParams(window.location.search).get('locationId') || '';
+      const syncBtn = document.getElementById('sync-btn') as HTMLButtonElement;
+      const syncIcon = document.getElementById('sync-icon')!;
+      const syncText = document.getElementById('sync-text')!;
+      const logsContainer = document.getElementById('logs-container')!;
+      const statusMessage = document.getElementById('status-message')!;
+      const summarySection = document.getElementById('summary-section')!;
+      const lastSyncTime = document.getElementById('last-sync-time')!;
+      const productCount = document.getElementById('product-count')!;
+
+      function addLog(message: string) {
+        const line = document.createElement('p');
+        line.textContent = message;
+        line.className = 'text-fj-sand';
+        logsContainer.appendChild(line);
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+      }
+
+      function clearLogs() {
+        logsContainer.innerHTML = '';
+      }
+
+      function getLastSyncTime(): string {
+        const stored = localStorage.getItem('lastSyncTime');
+        if (!stored) return 'Never';
+        const date = new Date(stored);
+        const today = new Date();
+        if (date.toDateString() === today.toDateString()) {
+          return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+        return date.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      }
+
+      function updateLastSyncTime() {
+        lastSyncTime.textContent = getLastSyncTime();
+      }
+
+      syncBtn.addEventListener('click', async () => {
+        syncBtn.disabled = true;
+        syncIcon.textContent = '⏳';
+        syncText.textContent = 'Syncing...';
+        statusMessage.textContent = '';
+        statusMessage.className = 'text-sm text-center';
+        summarySection.classList.add('hidden');
+
+        clearLogs();
+        addLog('Starting sync from GHL...');
+
+        const startTime = Date.now();
+
+        try {
+          const res = await fetch('/api/admin/sync-ghl', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ locationId: LOCATION_ID }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.error || 'Sync failed');
+          }
+
+          // Display output logs
+          if (data.output) {
+            clearLogs();
+            data.output.split('\n').forEach((line: string) => {
+              if (line.trim()) addLog(line);
+            });
+          }
+
+          // Show summary
+          const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+          document.getElementById('summary-count')!.textContent = data.productCount.toString();
+          document.getElementById('summary-duration')!.textContent = `${duration}s`;
+
+          const summaryWarnings = document.getElementById('summary-warnings')!;
+          if (data.placeholderWeights > 0) {
+            summaryWarnings.classList.remove('hidden');
+            document.getElementById('summary-placeholders')!.textContent = data.placeholderWeights.toString();
+          } else {
+            summaryWarnings.classList.add('hidden');
+          }
+
+          summarySection.classList.remove('hidden');
+
+          statusMessage.textContent = '✓ Sync complete!';
+          statusMessage.className = 'text-sm text-center text-fj-green font-semibold';
+
+          // Update last sync time
+          localStorage.setItem('lastSyncTime', new Date().toISOString());
+          updateLastSyncTime();
+          productCount.textContent = data.productCount.toString();
+        } catch (err) {
+          statusMessage.textContent = err instanceof Error ? err.message : 'Something went wrong';
+          statusMessage.className = 'text-sm text-center text-red-600 font-semibold';
+          addLog(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        } finally {
+          syncBtn.disabled = false;
+          syncIcon.textContent = '🔄';
+          syncText.textContent = 'Sync Now';
+        }
+      });
+
+      // Load last sync time on page load
+      updateLastSyncTime();
+
+      // Try to load product count from products.json
+      fetch('/data/products.json')
+        .then((res) => res.json())
+        .then((data: unknown[]) => {
+          productCount.textContent = data.length.toString();
+        })
+        .catch(() => {
+          productCount.textContent = '—';
+        });
+    </script>
+  </body>
+</html>
