@@ -10,9 +10,9 @@ ShipStation's API does not support automated customs declaration for rate calcul
 
 1. Customer adds items to cart
 2. Enters Canada address in checkout
-3. Shipping calculation returns: "We ship to Canada! Please contact us for a custom quote: sales@fjsolarproducts.com or +1 (407) 821-8722"
-4. Customer contacts sales for quote
-5. Sales provides custom rate based on weight/destination
+3. Info box appears: "We ship to Canada! Please contact us for a custom quote: order@fjsolarproducts.com or +1 (407) 821-8722"
+4. Customer contacts orders team for quote
+5. Orders team provides custom rate based on weight/destination
 6. Customer can then proceed with order (manual payment processing)
 
 ## Why Manual?
