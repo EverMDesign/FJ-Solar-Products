@@ -184,7 +184,40 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+// Capture console output for API integration
+let capturedOutput = '';
+const originalLog = console.log;
+const originalError = console.error;
+console.log = (...args) => {
+  const msg = args.join(' ');
+  capturedOutput += msg + '\n';
+  originalLog(...args);
+};
+console.error = (...args) => {
+  const msg = args.join(' ');
+  capturedOutput += msg + '\n';
+  originalError(...args);
+};
+
+// Export for module import (API integration)
+export default async function runFetchProducts() {
+  try {
+    await main();
+    return capturedOutput;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    capturedOutput += '\nError: ' + msg + '\n';
+    throw new Error(msg);
+  }
+}
+
+// CLI execution
+if (import.meta.url.startsWith('file://')) {
+  const scriptPath = import.meta.url.slice(7);
+  if (process.argv[1] === scriptPath) {
+    runFetchProducts().catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+  }
+}

@@ -1,10 +1,6 @@
 import type { APIRoute } from 'astro';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
 
 export const prerender = false;
-
-const execFileAsync = promisify(execFile);
 
 export const POST: APIRoute = async ({ request }) => {
   const LOCATION_ID = import.meta.env.LOCATION_ID;
@@ -19,14 +15,9 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
-    // Run fetch-products using npm script (more reliable than direct node spawn)
-    const { stdout, stderr } = await execFileAsync('npm', ['run', 'fetch-products'], {
-      cwd: process.cwd(),
-      env: process.env,
-      maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-    });
-
-    const output = stdout + stderr;
+    // Import and run the fetch-products module directly
+    const { default: runFetchProducts } = await import('../../scripts/fetch-products.mjs');
+    const output = await runFetchProducts();
 
     // Parse output for summary
     const productsMatch = output.match(/✓ Saved (\d+) products/);
