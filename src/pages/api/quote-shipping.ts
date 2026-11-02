@@ -100,16 +100,15 @@ export const POST: APIRoute = async ({ request }) => {
     service = 'Ground Advantage (Flat Rate)';
   } else {
     // Use ShipStation API for FJ Solar products
-    // For Canada, use Priority Mail International; for US, use Ground Advantage
+    // For Canada, show contact info (ShipStation API doesn't support customs calculation)
     const isCanada = address.country === 'CA';
 
-    // TEMPORARY: Canada shipping via ShipStation API not working yet (customs format issue)
     if (isCanada) {
       return new Response(
         JSON.stringify({
-          error: 'Canada shipping is temporarily unavailable. Please contact us at sales@fjsolarproducts.com for a custom quote.',
+          error: 'We ship to Canada! Please contact us for a custom quote: sales@fjsolarproducts.com or +1 (407) 821-8722',
         }),
-        { status: 503 }
+        { status: 400 }
       );
     }
     const serviceCode = isCanada ? USPS_PRIORITY_MAIL_INTERNATIONAL : USPS_GROUND_ADVANTAGE;
