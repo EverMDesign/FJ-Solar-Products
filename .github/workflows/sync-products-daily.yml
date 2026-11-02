@@ -20,11 +20,15 @@ jobs:
 
       - run: npm install
 
+      - name: Create .env from secrets
+        run: |
+          cat > .env << EOF
+          PIT_TOKEN=${{ secrets.GHL_PIT_TOKEN }}
+          LOCATION_ID=${{ secrets.GHL_LOCATION_ID }}
+          GHL_API_BASE=${{ secrets.GHL_API_BASE || 'https://services.leadconnectorhq.com' }}
+          EOF
+
       - name: Fetch products from GHL
-        env:
-          PIT_TOKEN: ${{ secrets.GHL_PIT_TOKEN }}
-          LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
-          GHL_API_BASE: ${{ secrets.GHL_API_BASE || 'https://services.leadconnectorhq.com' }}
         run: npm run fetch-products
 
       - name: Check for changes
