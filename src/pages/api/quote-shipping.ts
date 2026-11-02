@@ -106,7 +106,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (isCanada) {
       return new Response(
         JSON.stringify({
-          error: 'We ship to Canada! Please contact us for a custom quote: sales@fjsolarproducts.com or +1 (407) 821-8722',
+          error: 'We ship to Canada! Please contact us for a custom quote: order@fjsolarproducts.com or +1 (407) 821-8722',
         }),
         { status: 400 }
       );
