@@ -163,16 +163,23 @@ if (Astro.request.method === 'POST') {
     }
 
     // Track purchase with Meta Pixel
-    // Fire the event even without transId — the important thing is that a purchase happened
-    if (typeof window !== 'undefined' && window.fbq) {
-      console.log('[thank-you] Firing Purchase event:', { value: finalAmount, transId: finalTransId });
-      window.fbq('track', 'Purchase', {
-        value: finalAmount || 0,
-        currency: 'USD',
-        content_type: 'product',
-      });
-    } else {
-      console.log('[thank-you] Purchase event NOT fired - fbq unavailable');
+    // fbq may not be available yet (it loads async), so wait for it
+    function firePixelPurchase() {
+      if (typeof window !== 'undefined' && window.fbq) {
+        console.log('[thank-you] Firing Purchase event:', { value: finalAmount, transId: finalTransId });
+        window.fbq('track', 'Purchase', {
+          value: finalAmount || 0,
+          currency: 'USD',
+          content_type: 'product',
+        });
+      } else {
+        console.log('[thank-you] fbq still unavailable, retrying...');
+        setTimeout(firePixelPurchase, 100);
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      firePixelPurchase();
     }
   </script>
 </Layout>
