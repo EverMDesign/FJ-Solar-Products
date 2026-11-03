@@ -16,6 +16,7 @@
     "hasMultiplePrices": true,
     "sku": "AGS-NEG",
     "weightOz": 96,
+    "hsCode": "8536.41",
     "variantGroups": [
       {
         "name": "Signal Type",
@@ -130,8 +131,7 @@
           "unit": "in"
         }
       }
-    ],
-    "hsCode": "8536.41"
+    ]
   },
   {
     "id": "6ab165fd791299e19f54cb32",
@@ -155,6 +155,7 @@
     "hasMultiplePrices": true,
     "sku": "AGS-PORT",
     "weightOz": 32,
+    "hsCode": "8536.41",
     "variantGroups": [
       {
         "name": "Cable Length",
@@ -384,81 +385,12 @@
           "unit": "in"
         }
       }
-    ],
-    "hsCode": "8536.41"
-  },
-  {
-    "id": "6ab165f5c21f7bc9a548c123",
-    "slug": "victron-multiplus-ii-external-fan-kit",
-    "name": "Victron MultiPlus-II External Fan Kit",
-    "brand": "FJ Solar",
-    "description": "This cooling enhancement kit improves airflow through Victron MultiPlus-II inverter/charger units. When horizontal placement becomes necessary in tight spaces, it can disrupt the intended airflow and reduce cooling efficiency. This kit compensates by improving circulation.\n\nThe system integrates with one of the inverter's internal relays, allowing external fans to operate automatically synchronized with internal fan activity.\n\nIncluded Components:\n• Two 80mm fans\n• Two fan guards\n• Two ABS fan mounting adapters\n• Mounting hardware\n• Programming assistance\n\nCompatible Models:\n• Victron MultiPlus-II 12/3000-120\n• Victron MultiPlus-II 24/3000-70\n• Victron MultiPlus-II 12/3000-120 2x120v\n• Victron MultiPlus-II 24/3000-70 2x120v",
-    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f96623e0-96cc-443e-8f43-352e1d6fd127.webp",
-    "images": [
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f96623e0-96cc-443e-8f43-352e1d6fd127.webp",
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/b5c034fd-7e82-4e3a-b22a-7bba05606e9a.webp",
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fb0dc43e-07dd-4a58-8177-458b3fb6fe93.webp",
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/dc736f30-2936-4ac6-b71d-77265961a9a0.webp",
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/168ed4dd-ea2e-47c1-bdbc-6816be7bb7d7.webp",
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/e2af19ad-3770-4f7a-825d-6cd3eabf89d2.webp",
-      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/1496e9f5-8bcf-4b50-9dea-69ae64665e30.webp"
-    ],
-    "price": 69.99,
-    "priceLabel": "12v",
-    "currency": "USD",
-    "hasMultiplePrices": true,
-    "sku": "EXT-FAN-12V",
-    "weightOz": 10,
-    "hsCode": "8414.59.15",
-    "internationalShipping": {
-      "service": "usps_first_class_international"
-    },
-    "variantGroups": [
-      {
-        "name": "Voltage",
-        "options": [
-          "12v",
-          "24v"
-        ]
-      }
-    ],
-    "variants": [
-      {
-        "optionId": "wc92d8ztob8",
-        "name": "12v",
-        "options": [
-          "12v"
-        ],
-        "price": 69.99,
-        "weightOz": 10,
-        "dimensions": {
-          "length": 10,
-          "width": 6,
-          "height": 3,
-          "unit": "in"
-        }
-      },
-      {
-        "optionId": "b8t4liiqrwc",
-        "name": "24v",
-        "options": [
-          "24v"
-        ],
-        "price": 69.99,
-        "weightOz": 10,
-        "dimensions": {
-          "length": 10,
-          "width": 6,
-          "height": 3,
-          "unit": "in"
-        }
-      }
     ]
   },
   {
     "id": "6ab165ff2bfb4e37de1ae17e",
     "slug": "ve-direct-cable",
-    "name": "VE. - Direct Cable",
+    "name": "VE.Direct Cable",
     "brand": "Victron",
     "description": "The VE.Direct cable is used to connect one Victron component to the Cerbo GX using the VE.Direct port on the device. Cable length: 1.8 meters.",
     "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/118087f3-0c06-42eb-b03e-bd72215ae5fd.webp",
@@ -522,6 +454,74 @@
     "hasMultiplePrices": false,
     "sku": "VIC-BPP900455050",
     "weightOz": 16
+  },
+  {
+    "id": "6ab165f5c21f7bc9a548c123",
+    "slug": "victron-multiplus-ii-external-fan-kit",
+    "name": "Victron MultiPlus-II External Fan Kit",
+    "brand": "FJ Solar",
+    "description": "<p>This cooling enhancement kit improves airflow through Victron MultiPlus-II inverter/charger units. When horizontal placement becomes necessary in tight spaces, it can disrupt the intended airflow and reduce cooling efficiency. This kit compensates by improving circulation. The system integrates with one of the inverter's internal relays, allowing external fans to operate automatically synchronized with internal fan activity. Included Components: • Two 80mm fans • Two fan guards • Two ABS fan mounting adapters • Mounting hardware • Programming assistance Compatible Models: • Victron MultiPlus-II 12/3000-120 • Victron MultiPlus-II 24/3000-70 • Victron MultiPlus-II 12/4k-160 • Victron MultiPlus-II 12/3000-120 2x120v • Victron MultiPlus-II 24/3000-70 2x120v • Victron MultiPlus-II 12/4k-160 2x120v</p>",
+    "image": "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f96623e0-96cc-443e-8f43-352e1d6fd127.webp",
+    "images": [
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/f96623e0-96cc-443e-8f43-352e1d6fd127.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/b5c034fd-7e82-4e3a-b22a-7bba05606e9a.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/fb0dc43e-07dd-4a58-8177-458b3fb6fe93.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/dc736f30-2936-4ac6-b71d-77265961a9a0.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/168ed4dd-ea2e-47c1-bdbc-6816be7bb7d7.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/e2af19ad-3770-4f7a-825d-6cd3eabf89d2.webp",
+      "https://assets.cdn.filesafe.space/9Xlh2V4MI9gfWXNitjME/media/1496e9f5-8bcf-4b50-9dea-69ae64665e30.webp"
+    ],
+    "price": 69.99,
+    "priceLabel": "12v",
+    "currency": "USD",
+    "hasMultiplePrices": true,
+    "sku": "EXT-FAN-12V",
+    "weightOz": 10,
+    "hsCode": "8414.59.15",
+    "internationalShipping": {
+      "service": "usps_first_class_international"
+    },
+    "variantGroups": [
+      {
+        "name": "Voltage",
+        "options": [
+          "12v",
+          "24v"
+        ]
+      }
+    ],
+    "variants": [
+      {
+        "optionId": "wc92d8ztob8",
+        "name": "12v",
+        "options": [
+          "12v"
+        ],
+        "price": 69.99,
+        "weightOz": 10,
+        "dimensions": {
+          "length": 10,
+          "width": 6,
+          "height": 3,
+          "unit": "in"
+        }
+      },
+      {
+        "optionId": "b8t4liiqrwc",
+        "name": "24v",
+        "options": [
+          "24v"
+        ],
+        "price": 69.99,
+        "weightOz": 10,
+        "dimensions": {
+          "length": 10,
+          "width": 6,
+          "height": 3,
+          "unit": "in"
+        }
+      }
+    ]
   },
   {
     "id": "6ab166031277448b610380ea",
