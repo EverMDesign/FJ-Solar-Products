@@ -129,8 +129,8 @@ const gallery = product.images.length > 0 ? product.images : [product.image].fil
           )}
         </div>
 
-        <div class="mt-8 prose prose-sm max-w-none whitespace-pre-line text-fj-navy/80">
-          {product.description}
+        <div class="mt-8 prose prose-sm max-w-none text-fj-navy/80 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ml-5">
+          <Fragment set:html={product.description} />
         </div>
       </div>
     </div>
