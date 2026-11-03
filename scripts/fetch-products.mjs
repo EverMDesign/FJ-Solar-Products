@@ -109,7 +109,7 @@ function formatDescription(text) {
       listItems.push(itemText);
     } else if (trimmed && inList) {
       // End list and add regular content
-      result.push(`<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`);
+      result.push(`<ul>\n${listItems.map(item => `<li>${item}</li>`).join('\n')}\n</ul>`);
       inList = false;
       listItems = [];
       result.push(`<p>${trimmed}</p>`);
@@ -121,7 +121,7 @@ function formatDescription(text) {
 
   // Close any open list
   if (inList && listItems.length > 0) {
-    result.push(`<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`);
+    result.push(`<ul>\n${listItems.map(item => `<li>${item}</li>`).join('\n')}\n</ul>`);
   }
 
   return result.join('');
