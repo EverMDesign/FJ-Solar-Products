@@ -152,7 +152,7 @@ async function upsertGhlContact(details: any, orderNumber: string): Promise<stri
   // Remove duplicates
   const uniqueProductTags = [...new Set(productTags)];
 
-  const allTags = ['Customer', 'FJ Solar Store', 'fjsp-new-order', ...uniqueProductTags];
+  const allTags = ['Customer', 'FJ Solar Store', 'fjsp-new-order', 'fj_pending_followup', ...uniqueProductTags];
   console.log('Sending to GHL - itemIds:', lineItems.map((i: any) => i.itemId), 'productTags:', uniqueProductTags, 'allTags:', allTags);
 
   const body = {
