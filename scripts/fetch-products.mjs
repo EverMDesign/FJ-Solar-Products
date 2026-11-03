@@ -172,8 +172,6 @@ async function main() {
     });
   }
 
-  results.sort((a, b) => a.name.localeCompare(b.name));
-
   fs.writeFileSync(outputPath, JSON.stringify(results, null, 2) + '\n');
   console.log(`\n✓ Saved ${results.length} products → ${outputPath}`);
 
