@@ -121,7 +121,7 @@ function formatDescription(text) {
 
   // Close any open list
   if (inList && listItems.length > 0) {
-    result.push(`<ul>\n${listItems.map(item => `<li>${item}</li>`).join('\n')}\n</ul>`);
+    result.push(`<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`);
   }
 
   return result.join('');
