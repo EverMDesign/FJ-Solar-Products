@@ -87,6 +87,23 @@ async function getPrices(id) {
   return data.prices || [];
 }
 
+// Convert inline bullet points to proper HTML lists
+// Handles <p>• item</p><p>• item</p> patterns and converts to <ul><li>item</li></ul>
+function formatDescription(html) {
+  if (!html || !html.includes('•')) return html;
+
+  // Replace <p>• text</p> with <li>text</li>
+  let result = html.replace(/<p>\s*•\s*([^<]*)<\/p>/g, '<li>$1</li>');
+
+  // Wrap consecutive <li> tags in <ul>
+  result = result.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, '<ul>$1</ul>');
+
+  // Clean up any extra </ul><ul> patterns (consecutive lists should merge)
+  result = result.replace(/<\/ul>\s*<ul>/g, '');
+
+  return result;
+}
+
 async function main() {
   console.log('=== FJ Solar — fetching products from GHL ===\n');
 
@@ -152,7 +169,7 @@ async function main() {
       slug: slugify(full.name),
       name: full.name,
       brand: previous?.brand || defaultBrand,
-      description: full.description || '',
+      description: formatDescription(full.description || ''),
       image: full.image || '',
       images: (full.medias || []).map(m => m.url),
       price: lowestPrice ? lowestPrice.amount : null,
