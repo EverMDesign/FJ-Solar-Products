@@ -41,20 +41,38 @@ import Layout from '../layouts/Layout.astro';
             </select>
           </div>
 
-          <form id="shipping-form" class="mt-6 space-y-3">
+          <form id="shipping-form" class="mt-6 space-y-3" novalidate>
             <p class="text-sm font-semibold text-fj-navy">Your name</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input name="firstName" required placeholder="First name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
-              <input name="lastName" required placeholder="Last name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
+              <div>
+                <input name="firstName" required placeholder="First name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" autocomplete="given-name" />
+                <p class="hidden text-xs text-red-600 mt-1 field-error"></p>
+              </div>
+              <div>
+                <input name="lastName" required placeholder="Last name" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" autocomplete="family-name" />
+                <p class="hidden text-xs text-red-600 mt-1 field-error"></p>
+              </div>
             </div>
             <p class="text-sm font-semibold text-fj-navy">Shipping address</p>
-            <input name="street" required placeholder="Street address" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input name="city" required placeholder="City" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" />
-              <input name="state" required placeholder="State" maxlength="2" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="state-input" />
+            <div>
+              <input name="street" required placeholder="Street address" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" autocomplete="street-address" />
+              <p class="hidden text-xs text-red-600 mt-1 field-error"></p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input name="zip" required placeholder="ZIP code" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="zip-input" />
+              <div>
+                <input name="city" required placeholder="City" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" autocomplete="address-level2" />
+                <p class="hidden text-xs text-red-600 mt-1 field-error"></p>
+              </div>
+              <div>
+                <input name="state" required placeholder="State" maxlength="2" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="state-input" autocomplete="address-level1" />
+                <p class="hidden text-xs text-red-600 mt-1 field-error"></p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <input name="zip" required placeholder="ZIP code" class="w-full border border-fj-sand rounded px-3 py-2 text-sm" id="zip-input" autocomplete="postal-code" />
+                <p class="hidden text-xs text-red-600 mt-1 field-error"></p>
+              </div>
             </div>
             <button
               type="submit"
@@ -205,9 +223,67 @@ import Layout from '../layouts/Layout.astro';
     const RATE_LOADING_MESSAGES = ['Getting Rate…', 'Finding cheapest option…', 'Connecting with USPS…', 'Almost done…'];
     const RATE_MESSAGE_INTERVAL_MS = 1000;
 
+    // Get all required fields
+    const requiredFields = Array.from(shippingForm.querySelectorAll<HTMLInputElement>('input[required]'));
+    const fieldLabels: Record<string, string> = {
+      firstName: 'First name',
+      lastName: 'Last name',
+      street: 'Street address',
+      city: 'City',
+      state: 'State',
+      zip: 'ZIP code',
+    };
+
+    function validateField(field: HTMLInputElement): boolean {
+      const value = field.value.trim();
+      const isValid = value.length > 0;
+      const errorEl = field.closest('div')?.querySelector<HTMLElement>('.field-error');
+
+      if (!isValid && errorEl) {
+        errorEl.textContent = `${fieldLabels[field.name]} is required`;
+        errorEl.classList.remove('hidden');
+        field.classList.add('border-red-500');
+      } else if (errorEl) {
+        errorEl.classList.add('hidden');
+        field.classList.remove('border-red-500');
+      }
+
+      return isValid;
+    }
+
+    function validateForm(): boolean {
+      return requiredFields.every(field => validateField(field));
+    }
+
+    // Add validation on input change
+    requiredFields.forEach(field => {
+      field.addEventListener('input', () => validateField(field));
+      field.addEventListener('blur', () => validateField(field));
+    });
+
+    // Handle password managers: check fields after a delay on page load and when form gets focus
+    const checkFormState = () => {
+      requiredFields.forEach(field => {
+        if (field.value.trim().length > 0) {
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+    };
+
+    setTimeout(checkFormState, 200);
+    shippingForm.addEventListener('focusin', checkFormState);
+
     shippingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       shippingErrorEl.classList.add('hidden');
+
+      // Validate all required fields
+      if (!validateForm()) {
+        shippingErrorEl.textContent = 'Please fill in all required fields';
+        shippingErrorEl.classList.remove('hidden');
+        return;
+      }
+
       getRateBtn.disabled = true;
 
       // Track InitiateCheckout with Meta Pixel
