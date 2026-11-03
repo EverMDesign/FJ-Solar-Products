@@ -109,7 +109,7 @@ function formatDescription(text) {
       listItems.push(itemText);
     } else if (trimmed && inList) {
       // End list and add regular content
-      result.push(`<ul>\n${listItems.map(item => `<li>${item}</li>`).join('\n')}\n</ul>`);
+      result.push(`<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`);
       inList = false;
       listItems = [];
       result.push(`<p>${trimmed}</p>`);
