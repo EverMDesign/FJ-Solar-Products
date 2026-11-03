@@ -87,21 +87,44 @@ async function getPrices(id) {
   return data.prices || [];
 }
 
-// Convert inline bullet points to proper HTML lists
-// Handles <p>• item</p><p>• item</p> patterns and converts to <ul><li>item</li></ul>
-function formatDescription(html) {
-  if (!html || !html.includes('•')) return html;
+// Convert bullet points to proper HTML lists - handles both plain text and HTML
+function formatDescription(text) {
+  if (!text || !text.includes('•')) return text;
 
-  // Replace <p>• text</p> with <li>text</li>
-  let result = html.replace(/<p>\s*•\s*([^<]*)<\/p>/g, '<li>$1</li>');
+  const lines = text.split('\n');
+  let result = [];
+  let inList = false;
+  let listItems = [];
 
-  // Wrap consecutive <li> tags in <ul>
-  result = result.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, '<ul>$1</ul>');
+  lines.forEach((line) => {
+    const trimmed = line.trim();
 
-  // Clean up any extra </ul><ul> patterns (consecutive lists should merge)
-  result = result.replace(/<\/ul>\s*<ul>/g, '');
+    if (trimmed.startsWith('•')) {
+      // Start list if needed and collect item
+      if (!inList) {
+        inList = true;
+        listItems = [];
+      }
+      const itemText = trimmed.substring(1).trim();
+      listItems.push(itemText);
+    } else if (trimmed && inList) {
+      // End list and add regular content
+      result.push(`<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`);
+      inList = false;
+      listItems = [];
+      result.push(`<p>${trimmed}</p>`);
+    } else if (trimmed) {
+      // Regular content
+      result.push(`<p>${trimmed}</p>`);
+    }
+  });
 
-  return result;
+  // Close any open list
+  if (inList && listItems.length > 0) {
+    result.push(`<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`);
+  }
+
+  return result.join('');
 }
 
 async function main() {
