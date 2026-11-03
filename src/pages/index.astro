@@ -10,13 +10,14 @@ function formatPrice(amount: number | null, currency: string) {
 
 const featuredProduct = products[0];
 const DEFAULT_FILTER = 'All';
-const productsWithMeta = products
-  .map((product, index) => ({ ...product, allIndex: index }))
-  .sort((a, b) => {
-    if (a.brand === 'FJ Solar' && b.brand !== 'FJ Solar') return -1;
-    if (a.brand !== 'FJ Solar' && b.brand === 'FJ Solar') return 1;
-    return a.allIndex - b.allIndex;
-  });
+const fjSolar = products.filter((p) => p.brand === 'FJ Solar');
+const victron = products.filter((p) => p.brand === 'Victron');
+const other = products.filter((p) => p.brand !== 'FJ Solar' && p.brand !== 'Victron');
+const productsWithMeta = [
+  ...fjSolar.map((p, i) => ({ ...p, allIndex: i })),
+  ...victron.map((p, i) => ({ ...p, allIndex: fjSolar.length + i })),
+  ...other.map((p, i) => ({ ...p, allIndex: fjSolar.length + victron.length + i })),
+];
 ---
 
 <Layout title="Shop — Faithful Journey Solar" description="Victron parts and off-grid power gear from Faithful Journey Solar.">

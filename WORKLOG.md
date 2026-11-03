@@ -246,3 +246,19 @@ FJ Solar Checkout — Complete session summary with workflows, technical archite
 **Status:** ✅ Complete
 
 ---
+
+## 2026-11-02 — 16:21
+
+Meta Pixel implementation complete for FJ Solar e-commerce checkout flow
+
+**Status:** ✅ Complete
+
+---
+
+## 2026-11-03 — 22:00
+
+Meta Pixel Purchase event + documentation sprint: pixel now firing with order amounts; documented Canada shipping API limitations, GHL coupon integration strategy, and 3 video scripts for AGS products
+
+**Status:** ✅ Complete
+
+---
