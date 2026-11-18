@@ -2,6 +2,13 @@
 
 All notable changes to this project, newest first. Dates are when the work happened, not a formal release schedule — this is a live site, not a versioned package.
 
+## 2026-11-18 (Meta Pixel Purchase value fix)
+
+### Fixed
+- `thank-you.astro` no longer fires a Purchase event with `value: 0`. Meta flagged "Value field is missing" (100% of Purchase events, from the old WordPress site's Meta plugins); the same bug would have hit this site. Purchase now fires only when the order total is a number > 0.
+- Purchase passes the Authorize.net `transId` as `eventID` for de-duplication against any future Conversions API call.
+- The `fbq` retry loop is capped at 50 attempts (5s) instead of retrying forever.
+
 ## 2026-10-31 (Revert to transId-derived order numbers)
 
 ### Changed

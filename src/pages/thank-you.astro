@@ -129,17 +129,27 @@ if (Astro.request.method === 'POST') {
 
     // Track purchase with Meta Pixel
     // fbq may not be available yet (it loads async), so wait for it
+    // Meta requires a numeric value > 0 on Purchase; never send 0 or a missing value.
+    let pixelAttempts = 0;
     function firePixelPurchase() {
+      const value = Number(finalAmount);
+      if (!Number.isFinite(value) || value <= 0) {
+        console.warn('[thank-you] No valid order total; skipping Purchase event:', { finalAmount });
+        return;
+      }
       if (typeof window !== 'undefined' && window.fbq) {
-        console.log('[thank-you] Firing Purchase event:', { value: finalAmount, transId: finalTransId });
-        window.fbq('track', 'Purchase', {
-          value: finalAmount || 0,
-          currency: 'USD',
-          content_type: 'product',
-        });
-      } else {
-        console.log('[thank-you] fbq still unavailable, retrying...');
+        console.log('[thank-you] Firing Purchase event:', { value, transId: finalTransId });
+        const params = { value, currency: 'USD', content_type: 'product' };
+        // eventID lets Meta de-duplicate against any future Conversions API call.
+        if (finalTransId) {
+          window.fbq('track', 'Purchase', params, { eventID: String(finalTransId) });
+        } else {
+          window.fbq('track', 'Purchase', params);
+        }
+      } else if (++pixelAttempts < 50) {
         setTimeout(firePixelPurchase, 100);
+      } else {
+        console.warn('[thank-you] fbq never loaded; Purchase event not sent.');
       }
     }
 
